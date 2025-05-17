@@ -93,6 +93,34 @@ Authorization: Bearer <token>
 
 ---
 
+### POST /api/auth/register
+** Mô tả: Tạo tài khoản người dùng mới. Trả về thông tin user và token sau khi đăng ký thành công. **
+- Request body:
+``` json
+{
+  "username": "newuser",
+  "email": "newuser@example.com",
+  "password": "securePassword123"
+}
+```
+- Response thành công (201 Created):
+```
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "id": "user456",
+    "username": "newuser",
+    "email": "newuser@example.com"
+  }
+}
+```
+- Response lỗi (ví dụ: Email hoặc username đã tồn tại):
+```
+{
+  "error": "Username or email already exists"
+}
+```
+
 ### User API
 **GET /api/user/me**
 - Mô tả: Lấy thông tin user hiện tại.
