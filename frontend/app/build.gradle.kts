@@ -61,9 +61,6 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
-    implementation("com.google.firebase:firebase-bom:33.13.0")
-    implementation("com.google.firebase:firebase-auth:23.2.0")
-
     implementation("com.google.android.gms:play-services-auth:21.2.0")
 
     val credentialsManagerVersion = "1.5.0-alpha05"
@@ -71,4 +68,21 @@ dependencies {
     implementation("androidx.credentials:credentials:$credentialsManagerVersion")
     implementation("androidx.credentials:credentials-play-services-auth:$credentialsManagerVersion")
     implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
+
+    // Icon
+    implementation ("androidx.compose.material:material-icons-extended")
+
+    // Constraint Layout
+    implementation ("androidx.constraintlayout:constraintlayout-compose:1.1.0")
+
+    // Retrofit
+    implementation ("com.squareup.retrofit2:retrofit:2.9.0")
+
+    // Converter Gson (parse JSON)
+    implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation ("com.google.code.gson:gson:2.10.1")
+
+    // Logging Interceptor (log request/response)
+    implementation ("com.squareup.okhttp3:logging-interceptor:4.12.0")
+
 }

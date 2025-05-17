@@ -14,24 +14,26 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Taskify"
         tools:targetApi="31">
-
-        <!-- LoginActivity là màn hình khởi động đầu tiên -->
         <activity
-            android:name=".login.LoginActivity"
+            android:name=".presentation.auth.signUp.SignUpActivity"
+            android:exported="false" />
+        <activity
+            android:name=".presentation.auth.signIn.SignInActivity"
+            android:exported="false" /> <!-- LoginActivity là màn hình khởi động đầu tiên -->
+        <activity
+            android:name=".dashboard.DashboardActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.Taskify">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-
-        <!-- MainActivity sẽ mở sau khi đăng nhập -->
+        </activity> <!-- MainActivity sẽ mở sau khi đăng nhập -->
         <activity
             android:name=".MainActivity"
             android:exported="false" />
-
     </application>
 
 </manifest>
