@@ -94,7 +94,7 @@ Authorization: Bearer <token>
 ---
 
 ### POST /api/auth/register
-** Mô tả: Tạo tài khoản người dùng mới. Trả về thông tin user và token sau khi đăng ký thành công. **
+**Mô tả: Tạo tài khoản người dùng mới. Trả về thông tin user và token sau khi đăng ký thành công.**
 - Request body:
 ``` json
 {
