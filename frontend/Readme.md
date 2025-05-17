@@ -93,7 +93,7 @@ Authorization: Bearer <token>
 
 ---
 
-### POST /api/auth/register
+### POST /api/auth/signup
 **Mô tả: Tạo tài khoản người dùng mới. Trả về thông tin user và token sau khi đăng ký thành công.**
 - Headers:
 ``` makefile
