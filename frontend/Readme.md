@@ -93,6 +93,40 @@ Authorization: Bearer <token>
 
 ---
 
+### POST /api/auth/signup
+**Mô tả: Tạo tài khoản người dùng mới. Trả về thông tin user và token sau khi đăng ký thành công.**
+- Headers:
+``` makefile
+Authorization: Bearer <token>
+```
+- Request body:
+``` json
+{
+  "username": "newuser",
+  "email": "newuser@example.com",
+  "password": "securePassword123"
+}
+```
+- Response thành công (201 Created):
+``` json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "id": "user456",
+    "username": "newuser",
+    "email": "newuser@example.com"
+  }
+}
+```
+- Response lỗi (ví dụ: Email đã tồn tại):
+``` json
+{
+  "error": "Email already exists"
+}
+```
+
+---
+
 ### User API
 **GET /api/user/me**
 - Mô tả: Lấy thông tin user hiện tại.
@@ -154,14 +188,14 @@ Authorization: Bearer <token>
     "description": "Mô tả công việc",
     "subtasks": [
       {
-        "id": "subtask001",
         "title": "Subtask 1",
         "subtaskDes": "Mô tả subtask 1"
       }
     ],
     "createAt": "2025-05-16T08:30:00Z",
-    "taskDate": "2025-05-20",
-    "taskTime": "14:30"
+    "dueDate": "2025-05-16T08:35:00Z",
+    "type": "Meeting",
+    "isSuccess": false
   },
   {
     "id": "task002",
@@ -170,14 +204,14 @@ Authorization: Bearer <token>
     "description": "Mô tả công việc",
     "subtasks": [
       {
-        "id": "subtask001",
         "title": "Subtask 2",
         "subtaskDes": "Mô tả subtask 1"
       }
     ],
     "createAt": "2025-05-16T08:30:00Z",
-    "taskDate": "2025-05-20",
-    "taskTime": "14:30"
+    "dueDate": "2025-05-16T08:35:00Z",
+    "type": "Meeting",
+    "isSuccess": false
   }
 ]
 ```
@@ -202,8 +236,10 @@ Content-Type: application/json
       "subtaskDes": "Mô tả chi tiết subtask"
     }
   ],
-  "taskDate": "2025-06-01",
-  "taskTime": "10:00"
+  "createAt": "2025-05-16T08:30:00Z",
+  "dueDate": "2025-05-16T08:35:00Z",
+  "type": "Meeting",
+  "isSuccess": false
 }
 ```
 - Response thành công (201 Created):
@@ -215,14 +251,15 @@ Content-Type: application/json
   "description": "Mô tả task mới",
   "subtasks": [
     {
-      "id": "subtask005",
       "title": "Subtask 1",
       "subtaskDes": "Mô tả chi tiết subtask"
     }
   ],
-  "createAt": "2025-05-16T10:00:00Z",
-  "taskDate": "2025-06-01",
-  "taskTime": "10:00"
+  "createAt": "2025-05-16T08:30:00Z",
+  "dueDate": "2025-05-16T08:35:00Z",
+  "type": "Meeting",
+  "isSuccess": false
+}
 }
 ```
 
@@ -242,7 +279,6 @@ Content-Type: application/json
   "description": "Mô tả cập nhật",
   "subtasks": [
     {
-      "id": "subtask005",
       "title": "Subtask sửa",
       "subtaskDes": "Mô tả subtask sửa"
     },
@@ -251,8 +287,10 @@ Content-Type: application/json
       "subtaskDes": "Mô tả subtask mới"
     }
   ],
-  "taskDate": "2025-06-02",
-  "taskTime": "11:00"
+  "createAt": "2025-05-16T08:35:00Z",
+  "dueDate": "2025-05-16T08:50:00Z",
+  "type": "Travel",
+  "isSuccess": true
 }
 ```
 - Response thành công (200 OK):
@@ -264,19 +302,18 @@ Content-Type: application/json
   "description": "Mô tả cập nhật",
   "subtasks": [
     {
-      "id": "subtask005",
       "title": "Subtask sửa",
       "subtaskDes": "Mô tả subtask sửa"
     },
     {
-      "id": "subtask010",
       "title": "Subtask mới",
       "subtaskDes": "Mô tả subtask mới"
     }
   ],
-  "createAt": "2025-05-16T10:00:00Z",
-  "taskDate": "2025-06-02",
-  "taskTime": "11:00"
+  "createAt": "2025-05-16T08:35:00Z",
+  "dueDate": "2025-05-16T08:50:00Z",
+  "type": "Travel",
+  "isSuccess": true
 }
 ```
 
