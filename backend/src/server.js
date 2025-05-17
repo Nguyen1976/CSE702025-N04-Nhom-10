@@ -1,19 +1,19 @@
-import express from 'express'
-import mongoose from 'mongoose'
-import 'dotenv/config'
+require('module-alias/register')
+const express = require('express')
+const mongoose = require('mongoose')
+const env = require('~/config/environtment')
+const APIs_v1 = require('~/routes/v1/index')
 
 const app = express()
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
+app.use('/api/v1', APIs_v1)
 
-app.use('/', (req, res) => {
-  return res.json('Hello world')
-})
 
-mongoose.connect(process.env.MONGODB_URI).then(() => {
+mongoose.connect(env.MONGODB_URI).then(() => {
   console.log('Connect to db')
-  app.listen(process.env.APP_PORT, () => {
-    console.log(`Server is running port ${process.env.APP_PORT}`)
+  app.listen(env.APP_PORT, () => {
+    console.log(`Server is running port ${env.APP_PORT}`)
   })
 })
