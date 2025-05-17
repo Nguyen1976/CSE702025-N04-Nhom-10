@@ -17,10 +17,13 @@
   "dependencies": {
     "@babel/runtime": "^7.27.1",
     "backend": "file:",
+    "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
     "http-status-codes": "^2.3.0",
+    "joi": "^17.13.3",
+    "lodash": "^4.17.21",
     "module-alias": "^2.2.3",
     "mongodb": "^6.16.0",
     "mongoose": "^8.14.3",
