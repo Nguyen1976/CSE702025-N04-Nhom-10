@@ -118,10 +118,10 @@ Authorization: Bearer <token>
   }
 }
 ```
-- Response lỗi (ví dụ: Email hoặc username đã tồn tại):
+- Response lỗi (ví dụ: Email đã tồn tại):
 ``` json
 {
-  "error": "Username or email already exists"
+  "error": "Email already exists"
 }
 ```
 
