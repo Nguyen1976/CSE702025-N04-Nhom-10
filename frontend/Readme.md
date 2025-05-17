@@ -121,6 +121,8 @@ Authorization: Bearer <token>
 }
 ```
 
+---
+
 ### User API
 **GET /api/user/me**
 - Mô tả: Lấy thông tin user hiện tại.
