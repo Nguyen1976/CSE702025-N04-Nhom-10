@@ -96,7 +96,7 @@ Authorization: Bearer <token>
 ### POST /api/auth/register
 **Mô tả: Tạo tài khoản người dùng mới. Trả về thông tin user và token sau khi đăng ký thành công.**
 - Headers:
-```
+``` makefile
 Authorization: Bearer <token>
 ```
 - Request body:
@@ -108,7 +108,7 @@ Authorization: Bearer <token>
 }
 ```
 - Response thành công (201 Created):
-```
+``` json
 {
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
   "user": {
@@ -119,7 +119,7 @@ Authorization: Bearer <token>
 }
 ```
 - Response lỗi (ví dụ: Email hoặc username đã tồn tại):
-```
+``` json
 {
   "error": "Username or email already exists"
 }
