@@ -10,6 +10,17 @@ const createNew = async (req, res, next) => {
   }
 }
 
+const login = async (req, res, next) => {
+  try {
+    const result = await userService.login(req.body)
+
+    res.status(StatusCodes.OK).json(result)
+  } catch (error) {
+    next(error)
+  }
+}
+
 module.exports = {
-  createNew
+  createNew,
+  login
 }

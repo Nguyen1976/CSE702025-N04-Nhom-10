@@ -9,4 +9,6 @@ Router.route('/register').post(
     userController.createNew
 )
 
+Router.route('/login').post(userValidation.login, userController.login)
+
 module.exports = Router
