@@ -23,6 +23,7 @@
     "express": "^5.1.0",
     "http-status-codes": "^2.3.0",
     "joi": "^17.13.3",
+    "jsonwebtoken": "^9.0.2",
     "lodash": "^4.17.21",
     "module-alias": "^2.2.3",
     "mongodb": "^6.16.0",

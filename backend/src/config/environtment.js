@@ -1,6 +1,12 @@
-require('dotenv').config();
+require('dotenv').config()
 
 module.exports = {
   MONGODB_URI: process.env.MONGODB_URI,
-  APP_PORT: process.env.APP_PORT
+  APP_PORT: process.env.APP_PORT,
+
+  ACCESS_TOKEN_SECRET_SIGNATURE: process.env.ACCESS_TOKEN_SECRET_SIGNATURE,
+  ACCESS_TOKEN_LIFE: process.env.ACCESS_TOKEN_LIFE,
+
+  REFRESH_TOKEN_SECRET_SIGNATURE: process.env.REFRESH_TOKEN_SECRET_SIGNATURE,
+  REFRESH_TOKEN_LIFE: process.env.REFRESH_TOKEN_LIFE
 }
