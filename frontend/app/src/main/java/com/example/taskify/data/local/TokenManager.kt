@@ -5,6 +5,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 
 private val Context.dataStore by preferencesDataStore(name = "auth_prefs")
@@ -38,10 +39,13 @@ class TokenManager(private val context: Context) {
     }
 
     // Lấy Access Token (Flow để observe được)
-    val accessToken: Flow<String?> = context.dataStore.data
-        .map { preferences -> preferences[ACCESS_TOKEN_KEY] }
+    suspend fun getAccessToken(): String? {
+        return context.dataStore.data
+            .map { preferences -> preferences[ACCESS_TOKEN_KEY] }
+            .firstOrNull()
+    }
 
     // Lấy Refresh Token
-    val refreshToken: Flow<String?> = context.dataStore.data
+    val getRefreshToken: Flow<String?> = context.dataStore.data
         .map { preferences -> preferences[REFRESH_TOKEN_KEY] }
 }

@@ -17,6 +17,9 @@
         android:theme="@style/Theme.Taskify"
         tools:targetApi="31">
         <activity
+            android:name=".presentation.base.BaseActivity"
+            android:exported="false" />
+        <activity
             android:name=".presentation.tasktheme.ThemeSectionActivity"
             android:exported="false" />
         <activity

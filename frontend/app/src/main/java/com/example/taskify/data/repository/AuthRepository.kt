@@ -48,4 +48,8 @@ class AuthRepository @Inject constructor (
             Result.failure(e)
         }
     }
+
+    suspend fun isUserLoggedIn(): Boolean {
+        return tokenManager.getAccessToken() != null
+    }
 }

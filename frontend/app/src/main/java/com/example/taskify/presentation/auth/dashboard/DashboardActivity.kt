@@ -37,19 +37,42 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.startActivity
+import androidx.lifecycle.lifecycleScope
 import com.example.taskify.R
+import com.example.taskify.data.local.TokenManager
 import com.example.taskify.presentation.auth.signIn.SignInActivity
 import com.example.taskify.presentation.auth.signUp.SignUpActivity
+import com.example.taskify.presentation.main.MainActivity
 import com.example.taskify.ui.theme.TaskifyTheme
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class DashboardActivity : AppCompatActivity() {
+
+    @Inject
+    lateinit var tokenManager: TokenManager
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_login)
 
-        setContent {
-            DashboardSection()
+        lifecycleScope.launch {
+            val token = tokenManager.getAccessToken()
+            if (!token.isNullOrEmpty()) {
+                // User đã đăng nhập -> chuyển sang MainActivity luôn
+                startActivity(Intent(this@DashboardActivity, MainActivity::class.java).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                })
+                finish()
+            } else {
+                // Nếu chưa đăng nhập thì set UI Compose bình thường
+                setContent {
+                    DashboardSection()
+                }
+            }
         }
     }
 }
