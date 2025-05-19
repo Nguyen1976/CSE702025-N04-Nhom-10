@@ -49,7 +49,7 @@
 
 ## 2. Authentication API
 
-### POST /api/auth/login
+### POST /api/auth/signin
 
 **Mô tả:** Đăng nhập user, trả về token để xác thực các request tiếp theo.
 
@@ -78,7 +78,7 @@
 
 ---
 
-### POST /api/auth/logout
+### POST /api/auth/signout
 **Mô tả: Đăng xuất user, invalid token.**
 - Headers:
 ``` makefile
