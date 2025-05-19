@@ -68,7 +68,33 @@ const login = async (reqBody) => {
   }
 }
 
+const refreshToken = async (clientRefreshToken) => {
+  try {
+    const refreshTokenDecoded = await JWTProvider.verifyToken(
+      clientRefreshToken,
+      env.REFRESH_TOKEN_SECRET_SIGNATURE
+    )
+
+    const userInfo = {
+      _id: refreshTokenDecoded._id,
+      email: refreshTokenDecoded.email
+    }
+
+    const accessToken = await JWTProvider.generateToken(
+      userInfo,
+      env.ACCESS_TOKEN_SECRET_SIGNATURE,
+      env.ACCESS_TOKEN_LIFE
+      // 5
+    )
+
+    return { accessToken }
+  } catch (error) {
+    throw error
+  }
+}
+
 module.exports = {
   createNew,
-  login
+  login,
+  refreshToken
 }

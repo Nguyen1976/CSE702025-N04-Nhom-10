@@ -10,5 +10,5 @@ Router.route('/register').post(
 )
 
 Router.route('/login').post(userValidation.login, userController.login)
-
+Router.route('/refresh_token').get(userController.refreshToken)
 module.exports = Router
