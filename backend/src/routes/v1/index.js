@@ -4,7 +4,7 @@ const userRoute = require('./userRoute')
 
 const Router = express.Router()
 
-Router.get('/status', (req, res) => {
+Router.get('/status' ,(req, res) => {
   res.status(StatusCodes.OK).json({ message: 'APIs v1 are ready to use.' })
 })
 
