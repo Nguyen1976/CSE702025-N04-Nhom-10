@@ -5,15 +5,20 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
+        android:name=".MyApp"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:networkSecurityConfig="@xml/network_security_config"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Taskify"
         tools:targetApi="31">
+        <activity
+            android:name=".presentation.tasktheme.ThemeSectionActivity"
+            android:exported="false" />
         <activity
             android:name=".presentation.auth.signUp.SignUpActivity"
             android:exported="false" />
@@ -21,7 +26,7 @@
             android:name=".presentation.auth.signIn.SignInActivity"
             android:exported="false" /> <!-- LoginActivity là màn hình khởi động đầu tiên -->
         <activity
-            android:name=".dashboard.DashboardActivity"
+            android:name=".presentation.auth.dashboard.DashboardActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.Taskify">
@@ -32,7 +37,7 @@
             </intent-filter>
         </activity> <!-- MainActivity sẽ mở sau khi đăng nhập -->
         <activity
-            android:name=".MainActivity"
+            android:name=".presentation.main.MainActivity"
             android:exported="false" />
     </application>
 

@@ -1,7 +1,12 @@
+import com.android.tools.analytics.AnalyticsSettings.disable
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.hilt)
+    id("kotlin-kapt")
+    id("dagger.hilt.android.plugin")
 }
 
 android {
@@ -36,6 +41,10 @@ android {
     }
     buildFeatures {
         compose = true
+    }
+
+    lint {
+        disable += "NullSafeMutableLiveData"
     }
 }
 
@@ -85,4 +94,11 @@ dependencies {
     // Logging Interceptor (log request/response)
     implementation ("com.squareup.okhttp3:logging-interceptor:4.12.0")
 
+    // DataStore
+    implementation ("androidx.datastore:datastore-preferences:1.0.0")
+
+    // Hilt
+    implementation("com.google.dagger:hilt-android:2.50")
+    kapt("com.google.dagger:hilt-compiler:2.50")
+    implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
 }

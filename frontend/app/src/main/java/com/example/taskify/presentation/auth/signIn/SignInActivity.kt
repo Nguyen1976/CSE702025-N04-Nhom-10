@@ -16,6 +16,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -25,12 +26,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.taskify.R
 import com.example.taskify.components.PasswordTextField
 import com.example.taskify.components.AccountTextField
+import com.example.taskify.components.ButtonSection
 import com.example.taskify.components.TopTitle
 import com.example.taskify.components.isValidEmail
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class SignInActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,8 +50,11 @@ class SignInActivity : AppCompatActivity() {
 
 @Composable
 fun SignInScreen(
-    onBackClick: () -> Unit = {}
+    onBackClick: () -> Unit = {},
+    viewModel: SignInViewModel = hiltViewModel()
 ) {
+    val signInState by viewModel.signInState.collectAsState()
+
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
@@ -82,7 +90,7 @@ fun SignInScreen(
 
         Spacer(modifier = Modifier.weight(1f))
 
-        Button(
+        ButtonSection(
             onClick = {
                 var isValid = true
 
@@ -100,23 +108,35 @@ fun SignInScreen(
                 }
 
                 if (isValid) {
-                    // TODO:
+                    viewModel.signIn(email, password)
                 }
             },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 16.dp)
-                .height(52.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF24A19C)
-            ),
-            shape = RoundedCornerShape(16.dp)
-        ) {
-            Text(
-                "Sign In",
-                fontSize = 18.sp,
-                color = Color.White
-            )
+            text = "Sign in"
+        )
+
+        // Display loading / error / success
+        when(signInState) {
+            is UiState.Loading -> {
+                Spacer(modifier = Modifier.height(16.dp))
+                Text("Loading...", color = Color.Gray)
+            }
+
+            is UiState.Error -> {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = (signInState as UiState.Error).message,
+                    color = Color.Red
+                )
+            }
+
+            is UiState.Success -> {
+                val user = (signInState as UiState.Success).data.user
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(text = "Welcome, ${user.username}!", color = Color(0xFF24A19C))
+                // TODO: Navigate to home screen
+            }
+
+            else -> Unit
         }
     }
 }

@@ -1,4 +1,4 @@
-package com.example.taskify.dashboard
+package com.example.taskify.presentation.auth.dashboard
 
 import android.content.Intent
 import android.os.Bundle

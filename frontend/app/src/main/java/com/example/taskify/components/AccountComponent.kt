@@ -12,6 +12,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIos
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
@@ -213,4 +215,28 @@ fun TopTitle(
 
 fun isValidEmail(email: String): Boolean {
     return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
+}
+
+@Composable
+fun ButtonSection(
+    onClick: () -> Unit,
+    text: String
+) {
+    Button(
+        onClick = { onClick() },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 16.dp)
+            .height(52.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Color(0xFF24A19C)
+        ),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Text(
+            text = text,
+            fontSize = 18.sp,
+            color = Color.White
+        )
+    }
 }

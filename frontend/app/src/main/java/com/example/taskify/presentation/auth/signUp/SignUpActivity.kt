@@ -24,11 +24,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.taskify.R
 import com.example.taskify.components.AccountTextField
 import com.example.taskify.components.PasswordTextField
 import com.example.taskify.components.TopTitle
 import com.example.taskify.components.isValidEmail
+import com.example.taskify.data.local.TokenManager
 import com.example.taskify.data.remote.ApiClient
 import com.example.taskify.data.repository.AuthRepository
 
@@ -37,7 +37,8 @@ class SignUpActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        val viewModel = SignUpViewModel(AuthRepository(ApiClient.authApi))
+        val tokenManager = TokenManager(applicationContext)
+        val viewModel = SignUpViewModel(AuthRepository(ApiClient.authApi, tokenManager))
 
         setContent {
             SignUpScreen(onBackClick = {finish()}, viewModel = viewModel)
