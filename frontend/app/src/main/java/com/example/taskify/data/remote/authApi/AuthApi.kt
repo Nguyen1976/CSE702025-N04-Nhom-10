@@ -1,4 +1,4 @@
-package com.example.taskify.data.remote
+package com.example.taskify.data.remote.authApi
 
 import com.example.taskify.domain.model.signInModel.SignInRequest
 import com.example.taskify.domain.model.signInModel.SignInResponse

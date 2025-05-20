@@ -1,6 +1,7 @@
 package com.example.taskify.data.remote
 
 import com.example.taskify.data.network.AuthInterceptor
+import com.example.taskify.data.remote.authApi.AuthApi
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory

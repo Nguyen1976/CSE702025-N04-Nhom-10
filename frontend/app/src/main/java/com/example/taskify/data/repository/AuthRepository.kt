@@ -1,7 +1,7 @@
 package com.example.taskify.data.repository
 
 import com.example.taskify.data.local.TokenManager
-import com.example.taskify.data.remote.AuthApi
+import com.example.taskify.data.remote.authApi.AuthApi
 import com.example.taskify.domain.model.signInModel.SignInRequest
 import com.example.taskify.domain.model.signInModel.SignInResponse
 import com.example.taskify.domain.model.signUpModel.ErrorResponse
