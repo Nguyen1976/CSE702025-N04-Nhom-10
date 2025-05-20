@@ -17,6 +17,18 @@
         android:theme="@style/Theme.Taskify"
         tools:targetApi="31">
         <activity
+            android:name=".presentation.tasks.TaskActivity"
+            android:exported="false" />
+        <activity
+            android:name=".presentation.settings.SettingActivity"
+            android:exported="false" />
+        <activity
+            android:name=".presentation.filter.FilterActivity"
+            android:exported="false" />
+        <activity
+            android:name=".presentation.calendar.CalendarActivity"
+            android:exported="false" />
+        <activity
             android:name=".presentation.base.BaseActivity"
             android:exported="false" />
         <activity

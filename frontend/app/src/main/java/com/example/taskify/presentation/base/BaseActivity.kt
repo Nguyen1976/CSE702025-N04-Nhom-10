@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.example.taskify.components.showSessionExpiredDialog
 import com.example.taskify.data.local.TokenManager
 import com.example.taskify.data.network.TokenExpirationHandler
 import com.example.taskify.presentation.auth.dashboard.DashboardActivity
@@ -30,11 +31,11 @@ abstract class BaseActivity : AppCompatActivity() {
         // Bắt đầu đếm thời gian token hết hạn
         startSessionTimer()
 
-        // Lắng nghe sự kiện token hết hạn từ interceptor (nếu có)
+        // Lắng nghe sự kiện token hết hạn từ interceptor
         TokenExpirationHandler.addListener {
             runOnUiThread {
                 if (!isDialogShown) {
-                    showSessionExpiredDialog()
+                    displaySessionExpiredDialog()
                 }
             }
         }
@@ -47,12 +48,12 @@ abstract class BaseActivity : AppCompatActivity() {
         sessionJob = lifecycleScope.launch {
             val delayMillis = getTokenExpiryDuration()
             if (delayMillis <= 0) {
-                showSessionExpiredDialog()
+                displaySessionExpiredDialog()
                 return@launch
             }
             delay(delayMillis)
             if (!isDialogShown) {
-                showSessionExpiredDialog()
+                displaySessionExpiredDialog()
             }
         }
     }
@@ -83,21 +84,21 @@ abstract class BaseActivity : AppCompatActivity() {
         }
     }
 
-    private fun showSessionExpiredDialog() {
+    private fun displaySessionExpiredDialog() {
         if (isDialogShown) return
 
         isDialogShown = true
-        sessionExpiredDialog = AlertDialog.Builder(this)
-            .setTitle("Phiên đăng nhập hết hạn")
-            .setMessage("Phiên đăng nhập của bạn đã hết hạn. Vui lòng đăng nhập lại.")
-            .setCancelable(false)
-            .setPositiveButton("OK") { _, _ ->
+        sessionExpiredDialog = showSessionExpiredDialog(
+            onConfirm = {
                 lifecycleScope.launch {
                     tokenManager.clearTokens()
                     goToLogin()
                 }
-            }
-            .create()
+            },
+            title = "Session Expired",
+            message = "Your session has expired. Please log in again."
+        )
+
         sessionExpiredDialog?.show()
     }
 

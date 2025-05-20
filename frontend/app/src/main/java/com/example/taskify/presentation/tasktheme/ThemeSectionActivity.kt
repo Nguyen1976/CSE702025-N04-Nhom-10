@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,28 +24,21 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
-import com.example.taskify.R
 import com.example.taskify.components.ButtonSection
 import com.example.taskify.data.themeStorage.ThemeDataStore
 import com.example.taskify.domain.model.themeModel.ThemeOption
@@ -53,15 +47,15 @@ import kotlinx.coroutines.launch
 
 class ThemeSectionActivity : AppCompatActivity() {
 
-    private var selectedTheme = mutableStateOf(ThemeOption.Teal)
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
         setContent {
+            val selectedTheme = remember { mutableStateOf(ThemeOption.Teal) }
+
             ThemeSectionScreen(
-//                selectedTheme = selectedTheme.value,
+                selectedTheme = selectedTheme.value,
                 onThemeSelected = {
                     selectedTheme.value = it
                 },
@@ -79,12 +73,11 @@ class ThemeSectionActivity : AppCompatActivity() {
 
 @Composable
 fun ThemeSectionScreen(
-//    selectedTheme: ThemeOption,
+    selectedTheme: ThemeOption,
     onThemeSelected: (ThemeOption) -> Unit,
     onConfirm: () -> Unit
 ) {
-    val themes = listOf(ThemeOption.Teal, ThemeOption.Blue, ThemeOption.Red, ThemeOption.Blue)
-    var selectedTheme by remember { mutableStateOf(themes.first()) }
+    val themes = listOf(ThemeOption.Teal, ThemeOption.Black, ThemeOption.Red, ThemeOption.Blue)
 
     Column(
         modifier = Modifier
@@ -158,7 +151,10 @@ fun ThemeItem(
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
                 }
-                .clickable { onClick() }
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) { onClick() }
         ) {
             Column(
                 modifier = Modifier.background(Color.White).height(104.dp)
@@ -243,7 +239,7 @@ fun ThemeItem(
 fun PreviewThemeSelectionScreen() {
     // Bạn có thể cung cấp giá trị mặc định cho selectedTheme
     ThemeSectionScreen(
-//        selectedTheme = ThemeOption.Teal,
+        selectedTheme = ThemeOption.Teal,
         onThemeSelected = {},
         onConfirm = {}
     )
