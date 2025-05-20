@@ -21,6 +21,13 @@ const PASSWORD_RULE_MESSAGE =
   'Password must include at least 1 letter, a number, and at least 8 characters.'
 const PASSWORD_CONFIRMATION_MESSAGE = 'Password Confirmation does not match!'
 
+const TITLE_TASK_RULE = /^.{1,50}$/
+const TITLE_TASK_MESSAGE = 'Title maximum 50 characters'
+
+const DESCRIPTION_TASK_RULE = /^.{1,250}$/
+const DESCRIPTION_TASK_MESSAGE = 'description maximum 250 characters'
+
+
 module.exports = {
   OBJECT_ID_RULE,
   OBJECT_ID_RULE_MESSAGE,
@@ -31,5 +38,9 @@ module.exports = {
   PASSWORD_RULE_MESSAGE,
   PASSWORD_CONFIRMATION_MESSAGE,
   USERNAME_RULE,
-  USERNAME_RULE_MESSAGE
+  USERNAME_RULE_MESSAGE,
+  TITLE_TASK_RULE,
+  TITLE_TASK_MESSAGE,
+  DESCRIPTION_TASK_RULE,
+  DESCRIPTION_TASK_MESSAGE
 }
