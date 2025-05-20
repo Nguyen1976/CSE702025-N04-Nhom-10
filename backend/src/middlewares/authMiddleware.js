@@ -5,7 +5,7 @@ const ApiError = require('~/utils/ApiError')
 
 const isAuthorized = async (req, res, next) => {
   //Lấy accessToken từ client đẩy lên
-  const clientAccessToken = req.headers?.accesstoken.split(' ')[1]
+  const clientAccessToken = req.Authorization?.split(' ')[1]
 
   if (!clientAccessToken) {
     next(
