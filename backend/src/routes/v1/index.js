@@ -1,6 +1,7 @@
 const express = require('express')
 const { StatusCodes } = require('http-status-codes')
 const userRoute = require('./userRoute')
+const taskRoute = require('./taskRoute')
 
 const Router = express.Router()
 
@@ -9,4 +10,5 @@ Router.get('/status' ,(req, res) => {
 })
 
 Router.use('/users', userRoute)
+Router.use('/tasks', taskRoute)
 module.exports = Router
