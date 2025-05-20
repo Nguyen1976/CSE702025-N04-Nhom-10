@@ -29,8 +29,42 @@ const getTasks = async (user) => {
   }
 }
 
+const updateTask = async (taskId, reqBody, user) => {
+  try {
+    const task = await Task.findOneAndUpdate(
+      { _id: taskId, userId: user._id },
+      { ...reqBody },
+      { new: true }
+    )
+
+    if (!task) {
+      throw new ApiError(StatusCodes.NOT_FOUND)
+    }
+
+    return task
+  } catch (error) {
+    throw error
+  }
+}
+
+const deleteTask = async (taskId, user) => {
+  try {
+    const deleted = await Task.findOneAndDelete({
+      _id: taskId,
+      userId: user._id
+    })
+
+    if (!deleted) {
+      throw new ApiError(StatusCodes.NOT_FOUND)
+    }
+  } catch (error) {
+    throw error
+  }
+}
 
 module.exports = {
-    createNew,
-    getTasks
+  createNew,
+  getTasks,
+  updateTask,
+  deleteTask
 }

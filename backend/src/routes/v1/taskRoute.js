@@ -21,15 +21,15 @@ Router.route('/').post(
 )
 
 Router.route('/:taskId').put(
-     //validation
-    authMiddleware.isAuthorized
-    //controller
+    taskValidation.updateTask,
+    authMiddleware.isAuthorized,
+    taskController.updateTask
 )
 
 Router.route('/:taskId').delete(
     //validation
-    authMiddleware.isAuthorized
-    //controller
+    authMiddleware.isAuthorized,
+    taskController.deleteTask
 )
 
 module.exports = Router

@@ -32,6 +32,29 @@ const createNew = async (req, res, next) => {
   }
 }
 
+const updateTask = async (req, res, next) => {
+  const correctCondition = Joi.object({
+    title: Joi.string()
+      .pattern(TITLE_TASK_RULE)
+      .message(TITLE_TASK_MESSAGE),
+    description: Joi.string()
+      .pattern(DESCRIPTION_TASK_RULE)
+      .message(DESCRIPTION_TASK_MESSAGE),
+  }).unknown(true) // Cho phép các field khác
+
+  try {
+    await correctCondition.validateAsync(req.body, {
+      abortEarly: false
+    })
+    next()
+  } catch (error) {
+    next(
+      new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, new Error(error).message)
+    )
+  }
+}
+
 module.exports = {
-    createNew
+    createNew,
+    updateTask
 }
