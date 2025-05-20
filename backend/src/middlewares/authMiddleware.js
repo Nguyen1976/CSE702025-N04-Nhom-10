@@ -5,7 +5,7 @@ const ApiError = require('~/utils/ApiError')
 
 const isAuthorized = async (req, res, next) => {
   //Lấy accessToken từ client đẩy lên
-  const clientAccessToken = req.Authorization?.split(' ')[1]
+  const clientAccessToken = req.headers.authorization?.split(' ')[1]
 
   if (!clientAccessToken) {
     next(
@@ -24,7 +24,6 @@ const isAuthorized = async (req, res, next) => {
     //Quan trọng: Nếu như token hợp lệ, thì sẽ cần phải lưu thông tin giải mã được vài cái req.jwtDecoded sử dụng cho cấc tầng cần xử lý
     req.jwtDecoded = accessTokenDecoded
     //Cho phép req đi tiếp
-
     next()
   } catch (error) {
     // console.log(error)
