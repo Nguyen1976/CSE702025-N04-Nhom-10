@@ -1,5 +1,6 @@
 const { StatusCodes } = require('http-status-codes')
 const userService = require('~/services/userService')
+const ApiError = require('~/utils/ApiError')
 
 const createNew = async (req, res, next) => {
   try {
