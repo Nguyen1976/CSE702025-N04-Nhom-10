@@ -4,6 +4,7 @@ const User = require('~/models/UserModel')
 const bcrypt = require('bcryptjs')
 const env = require('~/config/environtment')
 const JWTProvider = require('~/providers/JwtProvider')
+const { StatusCodes } = require('http-status-codes')
 
 const createNew = async (reqBody) => {
   try {
