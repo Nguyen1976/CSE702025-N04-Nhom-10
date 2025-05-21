@@ -7,29 +7,29 @@ const Router = express.Router()
 
 //get list task of user
 Router.route('/').get(
-    //validation
-    authMiddleware.isAuthorized,
-    //controller
-    taskController.getTasks
+  //validation
+  authMiddleware.isAuthorized,
+  //controller
+  taskController.getTasks
 )
 
 //create
 Router.route('/').post(
-    taskValidation.createNew,
-    authMiddleware.isAuthorized,
-    taskController.createNew
+  taskValidation.createNew,
+  authMiddleware.isAuthorized,
+  taskController.createNew
 )
 
 Router.route('/:taskId').put(
-    taskValidation.updateTask,
-    authMiddleware.isAuthorized,
-    taskController.updateTask
+  taskValidation.updateTask,
+  authMiddleware.isAuthorized,
+  taskController.updateTask
 )
 
 Router.route('/:taskId').delete(
-    //validation
-    authMiddleware.isAuthorized,
-    taskController.deleteTask
+  //validation
+  authMiddleware.isAuthorized,
+  taskController.deleteTask
 )
 
 module.exports = Router
