@@ -1,7 +1,7 @@
 const ApiError = require('~/utils/ApiError')
 const { StatusCodes } = require('http-status-codes')
 const env = require('~/config/environtment')
-const Task = require('~/models/TaskModel')
+const Task = require('~/models/taskModel')
 
 const createNew = async (reqBody, user) => {
   try {
