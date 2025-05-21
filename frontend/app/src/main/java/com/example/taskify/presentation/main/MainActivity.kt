@@ -2,6 +2,7 @@ package com.example.taskify.presentation.main
 
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
@@ -34,6 +35,9 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -46,6 +50,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -78,6 +83,7 @@ import java.util.Locale
 class MainActivity : BaseActivity() {
 
     private val viewModel: TaskViewModel by viewModels()
+    private val showInputPanel = mutableStateOf(false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -93,7 +99,6 @@ class MainActivity : BaseActivity() {
                 return@launch
             }
 
-            // Hiển thị UI chính
             val isChosen = ThemeDataStore.isThemeChosen(this@MainActivity)
             if (!isChosen) {
                 startActivity(Intent(this@MainActivity, ThemeSectionActivity::class.java))
@@ -105,6 +110,7 @@ class MainActivity : BaseActivity() {
                     val coroutineScope = rememberCoroutineScope()
                     val tabs = TabItem.values()
                     val pagerState = rememberPagerState { tabs.size }
+
                     MaterialTheme {
                         Scaffold(
                             containerColor = Color.Transparent,
@@ -124,10 +130,15 @@ class MainActivity : BaseActivity() {
                                 state = pagerState,
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .padding(bottom = padding.calculateBottomPadding())
+                                    .padding(bottom = padding.calculateBottomPadding()),
+                                userScrollEnabled = !showInputPanel.value
                             ) { page ->
                                 when (page) {
-                                    0 -> MainScreen(theme = theme ?: ThemeOption.Teal, viewModel)
+                                    0 -> MainScreen(
+                                        theme = theme ?: ThemeOption.Teal,
+                                        viewModel = viewModel,
+                                        showInputPanel = showInputPanel
+                                    )
                                     1 -> TasksScreen()
                                     2 -> FilterScreen()
                                     3 -> CalendarScreen()
@@ -140,150 +151,134 @@ class MainActivity : BaseActivity() {
             }
         }
     }
+
+    override fun onBackPressed() {
+        if (showInputPanel.value) {
+            showInputPanel.value = false
+        } else {
+            super.onBackPressed()
+        }
+    }
 }
 
 @Composable
-fun MainScreen(theme: ThemeOption, viewModel: TaskViewModel) {
-    val color = when (theme) {
-        ThemeOption.Teal -> Color(0xFF26A69A)
-        ThemeOption.Black -> Color(0xFF1B1C1F)
-        ThemeOption.Red -> Color(0xFFEA4335)
-        ThemeOption.Blue -> Color(0xFF1877F2)
-    }
-
-    val today = LocalDate.now()
-    val formatter = DateTimeFormatter.ofPattern("EEE dd MMM yyyy", Locale.ENGLISH)
-    val formatterDate = "Today. " + today.format(formatter)
-
-    val currentDate = LocalDate.now().format(DateTimeFormatter.ISO_DATE) // Format as yyyy-MM-dd
-    val currentTime = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm")) // Format as HH:mm
-    var selectedDate by remember { mutableStateOf(currentDate) }
-    var selectedTime by remember { mutableStateOf(currentTime) }
+fun MainScreen(
+    theme: ThemeOption,
+    viewModel: TaskViewModel,
+    showInputPanel: MutableState<Boolean>
+) {
+    val color = theme.toColor()
+    val context = LocalContext.current
+    val formatterDate = "Today. " + LocalDate.now().format(
+        DateTimeFormatter.ofPattern("EEE dd MMM yyyy", Locale.ENGLISH)
+    )
 
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var isSuccess by remember { mutableStateOf(false) }
-
     var taskDate by remember { mutableStateOf<LocalDate?>(null) }
     var taskTime by remember { mutableStateOf<LocalTime?>(null) }
     var selectedType by remember { mutableStateOf<String?>(null) }
 
-    var showInputPanel by remember { mutableStateOf(false) }
+    val taskResult by viewModel.taskResult.collectAsState()
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(color = Color(0xFFF5F5F5))
-            .padding(16.dp)
-            .padding(top = 48.dp)
-    ) {
+    // Tự động đóng form nếu tạo thành công
+    LaunchedEffect(taskResult) {
+        if (taskResult?.isSuccess == true) {
+            showInputPanel.value = false
+            title = ""
+            description = ""
+            taskDate = null
+            taskTime = null
+            selectedType = null
+        }
+    }
+
+    // Sử dụng Box để chồng các layer, đảm bảo TaskInputPanel2 đè lên nội dung khác
+    Box(modifier = Modifier.fillMaxSize()) {
+        // Nội dung chính của màn hình
         Column(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.Start
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color(0xFFF5F5F5))
+                .padding(16.dp)
+                .padding(top = 48.dp)
         ) {
-            Text(
-                "Today",
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold
-            )
-
+            Text("Today", fontSize = 24.sp, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(6.dp))
-
             Text(
                 "Best platform for creating to-do lists",
                 fontSize = 14.sp,
                 color = Color.Black.copy(alpha = 0.6f)
             )
-        }
 
-        Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(32.dp))
 
-        Card(
-            shape = RoundedCornerShape(8.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(12.dp))
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null
-                ) { },
-            elevation = CardDefaults.cardElevation(0.1.dp),
-        ) {
-            Column(
+            Card(
+                shape = RoundedCornerShape(8.dp),
                 modifier = Modifier
-                    .background(Color.White)
-                    .height(150.dp)
+                    .fillMaxWidth()
+                    .clickable { },
+                elevation = CardDefaults.cardElevation(0.1.dp),
             ) {
-                Box(
+                Column(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .height(36.dp)
-                        .background(color = color)
-                )
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                        .padding(vertical = 10.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                        .background(Color.White)
+                        .height(150.dp)
                 ) {
                     Box(
                         modifier = Modifier
-                            .size(26.dp)
-                            .background(color = color, RoundedCornerShape(4.dp))
-                            .clickable { showInputPanel = true },
-                        contentAlignment = Alignment.Center
+                            .fillMaxWidth()
+                            .height(36.dp)
+                            .background(color = color)
+                    )
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                            .padding(vertical = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            "+",
-                            fontSize = 22.sp,
-                            lineHeight = 1.sp,
-                            color = Color.White
-                        )
+                        Box(
+                            modifier = Modifier
+                                .size(26.dp)
+                                .background(color = color, RoundedCornerShape(4.dp))
+                                .clickable { showInputPanel.value = true },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("+", fontSize = 22.sp, color = Color.White)
+                        }
+
+                        Spacer(modifier = Modifier.width(12.dp))
+
+                        Text("Tap plus to create a new task", fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
                     }
 
-                    Spacer(modifier = Modifier.width(12.dp))
-
-                    Text(
-                        "Tap plus to create a new task",
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                }
-
-                Box(
-                    modifier = Modifier
-                        .height(1.dp)
-                        .fillMaxWidth()
-                        .padding(horizontal = 12.dp)
-                        .background(color = Color(0xFFEEEEEE))
-                )
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 12.dp, vertical = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        "Add your task",
-                        fontSize = 12.sp,
-                        color = Color.Black.copy(alpha = 0.6f)
+                    Box(
+                        Modifier
+                            .height(1.dp)
+                            .fillMaxWidth()
+                            .padding(horizontal = 12.dp)
+                            .background(Color(0xFFEEEEEE))
                     )
 
-                    Text(
-                        text = formatterDate,
-                        fontSize = 12.sp,
-                        color = Color.Black.copy(alpha = 0.6f)
-                    )
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 12.dp, vertical = 4.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text("Add your task", fontSize = 12.sp, color = Color.Black.copy(alpha = 0.6f))
+                        Text(formatterDate, fontSize = 12.sp, color = Color.Black.copy(alpha = 0.6f))
+                    }
                 }
             }
         }
 
-        if (showInputPanel) {
-            TaskInputPanel(
+        // Đặt TaskInputPanel2 lên trên với zIndex
+        if (showInputPanel.value) {
+            TaskInputPanel2(
                 title = title,
                 onTitleChange = { title = it },
                 description = description,
@@ -294,23 +289,34 @@ fun MainScreen(theme: ThemeOption, viewModel: TaskViewModel) {
                 onTaskTimeChange = { taskTime = it },
                 selectedType = selectedType,
                 onTypeSelected = { selectedType = it },
-                isSuccess = false,  // xử lý success/error theo viewModel.taskResult
-                onDismiss = { /* xử lý đóng panel */ },
+                isSuccess = isSuccess,
+                onDismiss = { showInputPanel.value = false },
                 onSend = {
-                    val taskRequest = TaskRequest(
-                        title = title,
-                        description = description,
-                        createAt = LocalDateTime.now(),
-                        taskDate = taskDate!!,
-                        taskTime = taskTime!!,
-                        type = selectedType!!,
-                        isSuccess = isSuccess
-                    )
-                    viewModel.createTask(taskRequest)
+                    if (title.isNotBlank() && taskDate != null && taskTime != null && selectedType != null) {
+                        val taskRequest = TaskRequest(
+                            title = title,
+                            description = description,
+                            createAt = LocalDateTime.now(),
+                            taskDate = taskDate!!,
+                            taskTime = taskTime!!,
+                            type = selectedType!!,
+                            isSuccess = isSuccess
+                        )
+                        viewModel.createTask(taskRequest)
+                    } else {
+                        Toast.makeText(context, "Vui lòng nhập đầy đủ thông tin!", Toast.LENGTH_SHORT).show()
+                    }
                 }
             )
         }
     }
+}
+
+fun ThemeOption.toColor(): Color = when (this) {
+    ThemeOption.Teal -> Color(0xFF26A69A)
+    ThemeOption.Black -> Color(0xFF1B1C1F)
+    ThemeOption.Red -> Color(0xFFEA4335)
+    ThemeOption.Blue -> Color(0xFF1877F2)
 }
 
 @Composable
