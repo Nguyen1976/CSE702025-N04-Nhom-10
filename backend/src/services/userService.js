@@ -1,6 +1,6 @@
 const ApiError = require('~/utils/ApiError')
 const { pickUser } = require('~/utils/formatters')
-const User = require('~/models/UserModel')
+const User = require('~/models/userModel')
 const bcrypt = require('bcryptjs')
 const env = require('~/config/environtment')
 const JWTProvider = require('~/providers/JwtProvider')
