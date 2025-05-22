@@ -230,14 +230,9 @@ Content-Type: application/json
 {
   "title": "Task mới",
   "description": "Mô tả task mới",
-  "subtasks": [
-    {
-      "title": "Subtask 1",
-      "subtaskDes": "Mô tả chi tiết subtask"
-    }
-  ],
   "createAt": "2025-05-16T08:30:00Z",
-  "dueDate": "2025-05-16T08:35:00Z",
+  "taskDate": "2025-05-16",
+  "taskTime": "19:30:00"
   "type": "Meeting",
   "isSuccess": false
 }
@@ -249,17 +244,11 @@ Content-Type: application/json
   "userId": "user123",
   "title": "Task mới",
   "description": "Mô tả task mới",
-  "subtasks": [
-    {
-      "title": "Subtask 1",
-      "subtaskDes": "Mô tả chi tiết subtask"
-    }
-  ],
   "createAt": "2025-05-16T08:30:00Z",
-  "dueDate": "2025-05-16T08:35:00Z",
+  "taskDate": "2025-05-16",
+  "taskTime": "19:30:00"
   "type": "Meeting",
   "isSuccess": false
-}
 }
 ```
 
