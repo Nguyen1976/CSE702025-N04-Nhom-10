@@ -32,7 +32,8 @@
 | description | String             | Mô tả công việc                  |
 | subtasks    | List<'Subtask>     | Danh sách các subtask            |
 | createAt    | String (ISO8601)   | Ngày tạo task                   |
-| dueDate     | String (ISO8601)   | Ngày giờ thực hiện task             |
+| taskDate     | String (ISO8601)   | Ngày thực hiện task             |
+| taskTime     | String (ISO8601)   | Giờ thực hiện task             |
 | type        | String             | Loại việc làm (họp, du lịch, ...) |
 | isSuccess   | Boolean            | Đánh dấu hoàn thành              |
 
