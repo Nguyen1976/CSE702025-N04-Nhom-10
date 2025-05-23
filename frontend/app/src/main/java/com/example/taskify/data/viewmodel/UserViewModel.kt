@@ -2,6 +2,7 @@ package com.example.taskify.data.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.taskify.data.local.UserPreferences
 import com.example.taskify.data.repository.UserRepository
 import com.example.taskify.domain.model.signInModel.User
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -12,7 +13,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class UserViewModel @Inject constructor(
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val userPreferences: UserPreferences
 ) : ViewModel() {
 
     private val _userState = MutableStateFlow<User?>(null)
@@ -25,12 +27,31 @@ class UserViewModel @Inject constructor(
         viewModelScope.launch {
             val result = userRepository.getCurrentUser()
             if (result.isSuccess) {
-                _userState.value = result.getOrNull()
+                val user = result.getOrNull()
+                _userState.value = user
                 _error.value = null
+
+                // Save on DataStore
+                user?.let { userPreferences.saveUser(it) }
             } else {
                 _error.value = result.exceptionOrNull()?.message
                 _userState.value = null
             }
+        }
+    }
+
+    fun getUserFromLocal() {
+        viewModelScope.launch {
+            userPreferences.getUser().collect {
+                _userState.value = it
+            }
+        }
+    }
+
+    fun clearUser() {
+        viewModelScope.launch {
+            userPreferences.clearUser()
+            _userState.value = null
         }
     }
 }

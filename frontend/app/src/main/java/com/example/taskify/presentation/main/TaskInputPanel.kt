@@ -23,6 +23,7 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -67,6 +68,7 @@ fun TaskInputPanel(
     selectedType: String?,
     onTypeSelected: (String) -> Unit,
     isSuccess: Boolean,
+    isLoading: Boolean,
     onDismiss: () -> Unit,
     onSend: () -> Unit
 ) {
@@ -91,6 +93,13 @@ fun TaskInputPanel(
     LaunchedEffect(Unit) {
         focusRequester.requestFocus()
         keyboardController?.show()
+    }
+
+    LaunchedEffect(isLoading) {
+        if (isLoading) {
+            focusManager.clearFocus()
+            keyboardController?.hide()
+        }
     }
 
     if (isSuccess) {
@@ -176,10 +185,10 @@ fun TaskInputPanel(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(40.dp) // 👈 đảm bảo Box cùng chiều cao
+                            .height(40.dp)
                             .background(Color.White)
-                            .padding(horizontal = 12.dp), // 👈 chỉ padding ngang
-                        contentAlignment = Alignment.CenterStart // 👈 căn giữa theo chiều dọc
+                            .padding(horizontal = 12.dp),
+                        contentAlignment = Alignment.CenterStart
                     ) {
                         if (title.isEmpty()) {
                             Text(
@@ -320,7 +329,8 @@ fun TaskInputPanel(
                         .size(24.dp)
                         .clickable(
                             interactionSource = interactionSource,
-                            indication = null
+                            indication = null,
+                            enabled = !isLoading
                         ) { onSend() }
                 )
             }
@@ -354,34 +364,51 @@ fun TaskInputPanel(
 
             Spacer(modifier = Modifier.height(8.dp))
         }
+
+        if (isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.5f))
+                    .zIndex(2f),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(48.dp),
+                    strokeWidth = 4.dp,
+                    color = Color.White
+                )
+            }
+        }
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun TaskInputPanel2Preview() {
-    // Dummy state for preview
-    var title by remember { mutableStateOf("Sample Task") }
-    var description by remember { mutableStateOf("This is a description.") }
-    var taskDate by remember { mutableStateOf(LocalDate.now()) }
-    var taskTime by remember { mutableStateOf(LocalTime.of(14, 30)) }
-    var selectedType by remember { mutableStateOf("Work") }
-    var isSuccess by remember { mutableStateOf(false) }
-
-    // UI preview
-    TaskInputPanel(
-        title = title,
-        onTitleChange = { title = it },
-        description = description,
-        onDescriptionChange = { description = it },
-        taskDate = taskDate,
-        onTaskDateChange = { taskDate = it },
-        taskTime = taskTime,
-        onTaskTimeChange = { taskTime = it },
-        selectedType = selectedType,
-        onTypeSelected = { selectedType = it },
-        isSuccess = isSuccess,
-        onDismiss = { /* no-op */ },
-        onSend = { /* no-op */ }
-    )
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun TaskInputPanel2Preview() {
+//    // Dummy state for preview
+//    var title by remember { mutableStateOf("Sample Task") }
+//    var description by remember { mutableStateOf("This is a description.") }
+//    var taskDate by remember { mutableStateOf(LocalDate.now()) }
+//    var taskTime by remember { mutableStateOf(LocalTime.of(14, 30)) }
+//    var selectedType by remember { mutableStateOf("Work") }
+//    var isSuccess by remember { mutableStateOf(false) }
+//
+//    // UI preview
+//    TaskInputPanel(
+//        title = title,
+//        onTitleChange = { title = it },
+//        description = description,
+//        onDescriptionChange = { description = it },
+//        taskDate = taskDate,
+//        onTaskDateChange = { taskDate = it },
+//        taskTime = taskTime,
+//        onTaskTimeChange = { taskTime = it },
+//        selectedType = selectedType,
+//        onTypeSelected = { selectedType = it },
+//        isSuccess = isSuccess,
+//        onDismiss = { /* no-op */ },
+//        onSend = { /* no-op */ },
+//        isLoading = false
+//    )
+//}

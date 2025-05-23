@@ -62,13 +62,12 @@ class DashboardActivity : AppCompatActivity() {
         lifecycleScope.launch {
             val token = tokenManager.getAccessToken()
             if (!token.isNullOrEmpty()) {
-                // User đã đăng nhập -> chuyển sang MainActivity luôn
+                // đăng nhập -> MainActivity
                 startActivity(Intent(this@DashboardActivity, MainActivity::class.java).apply {
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                 })
                 finish()
             } else {
-                // Nếu chưa đăng nhập thì set UI Compose bình thường
                 setContent {
                     DashboardSection()
                 }
@@ -223,13 +222,5 @@ fun DashboardSection() {
                 }
             )
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun LoginPreview() {
-    TaskifyTheme {
-        DashboardSection()
     }
 }

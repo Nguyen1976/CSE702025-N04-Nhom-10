@@ -41,6 +41,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -115,7 +116,14 @@ class MainActivity : BaseActivity() {
                     val isLoading by taskViewModel.isLoading.collectAsState()
 
                     if (isLoading) {
-                        CircularProgressIndicator()
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color.Black.copy(alpha = 0.5f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator()
+                        }
                     }
 
                     LaunchedEffect(taskResult) {
@@ -157,8 +165,8 @@ class MainActivity : BaseActivity() {
                                         showInputPanel = showInputPanel
                                     )
                                     1 -> TasksScreen()
-                                    2 -> CalendarScreen()
-                                    3 -> FilterScreen()
+                                    2 -> key(page) { CalendarScreen() }
+                                    3 -> key(page) { FilterScreen() }
                                     4 -> SettingScreen()
                                 }
                             }
@@ -170,6 +178,7 @@ class MainActivity : BaseActivity() {
                         var taskDate by remember { mutableStateOf<LocalDate?>(null) }
                         var taskTime by remember { mutableStateOf<LocalTime?>(null) }
                         var selectedType by remember { mutableStateOf<String?>(null) }
+                        var isLoadingLocal by remember { mutableStateOf(false) }
 
                         val context = LocalContext.current
 
@@ -181,10 +190,13 @@ class MainActivity : BaseActivity() {
                                 taskDate = null
                                 taskTime = null
                                 selectedType = null
+                                isLoadingLocal = false
+                            } else if (taskResult?.isFailure == true) {
+                                isLoadingLocal = false
                             }
                         }
 
-                        // reset field
+                        // Reset field
                         LaunchedEffect(showInputPanel.value) {
                             if (showInputPanel.value) {
                                 title = ""
@@ -193,6 +205,7 @@ class MainActivity : BaseActivity() {
                                 taskTime = null
                                 selectedType = null
                                 isSuccess = false
+                                isLoadingLocal = false
                             }
                         }
 
@@ -209,9 +222,11 @@ class MainActivity : BaseActivity() {
                                 selectedType = selectedType,
                                 onTypeSelected = { selectedType = it },
                                 isSuccess = isSuccess,
+                                isLoading = isLoadingLocal,
                                 onDismiss = { showInputPanel.value = false },
                                 onSend = {
                                     if (title.isNotBlank() && taskDate != null && taskTime != null && selectedType != null) {
+                                        isLoadingLocal = true // Bật loading
                                         val taskRequest = TaskRequest(
                                             title = title,
                                             description = description,

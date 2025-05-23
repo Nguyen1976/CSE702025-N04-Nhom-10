@@ -69,15 +69,15 @@ fun CalendarSection() {
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
     var selectedMonth by remember { mutableStateOf(YearMonth.now()) }
 
-    // Tạo listState điều khiển scroll
+    // tạo listState điều khiển scroll
     val listState = rememberLazyListState()
     val daysInMonth = selectedMonth.lengthOfMonth()
     val startDate = selectedMonth.atDay(1)
     val dates = (0 until daysInMonth).map { startDate.plusDays(it.toLong()) }
 
-    // Scroll khi selectedDate hoặc selectedMonth thay đổi
+    // scroll khi selectedDate or selectedMonth thay đổi
     LaunchedEffect(selectedDate, selectedMonth) {
-        // Tìm vị trí ngày được chọn
+        // ngày đc chọn
         val index = dates.indexOfFirst { it == selectedDate }.coerceAtLeast(0)
         listState.animateScrollToItem((index - 2).coerceAtLeast(0))
     }

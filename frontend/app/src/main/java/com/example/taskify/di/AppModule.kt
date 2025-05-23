@@ -1,8 +1,8 @@
-// AppModule.kt
 package com.example.taskify.di
 
 import android.content.Context
 import com.example.taskify.data.local.TokenManager
+import com.example.taskify.data.local.UserPreferences
 import com.example.taskify.data.remote.TaskApi
 import com.example.taskify.data.remote.UserApi
 import com.example.taskify.data.remote.authApi.AuthApi
@@ -20,7 +20,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
 
 @Module
-@InstallIn(SingletonComponent::class) // scope Singleton để dùng suốt app
+@InstallIn(SingletonComponent::class)
 object AppModule {
 
     private const val BASE_URL = "http://192.168.100.211:8080"
@@ -81,5 +81,11 @@ object AppModule {
     @Singleton
     fun provideUserRepository(api: UserApi): UserRepository {
         return UserRepository(api)
+    }
+
+    @Provides
+    @Singleton
+    fun provideUserPreferences(@ApplicationContext context: Context): UserPreferences {
+        return UserPreferences(context)
     }
 }

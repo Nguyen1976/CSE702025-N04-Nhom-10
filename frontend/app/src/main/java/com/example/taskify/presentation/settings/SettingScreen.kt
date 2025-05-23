@@ -1,5 +1,6 @@
 package com.example.taskify.presentation.settings
 
+import android.content.Intent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -17,37 +18,91 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForwardIos
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.taskify.R
 import com.example.taskify.data.viewmodel.UserViewModel
-import com.example.taskify.domain.model.signInModel.User
+import com.example.taskify.presentation.auth.dashboard.DashboardActivity
+import com.example.taskify.ui.viewmodels.SignOutViewModel
 
 @Composable
-fun SettingScreen(userViewModel: UserViewModel = hiltViewModel()) {
+fun SettingScreen(
+    userViewModel: UserViewModel = hiltViewModel(),
+    signOutViewModel: SignOutViewModel = hiltViewModel()
+) {
     val user by userViewModel.userState.collectAsState()
+    val logoutState by signOutViewModel.logoutState.collectAsState()
+    var showLogoutDialog by remember { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
+    val context = LocalContext.current
+
+    LaunchedEffect(logoutState) {
+        when (logoutState) {
+            is SignOutViewModel.LogoutState.Success -> {
+                val intent = Intent(context, DashboardActivity::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                context.startActivity(intent)
+            }
+            is SignOutViewModel.LogoutState.Error -> {
+                snackbarHostState.showSnackbar(
+                    message = (logoutState as SignOutViewModel.LogoutState.Error).error,
+                    duration = SnackbarDuration.Short
+                )
+            }
+            else -> {}
+        }
+    }
 
     LaunchedEffect(Unit) {
+        userViewModel.getUserFromLocal()
         userViewModel.loadCurrentUser()
+    }
+
+    if (showLogoutDialog) {
+        AlertDialog(
+            onDismissRequest = { showLogoutDialog = false },
+            title = { Text("Log Out") },
+            text = { Text("Are you sure you want to log out?") },
+            confirmButton = {
+                TextButton(onClick = {
+                    signOutViewModel.logout()
+                    showLogoutDialog = false
+                }) {
+                    Text("Yes")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showLogoutDialog = false }) {
+                    Text("No")
+                }
+            }
+        )
     }
 
     Column(
@@ -70,7 +125,7 @@ fun SettingScreen(userViewModel: UserViewModel = hiltViewModel()) {
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            ConstraintLayout{
+            ConstraintLayout {
                 val (avatar, editBtn) = createRefs()
 
                 Image(
@@ -100,7 +155,7 @@ fun SettingScreen(userViewModel: UserViewModel = hiltViewModel()) {
                             start.linkTo(avatar.end, margin = -28.dp)
                         },
                     contentAlignment = Alignment.Center
-                ){
+                ) {
                     Image(
                         painter = painterResource(R.drawable.ic_edit),
                         contentDescription = null,
@@ -132,7 +187,9 @@ fun SettingScreen(userViewModel: UserViewModel = hiltViewModel()) {
                         .fillMaxWidth(),
                     contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator()
+                    CircularProgressIndicator(
+                        color = Color(0xFF24A19C)
+                    )
                 }
             }
         }
@@ -153,7 +210,26 @@ fun SettingScreen(userViewModel: UserViewModel = hiltViewModel()) {
 
         SettingItem(painter = painterResource(id = R.drawable.ic_key), "Privacy Policy", onClick = {})
         SettingItem(painter = painterResource(id = R.drawable.ic_help_center), "Help Center", onClick = {})
-        SettingItem(painter = painterResource(id = R.drawable.ic_logout), "Log Out", onClick = {})
+        SettingItem(
+            painter = painterResource(id = R.drawable.ic_logout),
+            text = "Log Out",
+            onClick = { showLogoutDialog = true }
+        )
+
+        if (logoutState is SignOutViewModel.LogoutState.Loading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        }
+
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        )
     }
 }
 
@@ -166,7 +242,11 @@ fun SettingItem(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 12.dp),
+            .padding(vertical = 12.dp)
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null
+            ) { onClick() },
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
@@ -175,7 +255,7 @@ fun SettingItem(
             tint = Color(0xFF767E8C),
             modifier = Modifier.size(24.dp)
         )
-        
+
         Spacer(modifier = Modifier.width(12.dp))
 
         Text(
@@ -190,12 +270,7 @@ fun SettingItem(
             Icons.Default.ArrowForwardIos,
             contentDescription = null,
             tint = Color(0xFF767E8C),
-            modifier = Modifier
-                .size(18.dp)
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null
-                ) { onClick() }
+            modifier = Modifier.size(18.dp)
         )
     }
 }

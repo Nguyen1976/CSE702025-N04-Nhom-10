@@ -1,36 +1,43 @@
 package com.example.taskify.presentation.auth.signUp
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.taskify.data.repository.AuthRepository
 import com.example.taskify.domain.model.signUpModel.SignUpRequest
+import com.example.taskify.domain.model.signUpModel.SignUpResponse
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class SignUpViewModel (
+sealed class UiState<out T> {
+    object Idle : UiState<Nothing>()
+    object Loading : UiState<Nothing>()
+    data class Success<out T>(val data: T) : UiState<T>()
+    data class Error(val message: String) : UiState<Nothing>()
+}
+
+@HiltViewModel
+class SignUpViewModel @Inject constructor(
     private val repository: AuthRepository
 ) : ViewModel() {
-    var email by mutableStateOf("")
-    var username by mutableStateOf("")
-    var password by mutableStateOf("")
-    var errorText by mutableStateOf<String?>(null)
-    var isLoading by mutableStateOf(false)
-    var success by mutableStateOf(false)
+    private val _signUpState = MutableStateFlow<UiState<SignUpResponse>>(UiState.Idle)
+    val signUpState: StateFlow<UiState<SignUpResponse>> = _signUpState.asStateFlow()
 
-    fun signUp() {
+    fun signUp(email: String, username: String, password: String) {
         viewModelScope.launch {
-            isLoading = true
+            _signUpState.value = UiState.Loading
             val result = repository.signUp(SignUpRequest(username, email, password))
-            isLoading = false
-            result.onSuccess {
-                success = true
-                errorText = null
-                // Lưu token nếu cần
-            }.onFailure {
-                errorText = it.message
+            _signUpState.value = when {
+                result.isSuccess -> UiState.Success(result.getOrNull()!!)
+                else -> UiState.Error(result.exceptionOrNull()?.message ?: "Unknown error")
             }
         }
+    }
+
+    fun resetSignUpState() {
+        _signUpState.value = UiState.Idle
     }
 }
