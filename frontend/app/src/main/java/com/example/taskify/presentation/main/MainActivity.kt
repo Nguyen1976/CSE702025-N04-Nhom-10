@@ -56,8 +56,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.taskify.R
 import com.example.taskify.data.themeStorage.ThemeDataStore
+import com.example.taskify.data.viewmodel.UserViewModel
 import com.example.taskify.domain.model.taskModel.TaskRequest
 import com.example.taskify.domain.model.themeModel.ThemeOption
 import com.example.taskify.presentation.auth.dashboard.DashboardActivity
@@ -79,7 +81,7 @@ import java.util.Locale
 @AndroidEntryPoint
 class MainActivity : BaseActivity() {
 
-    private val viewModel: TaskViewModel by viewModels()
+    private val taskViewModel: TaskViewModel by viewModels()
     private val showInputPanel = mutableStateOf(false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -109,8 +111,8 @@ class MainActivity : BaseActivity() {
                     val pagerState = rememberPagerState { tabs.size }
 
                     val context = LocalContext.current
-                    val taskResult by viewModel.taskResult.collectAsState()
-                    val isLoading by viewModel.isLoading.collectAsState()
+                    val taskResult by taskViewModel.taskResult.collectAsState()
+                    val isLoading by taskViewModel.isLoading.collectAsState()
 
                     if (isLoading) {
                         CircularProgressIndicator()
@@ -123,7 +125,7 @@ class MainActivity : BaseActivity() {
                             }.onFailure {
                                 Toast.makeText(context, "An error occurred while creating the task, please try again!", Toast.LENGTH_SHORT).show()
                             }
-                            viewModel.resetTaskResult()
+                            taskViewModel.resetTaskResult()
                         }
                     }
 
@@ -169,7 +171,6 @@ class MainActivity : BaseActivity() {
                         var taskTime by remember { mutableStateOf<LocalTime?>(null) }
                         var selectedType by remember { mutableStateOf<String?>(null) }
 
-                        val taskResult by viewModel.taskResult.collectAsState()
                         val context = LocalContext.current
 
                         LaunchedEffect(taskResult) {
@@ -220,7 +221,7 @@ class MainActivity : BaseActivity() {
                                             type = selectedType!!,
                                             isSuccess = isSuccess
                                         )
-                                        viewModel.createTask(taskRequest)
+                                        taskViewModel.createTask(taskRequest)
                                     } else {
                                         Toast.makeText(context, "Please fill in all the information!", Toast.LENGTH_SHORT).show()
                                     }
@@ -408,9 +409,9 @@ fun BottomBarWithIndicator(
 }
 
 enum class TabItem(@DrawableRes val iconRes: Int, val label: String) {
-    Home(R.drawable.home, "Home"),
-    Tasks(R.drawable.direct_inbox, "Tasks"),
-    Filter(R.drawable.calendar, "Filter"),
-    Calendar(R.drawable.category, "Calendar"),
-    Settings(R.drawable.setting, "Settings")
+    Home(R.drawable.ic_home, "Home"),
+    Tasks(R.drawable.ic_direct_inbox, "Tasks"),
+    Filter(R.drawable.ic_calendar, "Filter"),
+    Calendar(R.drawable.ic_category, "Calendar"),
+    Settings(R.drawable.ic_setting, "Settings")
 }

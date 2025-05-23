@@ -54,7 +54,7 @@ fun CalendarScreen() {
     ) {
         Text(
             "Upcoming",
-            fontSize = 18.sp,
+            fontSize = 20.sp,
             fontWeight = FontWeight.SemiBold
         )
 
@@ -173,7 +173,10 @@ fun MonthSelector(
             color = Color(0xFF24A19C),
             fontSize = 16.sp,
             modifier = Modifier
-                .clickable { onTodayClick() }
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) { onTodayClick() }
         )
     }
 

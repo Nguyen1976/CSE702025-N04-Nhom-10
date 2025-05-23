@@ -233,7 +233,7 @@ fun TaskInputPanel(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp)
             ) {
                 Image(
-                    painter = painterResource(R.drawable.direct_inbox),
+                    painter = painterResource(R.drawable.ic_direct_inbox),
                     contentDescription = null,
                     modifier = Modifier
                         .size(24.dp)
@@ -250,7 +250,7 @@ fun TaskInputPanel(
                 Spacer(modifier = Modifier.width(12.dp))
 
                 Image(
-                    painter = painterResource(R.drawable.calendar),
+                    painter = painterResource(R.drawable.ic_calendar),
                     contentDescription = null,
                     modifier = Modifier
                         .size(24.dp)
@@ -276,7 +276,7 @@ fun TaskInputPanel(
                 Spacer(modifier = Modifier.width(12.dp))
 
                 Image(
-                    painter = painterResource(R.drawable.clock),
+                    painter = painterResource(R.drawable.ic_clock),
                     contentDescription = null,
                     modifier = Modifier
                         .size(24.dp)
@@ -301,7 +301,7 @@ fun TaskInputPanel(
                 Spacer(modifier = Modifier.width(12.dp))
 
                 Image(
-                    painter = painterResource(R.drawable.flag),
+                    painter = painterResource(R.drawable.ic_flag),
                     contentDescription = null,
                     modifier = Modifier
                         .size(24.dp)
@@ -314,7 +314,7 @@ fun TaskInputPanel(
                 Spacer(modifier = Modifier.weight(1f))
 
                 Image(
-                    painter = painterResource(id = R.drawable.send),
+                    painter = painterResource(id = R.drawable.ic_send),
                     contentDescription = null,
                     modifier = Modifier
                         .size(24.dp)

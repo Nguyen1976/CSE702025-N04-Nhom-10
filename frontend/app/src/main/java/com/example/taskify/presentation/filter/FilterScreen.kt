@@ -3,6 +3,7 @@ package com.example.taskify.presentation.filter
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -86,7 +87,7 @@ fun FilterScreen() {
                 .fillMaxSize()
                 .background(color = Color(0xFFF5F5F5))
                 .padding(paddingValues)
-                .padding(top = 48.dp, start = 16.dp, end = 16.dp),
+                .padding(top = 32.dp, start = 16.dp, end = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
@@ -113,11 +114,14 @@ fun FilterScreen() {
                     Icons.Default.Add,
                     contentDescription = null,
                     modifier = Modifier
-                        .clickable {
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null
+                        ) {
                             snackbarJob?.cancel()
                             snackbarJob = scope.launch {
-                                delay(500L)
-                                snackbarHostState.showSnackbar("Add filter clicked")
+                                delay(200L)
+                                snackbarHostState.showSnackbar("Growing features")
                             }
                         }
                 )
@@ -125,11 +129,11 @@ fun FilterScreen() {
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            val filter = getPainterFromAny(R.drawable.filter)
-            val collision = getPainterFromAny(R.drawable.collision)
-            val okHand = getPainterFromAny(R.drawable.ok_hand)
-            val settingLabel = getPainterFromAny(R.drawable.settingfilter)
-            val taskSquare = getPainterFromAny(R.drawable.task_square)
+            val filter = getPainterFromAny(R.drawable.ic_filter)
+            val collision = getPainterFromAny(R.drawable.ic_collision)
+            val okHand = getPainterFromAny(R.drawable.ic_ok_hand)
+            val settingLabel = getPainterFromAny(R.drawable.ic_settingfilter)
+            val taskSquare = getPainterFromAny(R.drawable.ic_task_square)
 
             FilterItem(painter = filter, text = "Assigned to me")
             Spacer(modifier = Modifier.height(12.dp))
@@ -157,10 +161,13 @@ fun FilterScreen() {
                     Icons.Default.Add,
                     contentDescription = null,
                     modifier = Modifier
-                        .clickable {
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null
+                        ) {
                             snackbarJob?.cancel()
                             snackbarJob = scope.launch {
-                                delay(500L)
+                                delay(200L)
                                 snackbarHostState.showSnackbar(
                                     message = "Growing features",
                                     actionLabel = "OK",

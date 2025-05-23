@@ -4,8 +4,10 @@ package com.example.taskify.di
 import android.content.Context
 import com.example.taskify.data.local.TokenManager
 import com.example.taskify.data.remote.TaskApi
+import com.example.taskify.data.remote.UserApi
 import com.example.taskify.data.remote.authApi.AuthApi
 import com.example.taskify.data.remote.authApi.AuthInterceptor
+import com.example.taskify.data.repository.UserRepository
 import com.example.taskify.presentation.tasks.TaskRepository
 import dagger.Module
 import dagger.Provides
@@ -67,5 +69,17 @@ object AppModule {
     @Singleton
     fun provideTaskRepository(api: TaskApi): TaskRepository {
         return TaskRepository(api)
+    }
+
+    @Provides
+    @Singleton
+    fun provideUserApi(retrofit: Retrofit): UserApi {
+        return retrofit.create(UserApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideUserRepository(api: UserApi): UserRepository {
+        return UserRepository(api)
     }
 }
