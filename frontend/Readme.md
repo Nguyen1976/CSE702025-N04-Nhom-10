@@ -76,6 +76,12 @@
   }
 }
 ```
+- Response lỗi (ví dụ: sai Email hoặc mật khẩu):
+``` json
+{
+  "error": "Incorrect email or password"
+}
+```
 
 ---
 
