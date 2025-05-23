@@ -194,7 +194,8 @@ Authorization: Bearer <token>
       }
     ],
     "createAt": "2025-05-16T08:30:00Z",
-    "dueDate": "2025-05-16T08:35:00Z",
+    "taskDate": "2025-05-16",
+    "taskTime": "19:30:00",
     "type": "Meeting",
     "isSuccess": false
   },
@@ -210,7 +211,8 @@ Authorization: Bearer <token>
       }
     ],
     "createAt": "2025-05-16T08:30:00Z",
-    "dueDate": "2025-05-16T08:35:00Z",
+    "taskDate": "2025-05-16",
+    "taskTime": "19:30:00",
     "type": "Meeting",
     "isSuccess": false
   }
@@ -265,6 +267,7 @@ Content-Type: application/json
 - Request Body (JSON):
 ``` json
 {
+  "id": "task003"
   "title": "Task đã sửa",
   "description": "Mô tả cập nhật",
   "subtasks": [
@@ -278,7 +281,8 @@ Content-Type: application/json
     }
   ],
   "createAt": "2025-05-16T08:35:00Z",
-  "dueDate": "2025-05-16T08:50:00Z",
+  "taskDate": "2025-05-16",
+  "taskTime": "19:30:00",
   "type": "Travel",
   "isSuccess": true
 }
@@ -301,7 +305,8 @@ Content-Type: application/json
     }
   ],
   "createAt": "2025-05-16T08:35:00Z",
-  "dueDate": "2025-05-16T08:50:00Z",
+  "taskDate": "2025-05-16",
+  "taskTime": "19:30:00",
   "type": "Travel",
   "isSuccess": true
 }
