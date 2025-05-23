@@ -13,23 +13,30 @@ const TaskSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
-  subtasks: [
-    {
-      title: {
-        type: String,
-        required: true
-      },
-      subtaskDes: {
-        type: String,
-        required: true
+  subtasks: {
+    type: [
+      {
+        title: {
+          type: String,
+          required: true
+        },
+        subtaskDes: {
+          type: String,
+          required: true
+        }
       }
-    }
-  ],
+    ],
+    default: [] // <-- mặc định là mảng rỗng
+  },
   createAt: {
     type: String,
     default: () => new Date().toISOString()
   },
-  dueDate: {
+  taskDate: {
+    type: String,
+    required: true
+  },
+  taskTime: {
     type: String,
     required: true
   },
