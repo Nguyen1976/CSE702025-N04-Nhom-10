@@ -46,6 +46,9 @@ class TokenManager(private val context: Context) {
     }
 
     // Lấy Refresh Token
-    val getRefreshToken: Flow<String?> = context.dataStore.data
-        .map { preferences -> preferences[REFRESH_TOKEN_KEY] }
+    suspend fun getRefreshToken(): String? {
+        return context.dataStore.data
+            .map { preferences -> preferences[REFRESH_TOKEN_KEY] }
+            .firstOrNull()
+    }
 }

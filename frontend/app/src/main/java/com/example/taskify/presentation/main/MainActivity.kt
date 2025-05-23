@@ -30,6 +30,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.Scaffold
@@ -46,17 +47,14 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.lifecycleScope
 import com.example.taskify.R
 import com.example.taskify.data.themeStorage.ThemeDataStore
@@ -70,7 +68,6 @@ import com.example.taskify.presentation.settings.SettingScreen
 import com.example.taskify.presentation.tasks.TaskViewModel
 import com.example.taskify.presentation.tasks.TasksScreen
 import com.example.taskify.presentation.tasktheme.ThemeSectionActivity
-import com.example.taskify.ui.theme.TaskifyTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -90,6 +87,8 @@ class MainActivity : BaseActivity() {
         enableEdgeToEdge()
 
         lifecycleScope.launch {
+            val theme = ThemeDataStore.getSavedTheme(this@MainActivity)
+
             val token = tokenManager.getAccessToken()
 
             if (token.isNullOrEmpty()) {
@@ -104,12 +103,29 @@ class MainActivity : BaseActivity() {
                 startActivity(Intent(this@MainActivity, ThemeSectionActivity::class.java))
                 finish()
             } else {
-                val theme = ThemeDataStore.getSavedTheme(this@MainActivity)
-
                 setContent {
                     val coroutineScope = rememberCoroutineScope()
                     val tabs = TabItem.values()
                     val pagerState = rememberPagerState { tabs.size }
+
+                    val context = LocalContext.current
+                    val taskResult by viewModel.taskResult.collectAsState()
+                    val isLoading by viewModel.isLoading.collectAsState()
+
+                    if (isLoading) {
+                        CircularProgressIndicator()
+                    }
+
+                    LaunchedEffect(taskResult) {
+                        taskResult?.let { result ->
+                            result.onSuccess {
+                                Toast.makeText(context, "Task created successfully!", Toast.LENGTH_SHORT).show()
+                            }.onFailure {
+                                Toast.makeText(context, "An error occurred while creating the task, please try again!", Toast.LENGTH_SHORT).show()
+                            }
+                            viewModel.resetTaskResult()
+                        }
+                    }
 
                     MaterialTheme {
                         Scaffold(
@@ -136,15 +152,80 @@ class MainActivity : BaseActivity() {
                                 when (page) {
                                     0 -> MainScreen(
                                         theme = theme ?: ThemeOption.Teal,
-                                        viewModel = viewModel,
                                         showInputPanel = showInputPanel
                                     )
                                     1 -> TasksScreen()
-                                    2 -> FilterScreen()
-                                    3 -> CalendarScreen()
+                                    2 -> CalendarScreen()
+                                    3 -> FilterScreen()
                                     4 -> SettingScreen()
                                 }
                             }
+                        }
+
+                        var title by remember { mutableStateOf("") }
+                        var description by remember { mutableStateOf("") }
+                        var isSuccess by remember { mutableStateOf(false) }
+                        var taskDate by remember { mutableStateOf<LocalDate?>(null) }
+                        var taskTime by remember { mutableStateOf<LocalTime?>(null) }
+                        var selectedType by remember { mutableStateOf<String?>(null) }
+
+                        val taskResult by viewModel.taskResult.collectAsState()
+                        val context = LocalContext.current
+
+                        LaunchedEffect(taskResult) {
+                            if (taskResult?.isSuccess == true) {
+                                showInputPanel.value = false
+                                title = ""
+                                description = ""
+                                taskDate = null
+                                taskTime = null
+                                selectedType = null
+                            }
+                        }
+
+                        // reset field
+                        LaunchedEffect(showInputPanel.value) {
+                            if (showInputPanel.value) {
+                                title = ""
+                                description = ""
+                                taskDate = null
+                                taskTime = null
+                                selectedType = null
+                                isSuccess = false
+                            }
+                        }
+
+                        if (showInputPanel.value) {
+                            TaskInputPanel(
+                                title = title,
+                                onTitleChange = { title = it },
+                                description = description,
+                                onDescriptionChange = { description = it },
+                                taskDate = taskDate,
+                                onTaskDateChange = { taskDate = it },
+                                taskTime = taskTime,
+                                onTaskTimeChange = { taskTime = it },
+                                selectedType = selectedType,
+                                onTypeSelected = { selectedType = it },
+                                isSuccess = isSuccess,
+                                onDismiss = { showInputPanel.value = false },
+                                onSend = {
+                                    if (title.isNotBlank() && taskDate != null && taskTime != null && selectedType != null) {
+                                        val taskRequest = TaskRequest(
+                                            title = title,
+                                            description = description,
+                                            createAt = LocalDateTime.now(),
+                                            taskDate = taskDate!!,
+                                            taskTime = taskTime!!,
+                                            type = selectedType!!,
+                                            isSuccess = isSuccess
+                                        )
+                                        viewModel.createTask(taskRequest)
+                                    } else {
+                                        Toast.makeText(context, "Please fill in all the information!", Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+                            )
                         }
                     }
                 }
@@ -164,39 +245,14 @@ class MainActivity : BaseActivity() {
 @Composable
 fun MainScreen(
     theme: ThemeOption,
-    viewModel: TaskViewModel,
     showInputPanel: MutableState<Boolean>
 ) {
     val color = theme.toColor()
-    val context = LocalContext.current
     val formatterDate = "Today. " + LocalDate.now().format(
         DateTimeFormatter.ofPattern("EEE dd MMM yyyy", Locale.ENGLISH)
     )
 
-    var title by remember { mutableStateOf("") }
-    var description by remember { mutableStateOf("") }
-    var isSuccess by remember { mutableStateOf(false) }
-    var taskDate by remember { mutableStateOf<LocalDate?>(null) }
-    var taskTime by remember { mutableStateOf<LocalTime?>(null) }
-    var selectedType by remember { mutableStateOf<String?>(null) }
-
-    val taskResult by viewModel.taskResult.collectAsState()
-
-    // Tự động đóng form nếu tạo thành công
-    LaunchedEffect(taskResult) {
-        if (taskResult?.isSuccess == true) {
-            showInputPanel.value = false
-            title = ""
-            description = ""
-            taskDate = null
-            taskTime = null
-            selectedType = null
-        }
-    }
-
-    // Sử dụng Box để chồng các layer, đảm bảo TaskInputPanel2 đè lên nội dung khác
     Box(modifier = Modifier.fillMaxSize()) {
-        // Nội dung chính của màn hình
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -217,8 +273,7 @@ fun MainScreen(
             Card(
                 shape = RoundedCornerShape(8.dp),
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { },
+                    .fillMaxWidth(),
                 elevation = CardDefaults.cardElevation(0.1.dp),
             ) {
                 Column(
@@ -275,40 +330,6 @@ fun MainScreen(
                 }
             }
         }
-
-        // Đặt TaskInputPanel2 lên trên với zIndex
-        if (showInputPanel.value) {
-            TaskInputPanel2(
-                title = title,
-                onTitleChange = { title = it },
-                description = description,
-                onDescriptionChange = { description = it },
-                taskDate = taskDate,
-                onTaskDateChange = { taskDate = it },
-                taskTime = taskTime,
-                onTaskTimeChange = { taskTime = it },
-                selectedType = selectedType,
-                onTypeSelected = { selectedType = it },
-                isSuccess = isSuccess,
-                onDismiss = { showInputPanel.value = false },
-                onSend = {
-                    if (title.isNotBlank() && taskDate != null && taskTime != null && selectedType != null) {
-                        val taskRequest = TaskRequest(
-                            title = title,
-                            description = description,
-                            createAt = LocalDateTime.now(),
-                            taskDate = taskDate!!,
-                            taskTime = taskTime!!,
-                            type = selectedType!!,
-                            isSuccess = isSuccess
-                        )
-                        viewModel.createTask(taskRequest)
-                    } else {
-                        Toast.makeText(context, "Vui lòng nhập đầy đủ thông tin!", Toast.LENGTH_SHORT).show()
-                    }
-                }
-            )
-        }
     }
 }
 
@@ -330,14 +351,12 @@ fun BottomBarWithIndicator(
     val tabWidth = screenWidth / tabCount
     val indicatorWidth = 32.dp
 
-    // Lấy offset tính bằng số tab + offset fraction (0..1)
     val indicatorOffsetFraction by remember {
         derivedStateOf {
             pagerState.currentPage + pagerState.currentPageOffsetFraction
         }
     }
 
-    // Tính vị trí thanh trượt, chính giữa icon
     val indicatorOffset by animateDpAsState(
         targetValue = tabWidth * indicatorOffsetFraction + (tabWidth - indicatorWidth) / 2,
         label = "indicatorOffset"

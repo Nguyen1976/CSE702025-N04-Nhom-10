@@ -109,4 +109,5 @@ dependencies {
     // Other
     implementation ("androidx.compose.foundation:foundation:1.5.0")
     implementation ("com.google.accompanist:accompanist-systemuicontroller:0.30.1")
+    implementation ("androidx.compose.material3:material3:1.1.0")
 }

@@ -1,7 +1,9 @@
 package com.example.taskify.presentation.auth.signIn
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -13,6 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -29,6 +32,8 @@ import com.example.taskify.components.ButtonSection
 import com.example.taskify.components.PasswordTextField
 import com.example.taskify.components.TopTitle
 import com.example.taskify.components.isValidEmail
+import com.example.taskify.data.themeStorage.ThemeDataStore
+import com.example.taskify.presentation.main.MainActivity
 import com.example.taskify.presentation.tasktheme.ThemeSectionActivity
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -132,9 +137,18 @@ fun SignInScreen(
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(text = "Welcome, ${user.username}!", color = Color(0xFF24A19C))
 
-                val intent = Intent(context, ThemeSectionActivity::class.java)
-                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                context.startActivity(intent)
+                LaunchedEffect(Unit) {
+                    val isThemeChosen = ThemeDataStore.isThemeChosen(context)
+                    Log.d("THEME_DEBUG", "Is theme chosen in SignInActivity: $isThemeChosen")
+                    val intent = if (isThemeChosen) {
+                        Intent(context, MainActivity::class.java)
+                    } else {
+                        Intent(context, ThemeSectionActivity::class.java)
+                    }
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    context.startActivity(intent)
+                    (context as? Activity)?.finish()
+                }
             }
 
             else -> Unit

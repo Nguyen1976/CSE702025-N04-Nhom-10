@@ -28,10 +28,10 @@ abstract class BaseActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Bắt đầu đếm thời gian token hết hạn
+        // Bắt đầu đếm thời gian hết hạn refresh token
         startSessionTimer()
 
-        // Lắng nghe sự kiện token hết hạn từ interceptor
+        // Lắng nghe token hết hạn từ interceptor (ví dụ khi refresh token không hợp lệ)
         TokenExpirationHandler.addListener {
             runOnUiThread {
                 if (!isDialogShown) {
@@ -41,12 +41,11 @@ abstract class BaseActivity : AppCompatActivity() {
         }
     }
 
-    fun startSessionTimer() {
+    private fun startSessionTimer() {
         sessionJob?.cancel()
 
-        // gọi suspend function trong coroutine
         sessionJob = lifecycleScope.launch {
-            val delayMillis = getTokenExpiryDuration()
+            val delayMillis = getRefreshTokenExpiryDuration()
             if (delayMillis <= 0) {
                 displaySessionExpiredDialog()
                 return@launch
@@ -62,11 +61,11 @@ abstract class BaseActivity : AppCompatActivity() {
         startSessionTimer()
     }
 
-    private suspend fun getTokenExpiryDuration(): Long {
-        val token = tokenManager.getAccessToken() ?: return 0L
+    private suspend fun getRefreshTokenExpiryDuration(): Long {
+        val refreshToken = tokenManager.getRefreshToken() ?: return 0L
 
         return try {
-            val parts = token.split(".")
+            val parts = refreshToken.split(".")
             if (parts.size != 3) return 0L
 
             val payloadJson = String(Base64.getUrlDecoder().decode(parts[1]))
@@ -103,7 +102,7 @@ abstract class BaseActivity : AppCompatActivity() {
     }
 
     private fun goToLogin() {
-        val intent = Intent(this, DashboardActivity::class.java) // Thay AuthActivity bằng Activity đăng nhập của bạn
+        val intent = Intent(this, DashboardActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)
         finish()

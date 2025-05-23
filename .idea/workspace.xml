@@ -10,21 +10,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="645a0841-5295-4890-ba50-247f4bc9ec4b" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/frontend/app/src/main/java/com/example/taskify/data/remote/TaskApi.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/app/src/main/java/com/example/taskify/data/remote/authApi/AuthInterceptor.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/app/src/main/java/com/example/taskify/domain/model/taskModel/TaskRequest.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/app/src/main/java/com/example/taskify/domain/model/taskModel/TaskResponse.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/app/src/main/java/com/example/taskify/presentation/main/TaskInputPanel.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/app/src/main/java/com/example/taskify/presentation/tasks/TaskRepository.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/app/src/main/java/com/example/taskify/presentation/tasks/TaskViewModel.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/app/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/app/build.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/app/src/main/java/com/example/taskify/data/network/AuthInterceptor.kt" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/app/src/main/java/com/example/taskify/data/network/TokenExpirationInterceptor.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/app/src/main/java/com/example/taskify/data/remote/ApiClient.kt" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/app/src/main/java/com/example/taskify/data/remote/ApiClient.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/app/src/main/java/com/example/taskify/data/remote/AuthApi.kt" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/app/src/main/java/com/example/taskify/data/remote/authApi/AuthApi.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/app/src/main/java/com/example/taskify/data/repository/AuthRepository.kt" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/app/src/main/java/com/example/taskify/data/repository/AuthRepository.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/app/src/main/java/com/example/taskify/di/AppModule.kt" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/app/src/main/java/com/example/taskify/di/AppModule.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/app/src/main/java/com/example/taskify/presentation/main/MainActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/app/src/main/java/com/example/taskify/presentation/main/MainActivity.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -34,7 +20,7 @@
   <component name="ClangdSettings">
     <option name="formatViaClangd" value="false" />
   </component>
-  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[DeviceId(pluginId=PhysicalDevice, isTemplate=false, identifier=serial=13195704AS018155)]" />
+  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[DeviceId(pluginId=LocalEmulator, isTemplate=false, identifier=path=C:\Users\ADMIN\.android\avd\Medium_Phone_API_34.avd)]" />
   <component name="ExternalProjectsData">
     <projectState path="$PROJECT_DIR$/frontend">
       <ProjectState />

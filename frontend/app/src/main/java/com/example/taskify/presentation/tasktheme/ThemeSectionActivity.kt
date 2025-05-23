@@ -2,6 +2,7 @@ package com.example.taskify.presentation.tasktheme
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -58,11 +59,17 @@ class ThemeSectionActivity : AppCompatActivity() {
                 selectedTheme = selectedTheme.value,
                 onThemeSelected = {
                     selectedTheme.value = it
+                    Log.d("THEME_DEBUG", "Selected theme: $it")
                 },
                 onConfirm = {
                     lifecycleScope.launch {
                         ThemeDataStore.saveTheme(this@ThemeSectionActivity, selectedTheme.value)
-                        startActivity(Intent(this@ThemeSectionActivity, MainActivity::class.java))
+                        Log.d("THEME_DEBUG", "Theme saved: ${selectedTheme.value}")
+                        val isChosen = ThemeDataStore.isThemeChosen(this@ThemeSectionActivity)
+                        Log.d("THEME_DEBUG", "Is theme chosen after save: $isChosen")
+                        val intent = Intent(this@ThemeSectionActivity, MainActivity::class.java)
+                        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                        startActivity(intent)
                         finish()
                     }
                 }

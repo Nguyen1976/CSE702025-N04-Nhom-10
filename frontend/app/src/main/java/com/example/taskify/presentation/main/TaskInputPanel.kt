@@ -1,41 +1,33 @@
 package com.example.taskify.presentation.main
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Label
-import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,19 +38,24 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import com.example.taskify.R
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalTime
 
 @Composable
-fun TaskInputPanel2(
+fun TaskInputPanel(
     title: String,
     onTitleChange: (String) -> Unit,
     description: String,
@@ -73,13 +70,15 @@ fun TaskInputPanel2(
     onDismiss: () -> Unit,
     onSend: () -> Unit
 ) {
-    val emojis = remember { listOf("😊", "😎", "😅", "🥰", "🙌", "😴", "✌️") }
+    val emojis = remember { listOf("\uD83D\uDE00", "\uD83E\uDD11", "\uD83D\uDE07", "\uD83E\uDD70", "\uD83D\uDE4C", "\uD83D\uDC4B", "\uD83D\uDE30", "✌\uFE0F") }
     val focusRequester = remember { FocusRequester() }
     var showTypeDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
     val coroutineScope = rememberCoroutineScope()
+
+    val interactionSource = remember { MutableInteractionSource() }
 
     BackHandler(enabled = true) {
         coroutineScope.launch {
@@ -146,95 +145,200 @@ fun TaskInputPanel2(
         Box(
             modifier = Modifier
                 .matchParentSize()
-                .background(Color.Black.copy(alpha = 0.3f))
-                .clickable(onClick = onDismiss)
+                .background(Color.Black.copy(alpha = 0.8f))
+                .pointerInput(Unit) {
+                    detectTapGestures {
+                        onDismiss()
+                    }
+                }
         )
 
         Column(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
-                .wrapContentHeight() // Chỉ chiếm không gian cần thiết
+                .wrapContentHeight()
                 .background(Color.White)
                 .padding(horizontal = 16.dp)
-                .imePadding() // Chỉ sử dụng imePadding để điều chỉnh khi bàn phím xuất hiện
+                .imePadding()
+                .pointerInput(Unit) {}
         ) {
-            TextField(
+            BasicTextField(
                 value = title,
                 onValueChange = onTitleChange,
-                placeholder = { Text("eg : Meeting with client") },
+                singleLine = true,
+                textStyle = TextStyle(color = Color.Black, fontSize = 15.sp),
                 modifier = Modifier
                     .fillMaxWidth()
+                    .height(40.dp)
                     .focusRequester(focusRequester),
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color.Transparent,
-                    unfocusedContainerColor = Color.Transparent
-                ),
-                singleLine = true
+                decorationBox = { innerTextField ->
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(40.dp) // 👈 đảm bảo Box cùng chiều cao
+                            .background(Color.White)
+                            .padding(horizontal = 12.dp), // 👈 chỉ padding ngang
+                        contentAlignment = Alignment.CenterStart // 👈 căn giữa theo chiều dọc
+                    ) {
+                        if (title.isEmpty()) {
+                            Text(
+                                text = "eg : Meeting with client",
+                                color = Color(0xFFA9B0C5),
+                                fontSize = 15.sp
+                            )
+                        }
+                        innerTextField()
+                    }
+                }
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
-
-            TextField(
+            BasicTextField(
                 value = description,
                 onValueChange = onDescriptionChange,
-                placeholder = { Text("Description") },
-                modifier = Modifier.fillMaxWidth(),
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color.Transparent,
-                    unfocusedContainerColor = Color.Transparent
+                textStyle = TextStyle(
+                    color = Color.Black,
+                    fontSize = 15.sp
                 ),
-                maxLines = 3
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(40.dp),
+                maxLines = 3,
+                decorationBox = { innerTextField ->
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .height(40.dp)
+                            .padding(horizontal = 12.dp)
+                            .background(Color.White),
+                        contentAlignment = Alignment.CenterStart
+                    ) {
+                        if (description.isEmpty()) {
+                            Text(
+                                text = "Description",
+                                color = Color(0xFFA9B0C5),
+                                fontSize = 15.sp
+                            )
+                        }
+                        innerTextField()
+                    }
+                }
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp)
             ) {
-                IconButton(onClick = {
-                    val now = LocalDate.now()
-                    val year = taskDate?.year ?: now.year
-                    val month = taskDate?.monthValue?.minus(1) ?: now.monthValue - 1
-                    val day = taskDate?.dayOfMonth ?: now.dayOfMonth
+                Image(
+                    painter = painterResource(R.drawable.direct_inbox),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(24.dp)
+                        .clickable(
+                            interactionSource = interactionSource,
+                            indication = null
+                        ) { showTypeDialog = true },
+                    colorFilter = if (selectedType != null)
+                        ColorFilter.tint(Color(0xFF24A19C))
+                    else
+                        ColorFilter.tint(Color(0xFFA0AAB8))
+                )
 
-                    android.app.DatePickerDialog(context, { _, y, m, d ->
-                        onTaskDateChange(LocalDate.of(y, m + 1, d))
-                    }, year, month, day).show()
-                }) {
-                    Icon(Icons.Default.DateRange, contentDescription = "Pick Date")
-                }
+                Spacer(modifier = Modifier.width(12.dp))
 
-                IconButton(onClick = {
-                    val nowTime = LocalTime.now()
-                    val hour = taskTime?.hour ?: nowTime.hour
-                    val minute = taskTime?.minute ?: nowTime.minute
+                Image(
+                    painter = painterResource(R.drawable.calendar),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(24.dp)
+                        .clickable(
+                            interactionSource = interactionSource,
+                            indication = null
+                        ) {
+                            val now = LocalDate.now()
+                            val year = taskDate?.year ?: now.year
+                            val month = taskDate?.monthValue?.minus(1) ?: now.monthValue - 1
+                            val day = taskDate?.dayOfMonth ?: now.dayOfMonth
 
-                    android.app.TimePickerDialog(context, { _, h, m ->
-                        onTaskTimeChange(LocalTime.of(h, m))
-                    }, hour, minute, true).show()
-                }) {
-                    Icon(Icons.Default.AccessTime, contentDescription = "Pick Time")
-                }
+                            android.app.DatePickerDialog(context, { _, y, m, d ->
+                                onTaskDateChange(LocalDate.of(y, m + 1, d))
+                            }, year, month, day).show()
+                        },
+                    colorFilter = if (taskDate != null)
+                        ColorFilter.tint(Color(0xFF24A19C))
+                    else
+                        ColorFilter.tint(Color(0xFFA0AAB8))
+                )
 
-                IconButton(onClick = {
-                    showTypeDialog = true
-                }) {
-                    Icon(Icons.Default.Label, contentDescription = "Pick Type")
-                }
+                Spacer(modifier = Modifier.width(12.dp))
+
+                Image(
+                    painter = painterResource(R.drawable.clock),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(24.dp)
+                        .clickable(
+                            interactionSource = interactionSource,
+                            indication = null
+                        ) {
+                            val nowTime = LocalTime.now()
+                            val hour = taskTime?.hour ?: nowTime.hour
+                            val minute = taskTime?.minute ?: nowTime.minute
+
+                            android.app.TimePickerDialog(context, { _, h, m ->
+                                onTaskTimeChange(LocalTime.of(h, m))
+                            }, hour, minute, true).show()
+                        },
+                    colorFilter = if (taskTime != null)
+                        ColorFilter.tint(Color(0xFF24A19C))
+                    else
+                        ColorFilter.tint(Color(0xFFA0AAB8))
+                )
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                Image(
+                    painter = painterResource(R.drawable.flag),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(24.dp)
+                        .clickable(
+                            interactionSource = interactionSource,
+                            indication = null
+                        ) {  }
+                )
 
                 Spacer(modifier = Modifier.weight(1f))
 
-                IconButton(onClick = onSend) {
-                    Icon(Icons.Default.Send, contentDescription = "Send Task")
-                }
+                Image(
+                    painter = painterResource(id = R.drawable.send),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(24.dp)
+                        .clickable(
+                            interactionSource = interactionSource,
+                            indication = null
+                        ) { onSend() }
+                )
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Box(
+                modifier = Modifier
+                    .padding(12.dp)
+                    .fillMaxWidth()
+                    .height(1.dp)
+                    .background(color = Color(0xFFEEEEEE))
+            )
 
-            Row {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
                 emojis.forEach { emoji ->
                     Text(
                         text = emoji,
@@ -248,7 +352,36 @@ fun TaskInputPanel2(
                 }
             }
 
-            Spacer(modifier = Modifier.height(8.dp)) // Thêm khoảng cách nhỏ ở dưới để tránh sát mép
+            Spacer(modifier = Modifier.height(8.dp))
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun TaskInputPanel2Preview() {
+    // Dummy state for preview
+    var title by remember { mutableStateOf("Sample Task") }
+    var description by remember { mutableStateOf("This is a description.") }
+    var taskDate by remember { mutableStateOf(LocalDate.now()) }
+    var taskTime by remember { mutableStateOf(LocalTime.of(14, 30)) }
+    var selectedType by remember { mutableStateOf("Work") }
+    var isSuccess by remember { mutableStateOf(false) }
+
+    // UI preview
+    TaskInputPanel(
+        title = title,
+        onTitleChange = { title = it },
+        description = description,
+        onDescriptionChange = { description = it },
+        taskDate = taskDate,
+        onTaskDateChange = { taskDate = it },
+        taskTime = taskTime,
+        onTaskTimeChange = { taskTime = it },
+        selectedType = selectedType,
+        onTypeSelected = { selectedType = it },
+        isSuccess = isSuccess,
+        onDismiss = { /* no-op */ },
+        onSend = { /* no-op */ }
+    )
 }
