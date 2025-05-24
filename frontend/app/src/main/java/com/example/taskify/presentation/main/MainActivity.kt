@@ -164,7 +164,7 @@ class MainActivity : BaseActivity() {
                                         theme = theme ?: ThemeOption.Teal,
                                         showInputPanel = showInputPanel
                                     )
-                                    1 -> TasksScreen()
+                                    1 -> TasksScreen(theme = theme ?: ThemeOption.Teal,)
                                     2 -> key(page) { CalendarScreen() }
                                     3 -> key(page) { FilterScreen() }
                                     4 -> SettingScreen()

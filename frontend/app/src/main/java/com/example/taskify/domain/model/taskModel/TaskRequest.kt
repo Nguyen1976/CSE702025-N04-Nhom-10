@@ -11,7 +11,8 @@ data class TaskRequest(
     val taskDate: LocalDate,
     val taskTime: LocalTime,
     val type: String,
-    val isSuccess: Boolean
+    val isSuccess: Boolean,
+    val subTasks: List<SubTaskRequest>? = null
 )
 
 data class SubTaskRequest (

@@ -5,11 +5,12 @@ data class TaskResponse(
     val userId: String,
     val title: String,
     val description: String,
-    val subTasks: List<SubtaskResponse>,
     val createAt: String,
-    val dueDate: String,
+    val taskDate: String,
+    val taskTime: String,
     val type: String,
-    val isSuccess: Boolean
+    val isSuccess: Boolean,
+    val subTasks: List<SubtaskResponse>,
 )
 
 data class SubtaskResponse(

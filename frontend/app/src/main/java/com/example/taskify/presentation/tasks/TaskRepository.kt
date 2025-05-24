@@ -24,4 +24,20 @@ class TaskRepository @Inject constructor(
             Result.failure(e)
         }
     }
+
+    suspend fun getTasks(): Result<List<TaskResponse>> {
+        return try {
+            val response = api.getTasks()
+            if (response.isSuccessful) {
+                val tasks = response.body() ?: emptyList()
+                Result.success(tasks)
+            } else {
+                val errorBody = response.errorBody()?.string()
+                val errorMessage = Gson().fromJson(errorBody, ErrorResponse::class.java).error
+                Result.failure(Exception(errorMessage))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }

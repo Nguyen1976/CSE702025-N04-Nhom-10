@@ -13,8 +13,12 @@ import javax.inject.Inject
 class TaskViewModel @Inject constructor(
     private val repository: TaskRepository
 ): ViewModel() {
+
     private val _taskResult = MutableStateFlow<Result<Unit>?>(null)
     val taskResult = _taskResult.asStateFlow()
+
+    private val _taskList = MutableStateFlow<List<com.example.taskify.domain.model.taskModel.TaskResponse>>(emptyList())
+    val taskList = _taskList.asStateFlow()
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading = _isLoading.asStateFlow()
@@ -24,6 +28,17 @@ class TaskViewModel @Inject constructor(
             _isLoading.value = true
             val result = repository.createTask(task)
             _taskResult.value = result.map { Unit }
+            _isLoading.value = false
+        }
+    }
+
+    fun getTasks() {
+        viewModelScope.launch {
+            _isLoading.value = true
+            val result = repository.getTasks()
+            result.onSuccess { tasks ->
+                _taskList.value = tasks
+            }.onFailure { }
             _isLoading.value = false
         }
     }
