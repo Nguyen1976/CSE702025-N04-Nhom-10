@@ -1,0 +1,256 @@
+{
+	"info": {
+		"_postman_id": "18b8d04e-f441-4fed-a886-df94e344ac36",
+		"name": "Note_App_KTPM",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "30276076"
+	},
+	"item": [
+		{
+			"name": "login",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2ODJkOWI4YWY2MDliNzMyMmRiZDcyMTEiLCJlbWFpbCI6InRlc3QxQGV4YW1wbGUuY29tIiwiaWF0IjoxNzQ3ODE5NzQ5LCJleHAiOjE3NDkwMjkzNDl9._8m6jHBgpEAAFlzuYGj1Swbm87CfszoGJvaBQEDB9b4",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"email\": \"test10@example.com\",\r\n  \"password\": \"securePassword123\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/v1/users/login",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"v1",
+						"users",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "refresh_token",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2ODJkOWI4YWY2MDliNzMyMmRiZDcyMTEiLCJlbWFpbCI6InRlc3QxQGV4YW1wbGUuY29tIiwiaWF0IjoxNzQ3ODE5OTc4LCJleHAiOjE3NDkwMjk1Nzh9.mB6muXHlKWVp6Z0UkIH9oNjJ2E0mE9A2wvNU_mxL7Tw",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "\r\n{\r\n  \"refreshToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2ODJkOWI4YWY2MDliNzMyMmRiZDcyMTEiLCJlbWFpbCI6InRlc3QxQGV4YW1wbGUuY29tIiwiaWF0IjoxNzQ3ODE5OTc4LCJleHAiOjE3NDkwMjk1Nzh9.mB6muXHlKWVp6Z0UkIH9oNjJ2E0mE9A2wvNU_mxL7Tw\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/v1/users/refresh_token",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"v1",
+						"users",
+						"refresh_token"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update task",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2ODJmMmRjYzNmNDczNWI4YTg5MTA3MTUiLCJlbWFpbCI6InRlc3QxMEBleGFtcGxlLmNvbSIsImlhdCI6MTc0ODE0ODY3OCwiZXhwIjoxNzQ4MTUyMjc4fQ.2W3WxXKMtHc3pk5Wgnzg61w8XZgyxTsDIo5VkpAz3K4",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"title\": \"Task mới sửa\",\r\n    \"description\": \"Mô tả task mới\",\r\n    \"taskDate\": \"2025-05-16\",\r\n    \"taskTime\": \"19:30:00\",\r\n    \"type\": \"Meeting\",\r\n    \"isSuccess\": true,\r\n    \"_id\": \"6832a1f1727015191954a61b\",\r\n    \"subtasks\": [{\r\n      \"title\": \"Subtask mới\",\r\n      \"subtaskDes\": \"Mô tả subtask sửa\"\r\n    },\r\n    {\r\n      \"title\": \"Subtask mới\",\r\n      \"subtaskDes\": \"Mô tả subtask mới\"\r\n    }],\r\n    \"createAt\": \"2025-05-25T04:52:01.355Z\",\r\n    \"__v\": 0\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/v1/tasks/6832a1f1727015191954a61b",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"v1",
+						"tasks",
+						"6832a1f1727015191954a61b"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "register",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"username\": \"test2\",\r\n  \"email\": \"test2@example.com\",\r\n  \"password\": \"securePassword123\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/v1/users/register",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"v1",
+						"users",
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "read tasks",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2ODJmMmRjYzNmNDczNWI4YTg5MTA3MTUiLCJlbWFpbCI6InRlc3QxMEBleGFtcGxlLmNvbSIsImlhdCI6MTc0ODE2MjIyOCwiZXhwIjoxNzQ4MTY1ODI4fQ.LkP8BZ9cmGK3NIM__RyLH_eRITE40p7GkHx8dM4qoHg",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:3000/api/v1/tasks",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"v1",
+						"tasks"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "create task",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2ODJmMmRjYzNmNDczNWI4YTg5MTA3MTUiLCJlbWFpbCI6InRlc3QxMEBleGFtcGxlLmNvbSIsImlhdCI6MTc0ODE2MjIyOCwiZXhwIjoxNzQ4MTY1ODI4fQ.LkP8BZ9cmGK3NIM__RyLH_eRITE40p7GkHx8dM4qoHg",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"title\": \"Task mới\",\r\n  \"description\": \"Mô tả task mới\",\r\n  \"taskDate\": \"2025-05-26\",\r\n  \"taskTime\": \"19:30:00\",\r\n  \"type\": \"Meeting\",\r\n  \"isSuccess\": false\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/v1/tasks",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"v1",
+						"tasks"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "delete task",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2ODJmMmRjYzNmNDczNWI4YTg5MTA3MTUiLCJlbWFpbCI6InRlc3QxMEBleGFtcGxlLmNvbSIsImlhdCI6MTc0ODE2MjIyOCwiZXhwIjoxNzQ4MTY1ODI4fQ.LkP8BZ9cmGK3NIM__RyLH_eRITE40p7GkHx8dM4qoHg",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"title\": \"Task mới\",\r\n  \"description\": \"Mô tả task mới\",\r\n  \"taskDate\": \"2025-05-26\",\r\n  \"taskTime\": \"19:30:00\",\r\n  \"type\": \"Meeting\",\r\n  \"isSuccess\": false\r\n}"
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/v1/tasks/6832d75d7ab5eaa0a75d5bc7",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"v1",
+						"tasks",
+						"6832d75d7ab5eaa0a75d5bc7"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
