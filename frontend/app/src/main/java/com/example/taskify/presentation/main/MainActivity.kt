@@ -226,7 +226,7 @@ class MainActivity : BaseActivity() {
                                 onDismiss = { showInputPanel.value = false },
                                 onSend = {
                                     if (title.isNotBlank() && taskDate != null && taskTime != null && selectedType != null) {
-                                        isLoadingLocal = true // Bật loading
+                                        isLoadingLocal = true // loading
                                         val taskRequest = TaskRequest(
                                             title = title,
                                             description = description,

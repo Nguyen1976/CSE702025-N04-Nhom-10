@@ -43,6 +43,19 @@ class TaskViewModel @Inject constructor(
         }
     }
 
+    fun deleteTask(taskId: String) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            val result = repository.deleteTask(taskId)
+            result.onSuccess {
+                getTasks()
+            }.onFailure {
+                // Error
+            }
+            _isLoading.value = false
+        }
+    }
+
     fun resetTaskResult() {
         _taskResult.value = null
     }

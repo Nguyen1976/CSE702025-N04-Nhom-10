@@ -40,4 +40,19 @@ class TaskRepository @Inject constructor(
             Result.failure(e)
         }
     }
+
+    suspend fun deleteTask(taskId: String): Result<Unit> {
+        return try {
+            val response = api.deleteTask(taskId)
+            if (response.isSuccessful) {
+                Result.success(Unit)
+            } else {
+                val errorBody = response.errorBody()?.string()
+                val errorMessage = Gson().fromJson(errorBody, ErrorResponse::class.java).error
+                Result.failure(Exception(errorMessage))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }
