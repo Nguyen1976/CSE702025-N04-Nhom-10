@@ -1,5 +1,7 @@
 package com.example.taskify.domain.model.taskModel
 
+import com.google.gson.annotations.SerializedName
+
 data class TaskResponse(
     val id: String,
     val userId: String,
@@ -9,6 +11,7 @@ data class TaskResponse(
     val taskDate: String,
     val taskTime: String,
     val type: String,
+    @SerializedName("success")
     val isSuccess: Boolean,
     val subTasks: List<SubtaskResponse>,
 )

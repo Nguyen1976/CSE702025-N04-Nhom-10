@@ -289,7 +289,7 @@ fun TaskInputPanel(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp)
             ) {
                 Image(
-                    painter = painterResource(R.drawable.ic_direct_inbox),
+                    painter = painterResource(R.drawable.ic_tag),
                     contentDescription = null,
                     modifier = Modifier
                         .size(24.dp)

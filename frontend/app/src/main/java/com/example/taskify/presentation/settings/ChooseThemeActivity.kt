@@ -1,8 +1,7 @@
-package com.example.taskify.presentation.tasktheme
+package com.example.taskify.presentation.settings
 
-import android.content.Intent
 import android.os.Bundle
-import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -10,8 +9,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,6 +21,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -30,44 +33,43 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
+import com.example.taskify.R
 import com.example.taskify.components.ButtonSection
 import com.example.taskify.data.themeStorage.ThemeDataStore
 import com.example.taskify.domain.model.themeModel.ThemeOption
-import com.example.taskify.presentation.main.MainActivity
 import kotlinx.coroutines.launch
 
-class ThemeSectionActivity : AppCompatActivity() {
-
+class ChooseThemeActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        setContentView(R.layout.activity_choose_theme)
 
         setContent {
             val selectedTheme = remember { mutableStateOf(ThemeOption.Teal) }
 
-            ThemeSectionScreen(
+            ChooseThemeScreen(
                 selectedTheme = selectedTheme.value,
                 onThemeSelected = {
                     selectedTheme.value = it
-                    Log.d("THEME_DEBUG", "Selected theme: $it")
                 },
                 onConfirm = {
                     lifecycleScope.launch {
-                        ThemeDataStore.saveTheme(this@ThemeSectionActivity, selectedTheme.value)
-
-                        val intent = Intent(this@ThemeSectionActivity, MainActivity::class.java)
-                        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-                        startActivity(intent)
+                        ThemeDataStore.saveTheme(this@ChooseThemeActivity, selectedTheme.value)
+                        Toast.makeText(this@ChooseThemeActivity, "Theme changed successfully!", Toast.LENGTH_SHORT).show()
                         finish()
                     }
                 }
@@ -77,67 +79,76 @@ class ThemeSectionActivity : AppCompatActivity() {
 }
 
 @Composable
-fun ThemeSectionScreen(
+fun ChooseThemeScreen(
     selectedTheme: ThemeOption,
     onThemeSelected: (ThemeOption) -> Unit,
     onConfirm: () -> Unit
 ) {
-    val themes = listOf(ThemeOption.Teal, ThemeOption.Black, ThemeOption.Red, ThemeOption.Blue)
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF0F3FA))
+            .background(color = Color(0xFFF5F5F5))
             .padding(16.dp)
             .padding(top = 48.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
-            "Create to do list",
-            fontWeight = FontWeight.SemiBold,
-            fontSize = 24.sp
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
+        val themes = ThemeOption.values().toList().drop(4)
 
         Text(
-            "Choose your to do list color theme:",
-            fontSize = 14.sp,
-            color = Color(0xFF767E8C)
+            "Theme",
+            fontSize = 20.sp,
+            fontWeight = FontWeight.SemiBold
         )
 
-        Spacer(modifier = Modifier.height(28.dp))
+        Spacer(modifier = Modifier.height(32.dp))
 
-        themes.forEach { theme ->
-            ThemeItem(theme = theme, isSelected = theme == selectedTheme) {
-                onThemeSelected(theme)
+        LazyColumn(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            contentPadding = PaddingValues(bottom = 16.dp)
+        ) {
+            items(themes) { theme ->
+                ThemeSettingItem(theme = theme, isSelected = theme == selectedTheme) {
+                    onThemeSelected(theme)
+                }
             }
-
-            Spacer(modifier = Modifier.height(12.dp))
         }
 
-        Spacer(modifier = Modifier.weight(1f))
+        Spacer(modifier = Modifier.height(16.dp))
 
         ButtonSection(
             onClick = {
                 onConfirm()
             },
-            text = "Open Taskify"
+            text = "Apply Change"
         )
     }
 }
 
 @Composable
-fun ThemeItem(
+fun ThemeSettingItem(
     theme: ThemeOption,
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
     val color = when (theme) {
-        ThemeOption.Teal -> Color(0xFF26A69A)
-        ThemeOption.Black -> Color(0xFF1B1C1F)
-        ThemeOption.Red -> Color(0xFFEA4335)
-        ThemeOption.Blue -> Color(0xFF1877F2)
+        ThemeOption.LightRed -> Color(0xFFE57373)
+        ThemeOption.LightBlue -> Color(0xFF42A5F5)
+        ThemeOption.LightGreen -> Color(0xFF81C784)
+        ThemeOption.LightOrange -> Color(0xFFFFB74D)
+        ThemeOption.DarkCharcoal -> Color(0xFF212121)
+        ThemeOption.BabyPink -> Color(0xFFF8BBD0)
+        ThemeOption.LightYellow -> Color(0xFFFFF176)
+        ThemeOption.MediumBlue -> Color(0xFF2196F3)
+        ThemeOption.LightPurple -> Color(0xFFBA68C8)
+        ThemeOption.SlateGray -> Color(0xFF546E7A)
+        ThemeOption.LightCyan -> Color(0xFF4DD0E1)
+        ThemeOption.MintGreen -> Color(0xFF4DB6AC)
+        ThemeOption.HotPink -> Color(0xFFF06292)
+        ThemeOption.VividOrange -> Color(0xFFFF5722)
         else -> Color.Gray
     }
 
@@ -147,7 +158,7 @@ fun ThemeItem(
         val (card, icon) = createRefs()
 
         Card(
-            shape = RoundedCornerShape(12.dp),
+            shape = RoundedCornerShape(8.dp),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 8.dp)
@@ -236,30 +247,5 @@ fun ThemeItem(
                 )
             }
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewThemeSelectionScreen() {
-    // Bạn có thể cung cấp giá trị mặc định cho selectedTheme
-    ThemeSectionScreen(
-        selectedTheme = ThemeOption.Teal,
-        onThemeSelected = {},
-        onConfirm = {}
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewThemeItemAllThemes() {
-    Column {
-        ThemeItem(theme = ThemeOption.Teal, isSelected = false, onClick = {})
-        Spacer(Modifier.height(8.dp))
-        ThemeItem(theme = ThemeOption.Black, isSelected = true, onClick = {})
-        Spacer(Modifier.height(8.dp))
-        ThemeItem(theme = ThemeOption.Red, isSelected = false, onClick = {})
-        Spacer(Modifier.height(8.dp))
-        ThemeItem(theme = ThemeOption.Blue, isSelected = true, onClick = {})
     }
 }
