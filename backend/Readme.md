@@ -7,7 +7,7 @@
 
 ### POST /api/v1/users/register
 
-**Mô tả:** Đăng ký người dùng mới. Trả về token và thông tin user sau khi đăng ký thành công.
+**Mô tả:** Đăng ký người dùng mới. Trả về thông tin user sau khi đăng ký thành công.
 
 - Request Body:
 
@@ -111,21 +111,51 @@ Authorization: Bearer <token>
 ```json
 [
     {
-        "_id": "682d9f4cf609b7322dbd7215",
-        "userId": "682d9b8af609b7322dbd7211",
-        "title": "Task mới",
+        "_id": "68304f091cfe257ad97f98ed",
+        "userId": "682f2dcc3f4735b8a8910715",
+        "title": "Task mới sửa",
         "description": "Mô tả task mới",
-        "subtasks": [
-            {
-                "title": "Subtask 1",
-                "subtaskDes": "Mô tả chi tiết subtask",
-                "_id": "682d9f4cf609b7322dbd7216"
-            }
-        ],
-        "createAt": "2025-05-16T08:30:00Z",
-        "dueDate": "2025-05-16T08:35:00Z",
+        "taskDate": "2025-05-16",
+        "taskTime": "19:30:00",
         "type": "Meeting",
         "isSuccess": false,
+        "subtasks": [
+            {
+                "title": "Subtask sửa",
+                "subtaskDes": "Mô tả subtask sửa",
+                "_id": "683050fb1cfe257ad97f98f4"
+            },
+            {
+                "title": "Subtask mới",
+                "subtaskDes": "Mô tả subtask mới",
+                "_id": "683050fb1cfe257ad97f98f5"
+            }
+        ],
+        "createAt": "2025-05-23T10:33:45.910Z",
+        "__v": 0
+    },
+    {
+        "_id": "6832a1f1727015191954a61b",
+        "userId": "682f2dcc3f4735b8a8910715",
+        "title": "Task mới sửa",
+        "description": "Mô tả task mới",
+        "taskDate": "2025-05-16",
+        "taskTime": "19:30:00",
+        "type": "Meeting",
+        "isSuccess": true,
+        "subtasks": [
+            {
+                "title": "Subtask mới",
+                "subtaskDes": "Mô tả subtask sửa",
+                "_id": "6832a2b2727015191954a622"
+            },
+            {
+                "title": "Subtask mới",
+                "subtaskDes": "Mô tả subtask mới",
+                "_id": "6832a2b2727015191954a623"
+            }
+        ],
+        "createAt": "2025-05-25T04:52:01.355Z",
         "__v": 0
     }
 ]
@@ -148,16 +178,10 @@ Content-Type: application/json
 
 ```json
 {
-  "title": "Task mới",
+  "title": "Task mới sửa",
   "description": "Mô tả task mới",
-  "subtasks": [
-    {
-      "title": "Subtask 1",
-      "subtaskDes": "Mô tả chi tiết subtask"
-    }
-  ],
-  "createAt": "2025-05-16T08:30:00Z",
-  "dueDate": "2025-05-16T08:35:00Z",
+  "taskDate": "2025-05-26",
+  "taskTime": "19:30:00",
   "type": "Meeting",
   "isSuccess": false
 }
@@ -167,21 +191,16 @@ Content-Type: application/json
 
 ```json
 {
-    "userId": "682d9b8af609b7322dbd7211",
-    "title": "Task mới",
+    "userId": "682f2dcc3f4735b8a8910715",
+    "title": "Task mới sửa",
     "description": "Mô tả task mới",
-    "subtasks": [
-        {
-            "title": "Subtask 1",
-            "subtaskDes": "Mô tả chi tiết subtask",
-            "_id": "682d9f4cf609b7322dbd7216"
-        }
-    ],
-    "createAt": "2025-05-16T08:30:00Z",
-    "dueDate": "2025-05-16T08:35:00Z",
+    "taskDate": "2025-05-16",
+    "taskTime": "19:30:00",
     "type": "Meeting",
     "isSuccess": false,
-    "_id": "682d9f4cf609b7322dbd7215",
+    "_id": "6832a1f1727015191954a61b",
+    "subtasks": [],
+    "createAt": "2025-05-25T04:52:01.355Z",
     "__v": 0
 }
 ```
@@ -203,22 +222,23 @@ Content-Type: application/json
 
 ```json
 {
-  "title": "Task đã sửa",
-  "description": "Mô tả cập nhật",
-  "subtasks": [
-    {
-      "title": "Subtask sửa",
+    "title": "Task mới sửa",
+    "description": "Mô tả task mới",
+    "taskDate": "2025-05-16",
+    "taskTime": "19:30:00",
+    "type": "Meeting",
+    "isSuccess": true,
+    "_id": "6832a1f1727015191954a61b",
+    "subtasks": [{
+      "title": "Subtask mới",
       "subtaskDes": "Mô tả subtask sửa"
     },
     {
       "title": "Subtask mới",
       "subtaskDes": "Mô tả subtask mới"
-    }
-  ],
-  "createAt": "2025-05-16T08:35:00Z",
-  "dueDate": "2025-05-16T08:50:00Z",
-  "type": "Travel",
-  "isSuccess": true
+    }],
+    "createAt": "2025-05-25T04:52:01.355Z",
+    "__v": 0
 }
 ```
 
@@ -226,26 +246,27 @@ Content-Type: application/json
 
 ```json
 {
-    "_id": "682d9f4cf609b7322dbd7215",
-    "userId": "682d9b8af609b7322dbd7211",
-    "title": "Task đã sửa",
-    "description": "Mô tả cập nhật",
+    "_id": "6832a1f1727015191954a61b",
+    "userId": "682f2dcc3f4735b8a8910715",
+    "title": "Task mới sửa",
+    "description": "Mô tả task mới",
+    "taskDate": "2025-05-16",
+    "taskTime": "19:30:00",
+    "type": "Meeting",
+    "isSuccess": true,
     "subtasks": [
         {
-            "title": "Subtask sửa",
+            "title": "Subtask mới",
             "subtaskDes": "Mô tả subtask sửa",
-            "_id": "682d9fc9f609b7322dbd721a"
+            "_id": "6832a2b2727015191954a622"
         },
         {
             "title": "Subtask mới",
             "subtaskDes": "Mô tả subtask mới",
-            "_id": "682d9fc9f609b7322dbd721b"
+            "_id": "6832a2b2727015191954a623"
         }
     ],
-    "createAt": "2025-05-16T08:35:00Z",
-    "dueDate": "2025-05-16T08:50:00Z",
-    "type": "Travel",
-    "isSuccess": true,
+    "createAt": "2025-05-25T04:52:01.355Z",
     "__v": 0
 }
 ```
