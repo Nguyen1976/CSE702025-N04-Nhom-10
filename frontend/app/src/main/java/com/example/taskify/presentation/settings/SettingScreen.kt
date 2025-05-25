@@ -196,7 +196,7 @@ fun SettingScreen(
 
         Spacer(modifier = Modifier.height(20.dp))
         SettingItem(painter = painterResource(id = R.drawable.ic_account), "Account", onClick = {})
-        SettingItem(painter = painterResource(id = R.drawable.ic_theme), "Theme", onClick = {})
+        SettingItem(painter = painterResource(id = R.drawable.ic_theme), "Theme", onClick = { context.startActivity(Intent(context, ChooseThemeActivity::class.java)) })
         SettingItem(painter = painterResource(id = R.drawable.ic_app_icon), "App icon", onClick = {})
         SettingItem(painter = painterResource(id = R.drawable.ic_productivity), "Productivity", onClick = {})
 

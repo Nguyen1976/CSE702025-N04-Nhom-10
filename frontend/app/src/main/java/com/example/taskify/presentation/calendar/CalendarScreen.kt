@@ -83,7 +83,6 @@ fun CalendarSection() {
     }
 
     Column {
-
         MonthSelector(
             selectedDate = selectedDate,
             onMonthSelected = {

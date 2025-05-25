@@ -59,6 +59,15 @@ fun SignInScreen(
     viewModel: SignInViewModel = hiltViewModel()
 ) {
     val signInState by viewModel.signInState.collectAsState()
+    val context = LocalContext.current
+
+    LaunchedEffect(signInState) {
+        if (signInState is UiState.Error) {
+            val errorMessage = (signInState as UiState.Error).message
+            Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+            viewModel.resetState()
+        }
+    }
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -66,7 +75,6 @@ fun SignInScreen(
     var emailError by remember { mutableStateOf<String?>(null) }
     var passwordError by remember { mutableStateOf<String?>(null) }
 
-    val context = LocalContext.current
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(

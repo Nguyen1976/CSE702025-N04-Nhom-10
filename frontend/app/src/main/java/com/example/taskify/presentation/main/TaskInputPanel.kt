@@ -1,5 +1,10 @@
 package com.example.taskify.presentation.main
 
+import android.app.DatePickerDialog
+import android.app.TimePickerDialog
+import android.content.ContextWrapper
+import android.content.res.Configuration
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -22,6 +27,10 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AutoStories
+import androidx.compose.material.icons.filled.Groups
+import androidx.compose.material.icons.filled.SportsEsports
+import androidx.compose.material.icons.filled.Work
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -46,7 +55,6 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
@@ -54,6 +62,9 @@ import com.example.taskify.R
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalTime
+import java.time.format.DateTimeFormatter
+import java.util.Calendar
+import java.util.Locale
 
 @Composable
 fun TaskInputPanel(
@@ -81,6 +92,26 @@ fun TaskInputPanel(
     val coroutineScope = rememberCoroutineScope()
 
     val interactionSource = remember { MutableInteractionSource() }
+
+    val englishContext = remember {
+        object : ContextWrapper(context) {
+            override fun getResources(): android.content.res.Resources {
+                val res = super.getResources()
+                val config = Configuration(res.configuration).apply {
+                    setLocale(Locale.ENGLISH)
+                }
+                return createConfigurationContext(config).resources
+            }
+        }
+    }
+
+    val dateFormatter = remember {
+        DateTimeFormatter.ofPattern("EEE, dd MMM yyyy", Locale.ENGLISH)
+    }
+
+    fun formatTaskDate(date: LocalDate?): String {
+        return date?.format(dateFormatter) ?: ""
+    }
 
     BackHandler(enabled = true) {
         coroutineScope.launch {
@@ -114,27 +145,43 @@ fun TaskInputPanel(
             title = { Text("Type") },
             text = {
                 Column {
+                    val icons = listOf(Icons.Default.Groups, Icons.Default.SportsEsports, Icons.Default.AutoStories, Icons.Default.Work)
                     val types = listOf("Meeting", "Entertainment", "Study", "Work")
-                    types.forEach { item ->
-                        Text(
-                            text = item,
+                    icons.zip(types).forEach { (icon, item) ->
+                        Row(
                             modifier = Modifier
-                                .padding(vertical = 4.dp)
+                                .fillMaxWidth()
                                 .clickable {
                                     onTypeSelected(item)
                                     showTypeDialog = false
                                 }
-                        )
+                                .padding(vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = icon,
+                                contentDescription = item,
+                                tint = Color.Black,
+                                modifier = Modifier.size(24.dp)
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Text(
+                                text = item,
+                                fontSize = 16.sp
+                            )
+                        }
                     }
 
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.clickable { /* TODO: Add new type */ }
+                        modifier = Modifier.clickable {
+                            Toast.makeText(context, "Growing features", Toast.LENGTH_SHORT).show()
+                        }
                     ) {
-                        Icon(Icons.Default.Add, contentDescription = "Add", tint = Color.Gray)
-                        Text(" Add type...", color = Color.Gray)
+                        Icon(Icons.Default.Add, contentDescription = "Add", tint = Color.Gray, modifier = Modifier.size(24.dp))
+                        Text(" Add type...", color = Color.Gray, fontSize = 16.sp)
                     }
                 }
             },
@@ -242,7 +289,7 @@ fun TaskInputPanel(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp)
             ) {
                 Image(
-                    painter = painterResource(R.drawable.ic_direct_inbox),
+                    painter = painterResource(R.drawable.ic_tag),
                     contentDescription = null,
                     modifier = Modifier
                         .size(24.dp)
@@ -272,9 +319,30 @@ fun TaskInputPanel(
                             val month = taskDate?.monthValue?.minus(1) ?: now.monthValue - 1
                             val day = taskDate?.dayOfMonth ?: now.dayOfMonth
 
-                            android.app.DatePickerDialog(context, { _, y, m, d ->
-                                onTaskDateChange(LocalDate.of(y, m + 1, d))
-                            }, year, month, day).show()
+                            val datePickerDialog = DatePickerDialog(
+                                englishContext,
+                                { _, y, m, d ->
+                                    onTaskDateChange(LocalDate.of(y, m + 1, d))
+                                },
+                                year,
+                                month,
+                                day
+                            )
+
+                            val dateFormat = java.text.SimpleDateFormat("EEE, MMM d", Locale.ENGLISH)
+                            val selectedDate = Calendar.getInstance().apply {
+                                set(year, month, day)
+                            }.time
+                            datePickerDialog.setTitle(dateFormat.format(selectedDate))
+
+                            datePickerDialog.datePicker.init(year, month, day) { _, y, m, d ->
+                                val updatedDate = Calendar.getInstance().apply {
+                                    set(y, m, d)
+                                }.time
+                                datePickerDialog.setTitle(dateFormat.format(updatedDate))
+                            }
+
+                            datePickerDialog.show()
                         },
                     colorFilter = if (taskDate != null)
                         ColorFilter.tint(Color(0xFF24A19C))
@@ -297,9 +365,15 @@ fun TaskInputPanel(
                             val hour = taskTime?.hour ?: nowTime.hour
                             val minute = taskTime?.minute ?: nowTime.minute
 
-                            android.app.TimePickerDialog(context, { _, h, m ->
-                                onTaskTimeChange(LocalTime.of(h, m))
-                            }, hour, minute, true).show()
+                            TimePickerDialog(
+                                englishContext,
+                                { _, h, m ->
+                                    onTaskTimeChange(LocalTime.of(h, m))
+                                },
+                                hour,
+                                minute,
+                                true
+                            ).show()
                         },
                     colorFilter = if (taskTime != null)
                         ColorFilter.tint(Color(0xFF24A19C))
@@ -317,7 +391,7 @@ fun TaskInputPanel(
                         .clickable(
                             interactionSource = interactionSource,
                             indication = null
-                        ) {  }
+                        ) { }
                 )
 
                 Spacer(modifier = Modifier.weight(1f))

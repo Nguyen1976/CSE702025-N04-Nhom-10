@@ -57,10 +57,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.taskify.R
 import com.example.taskify.data.themeStorage.ThemeDataStore
-import com.example.taskify.data.viewmodel.UserViewModel
 import com.example.taskify.domain.model.taskModel.TaskRequest
 import com.example.taskify.domain.model.themeModel.ThemeOption
 import com.example.taskify.presentation.auth.dashboard.DashboardActivity
@@ -90,10 +88,7 @@ class MainActivity : BaseActivity() {
         enableEdgeToEdge()
 
         lifecycleScope.launch {
-            val theme = ThemeDataStore.getSavedTheme(this@MainActivity)
-
             val token = tokenManager.getAccessToken()
-
             if (token.isNullOrEmpty()) {
                 val intent = Intent(this@MainActivity, DashboardActivity::class.java)
                 intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -105,144 +100,148 @@ class MainActivity : BaseActivity() {
             if (!isChosen) {
                 startActivity(Intent(this@MainActivity, ThemeSectionActivity::class.java))
                 finish()
-            } else {
-                setContent {
-                    val coroutineScope = rememberCoroutineScope()
-                    val tabs = TabItem.values()
-                    val pagerState = rememberPagerState { tabs.size }
+                return@launch
+            }
 
-                    val context = LocalContext.current
-                    val taskResult by taskViewModel.taskResult.collectAsState()
-                    val isLoading by taskViewModel.isLoading.collectAsState()
+            setContent {
+                // Lấy theme từ Flow
+                val themeFlow = ThemeDataStore.getSavedTheme(this@MainActivity)
+                val theme by themeFlow.collectAsState(initial = ThemeOption.Teal)
 
-                    if (isLoading) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(Color.Black.copy(alpha = 0.5f)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CircularProgressIndicator()
-                        }
+                val coroutineScope = rememberCoroutineScope()
+                val tabs = TabItem.values()
+                val pagerState = rememberPagerState { tabs.size }
+
+                val context = LocalContext.current
+                val taskResult by taskViewModel.taskResult.collectAsState()
+                val isLoading by taskViewModel.isLoading.collectAsState()
+
+                if (isLoading) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.Black.copy(alpha = 0.5f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
                     }
+                }
 
-                    LaunchedEffect(taskResult) {
-                        taskResult?.let { result ->
-                            result.onSuccess {
-                                Toast.makeText(context, "Task created successfully!", Toast.LENGTH_SHORT).show()
-                            }.onFailure {
-                                Toast.makeText(context, "An error occurred while creating the task, please try again!", Toast.LENGTH_SHORT).show()
-                            }
-                            taskViewModel.resetTaskResult()
+                LaunchedEffect(taskResult) {
+                    taskResult?.let { result ->
+                        result.onSuccess {
+                            Toast.makeText(context, "Task created successfully!", Toast.LENGTH_SHORT).show()
+                        }.onFailure {
+                            Toast.makeText(context, "An error occurred while creating the task, please try again!", Toast.LENGTH_SHORT).show()
                         }
+                        taskViewModel.resetTaskResult()
                     }
+                }
 
-                    MaterialTheme {
-                        Scaffold(
-                            containerColor = Color.Transparent,
-                            bottomBar = {
-                                BottomBarWithIndicator(
-                                    tabs = tabs,
-                                    pagerState = pagerState,
-                                    onTabSelected = { index ->
-                                        coroutineScope.launch {
-                                            pagerState.animateScrollToPage(index)
-                                        }
-                                    }
-                                )
-                            }
-                        ) { padding ->
-                            HorizontalPager(
-                                state = pagerState,
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(bottom = padding.calculateBottomPadding()),
-                                userScrollEnabled = !showInputPanel.value
-                            ) { page ->
-                                when (page) {
-                                    0 -> MainScreen(
-                                        theme = theme ?: ThemeOption.Teal,
-                                        showInputPanel = showInputPanel
-                                    )
-                                    1 -> TasksScreen()
-                                    2 -> key(page) { CalendarScreen() }
-                                    3 -> key(page) { FilterScreen() }
-                                    4 -> SettingScreen()
-                                }
-                            }
-                        }
-
-                        var title by remember { mutableStateOf("") }
-                        var description by remember { mutableStateOf("") }
-                        var isSuccess by remember { mutableStateOf(false) }
-                        var taskDate by remember { mutableStateOf<LocalDate?>(null) }
-                        var taskTime by remember { mutableStateOf<LocalTime?>(null) }
-                        var selectedType by remember { mutableStateOf<String?>(null) }
-                        var isLoadingLocal by remember { mutableStateOf(false) }
-
-                        val context = LocalContext.current
-
-                        LaunchedEffect(taskResult) {
-                            if (taskResult?.isSuccess == true) {
-                                showInputPanel.value = false
-                                title = ""
-                                description = ""
-                                taskDate = null
-                                taskTime = null
-                                selectedType = null
-                                isLoadingLocal = false
-                            } else if (taskResult?.isFailure == true) {
-                                isLoadingLocal = false
-                            }
-                        }
-
-                        // Reset field
-                        LaunchedEffect(showInputPanel.value) {
-                            if (showInputPanel.value) {
-                                title = ""
-                                description = ""
-                                taskDate = null
-                                taskTime = null
-                                selectedType = null
-                                isSuccess = false
-                                isLoadingLocal = false
-                            }
-                        }
-
-                        if (showInputPanel.value) {
-                            TaskInputPanel(
-                                title = title,
-                                onTitleChange = { title = it },
-                                description = description,
-                                onDescriptionChange = { description = it },
-                                taskDate = taskDate,
-                                onTaskDateChange = { taskDate = it },
-                                taskTime = taskTime,
-                                onTaskTimeChange = { taskTime = it },
-                                selectedType = selectedType,
-                                onTypeSelected = { selectedType = it },
-                                isSuccess = isSuccess,
-                                isLoading = isLoadingLocal,
-                                onDismiss = { showInputPanel.value = false },
-                                onSend = {
-                                    if (title.isNotBlank() && taskDate != null && taskTime != null && selectedType != null) {
-                                        isLoadingLocal = true // Bật loading
-                                        val taskRequest = TaskRequest(
-                                            title = title,
-                                            description = description,
-                                            createAt = LocalDateTime.now(),
-                                            taskDate = taskDate!!,
-                                            taskTime = taskTime!!,
-                                            type = selectedType!!,
-                                            isSuccess = isSuccess
-                                        )
-                                        taskViewModel.createTask(taskRequest)
-                                    } else {
-                                        Toast.makeText(context, "Please fill in all the information!", Toast.LENGTH_SHORT).show()
+                MaterialTheme {
+                    Scaffold(
+                        containerColor = Color.Transparent,
+                        bottomBar = {
+                            BottomBarWithIndicator(
+                                tabs = tabs,
+                                pagerState = pagerState,
+                                onTabSelected = { index ->
+                                    coroutineScope.launch {
+                                        pagerState.animateScrollToPage(index)
                                     }
                                 }
                             )
                         }
+                    ) { padding ->
+                        HorizontalPager(
+                            state = pagerState,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(bottom = padding.calculateBottomPadding()),
+                            userScrollEnabled = !showInputPanel.value
+                        ) { page ->
+                            when (page) {
+                                0 -> MainScreen(
+                                    theme = theme ?: ThemeOption.Teal,
+                                    showInputPanel = showInputPanel
+                                )
+                                1 -> TasksScreen(theme = theme ?: ThemeOption.Teal)
+                                2 -> key(page) { CalendarScreen() }
+                                3 -> key(page) { FilterScreen() }
+                                4 -> SettingScreen()
+                            }
+                        }
+                    }
+
+                    var title by remember { mutableStateOf("") }
+                    var description by remember { mutableStateOf("") }
+                    var isSuccess by remember { mutableStateOf(false) }
+                    var taskDate by remember { mutableStateOf<LocalDate?>(null) }
+                    var taskTime by remember { mutableStateOf<LocalTime?>(null) }
+                    var selectedType by remember { mutableStateOf<String?>(null) }
+                    var isLoadingLocal by remember { mutableStateOf(false) }
+
+                    val context = LocalContext.current
+
+                    LaunchedEffect(taskResult) {
+                        if (taskResult?.isSuccess == true) {
+                            showInputPanel.value = false
+                            title = ""
+                            description = ""
+                            taskDate = null
+                            taskTime = null
+                            selectedType = null
+                            isLoadingLocal = false
+                        } else if (taskResult?.isFailure == true) {
+                            isLoadingLocal = false
+                        }
+                    }
+
+                    LaunchedEffect(showInputPanel.value) {
+                        if (showInputPanel.value) {
+                            title = ""
+                            description = ""
+                            taskDate = null
+                            taskTime = null
+                            selectedType = null
+                            isSuccess = false
+                            isLoadingLocal = false
+                        }
+                    }
+
+                    if (showInputPanel.value) {
+                        TaskInputPanel(
+                            title = title,
+                            onTitleChange = { title = it },
+                            description = description,
+                            onDescriptionChange = { description = it },
+                            taskDate = taskDate,
+                            onTaskDateChange = { taskDate = it },
+                            taskTime = taskTime,
+                            onTaskTimeChange = { taskTime = it },
+                            selectedType = selectedType,
+                            onTypeSelected = { selectedType = it },
+                            isSuccess = isSuccess,
+                            isLoading = isLoadingLocal,
+                            onDismiss = { showInputPanel.value = false },
+                            onSend = {
+                                if (title.isNotBlank() && taskDate != null && taskTime != null && selectedType != null) {
+                                    isLoadingLocal = true
+                                    val taskRequest = TaskRequest(
+                                        title = title,
+                                        description = description,
+                                        createAt = LocalDateTime.now(),
+                                        taskDate = taskDate!!,
+                                        taskTime = taskTime!!,
+                                        type = selectedType!!,
+                                        isSuccess = isSuccess
+                                    )
+                                    taskViewModel.createTask(taskRequest)
+                                } else {
+                                    Toast.makeText(context, "Please fill in all the information!", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                        )
                     }
                 }
             }
@@ -354,6 +353,20 @@ fun ThemeOption.toColor(): Color = when (this) {
     ThemeOption.Black -> Color(0xFF1B1C1F)
     ThemeOption.Red -> Color(0xFFEA4335)
     ThemeOption.Blue -> Color(0xFF1877F2)
+    ThemeOption.LightRed -> Color(0xFFE57373)
+    ThemeOption.LightBlue -> Color(0xFF42A5F5)
+    ThemeOption.LightGreen -> Color(0xFF81C784)
+    ThemeOption.LightOrange -> Color(0xFFFFB74D)
+    ThemeOption.DarkCharcoal -> Color(0xFF212121)
+    ThemeOption.BabyPink -> Color(0xFFF8BBD0)
+    ThemeOption.LightYellow -> Color(0xFFFFF176)
+    ThemeOption.MediumBlue -> Color(0xFF2196F3)
+    ThemeOption.LightPurple -> Color(0xFFBA68C8)
+    ThemeOption.SlateGray -> Color(0xFF546E7A)
+    ThemeOption.LightCyan -> Color(0xFF4DD0E1)
+    ThemeOption.MintGreen -> Color(0xFF4DB6AC)
+    ThemeOption.HotPink -> Color(0xFFF06292)
+    ThemeOption.VividOrange -> Color(0xFFFF5722)
 }
 
 @Composable

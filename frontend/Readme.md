@@ -179,7 +179,7 @@ Content-Type: application/json
 ---
 
 ### Task API
-** GET /api/tasks
+**GET /api/tasks**
 - Mô tả: Lấy danh sách tất cả task của user hiện tại.
 - Headers:
 ``` makefile
@@ -227,7 +227,7 @@ Authorization: Bearer <token>
 
 --- 
 
-**POST /api/tasks
+**POST /api/tasks**
 - Mô tả: Tạo task mới.
 - Headers:
 ``` makefile
@@ -239,6 +239,16 @@ Content-Type: application/json
 {
   "title": "Task mới",
   "description": "Mô tả task mới",
+  "subtasks": [
+    {
+      "title": "Subtask sửa",
+      "subtaskDes": "Mô tả subtask sửa"
+    },
+    {
+      "title": "Subtask mới",
+      "subtaskDes": "Mô tả subtask mới"
+    }
+  ]
   "createAt": "2025-05-16T08:30:00Z",
   "taskDate": "2025-05-16",
   "taskTime": "19:30:00"
@@ -253,6 +263,16 @@ Content-Type: application/json
   "userId": "user123",
   "title": "Task mới",
   "description": "Mô tả task mới",
+  "subtasks": [
+    {
+      "title": "Subtask sửa",
+      "subtaskDes": "Mô tả subtask sửa"
+    },
+    {
+      "title": "Subtask mới",
+      "subtaskDes": "Mô tả subtask mới"
+    }
+  ]
   "createAt": "2025-05-16T08:30:00Z",
   "taskDate": "2025-05-16",
   "taskTime": "19:30:00"
@@ -263,7 +283,7 @@ Content-Type: application/json
 
 ---
 
-**PUT /api/tasks/{taskId}
+**PUT /api/tasks/{taskId}**
 - Mô tả: Cập nhật task.
 - Headers:
 ``` makefile
