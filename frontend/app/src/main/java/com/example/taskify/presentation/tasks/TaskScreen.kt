@@ -349,8 +349,6 @@ fun TaskCard(
                 )
             }
 
-//            Spacer(modifier = Modifier.height(4.dp))
-
             Box(
                 Modifier
                     .height(1.dp)
