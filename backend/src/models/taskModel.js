@@ -26,7 +26,8 @@ const TaskSchema = new mongoose.Schema({
         }
       }
     ],
-    default: [] // <-- mặc định là mảng rỗng
+    default: [],
+    _id: false
   },
   createAt: {
     type: String,
