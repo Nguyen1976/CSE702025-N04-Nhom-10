@@ -228,7 +228,6 @@ Content-Type: application/json
     "taskTime": "19:30:00",
     "type": "Meeting",
     "isSuccess": true,
-    "_id": "6832a1f1727015191954a61b",
     "subtasks": [{
       "title": "Subtask mới",
       "subtaskDes": "Mô tả subtask sửa"
@@ -246,7 +245,7 @@ Content-Type: application/json
 
 ```json
 {
-    "_id": "6832a1f1727015191954a61b",
+    "_id": "6837d1e974f254aea8ee7af5",
     "userId": "682f2dcc3f4735b8a8910715",
     "title": "Task mới sửa",
     "description": "Mô tả task mới",
@@ -257,13 +256,11 @@ Content-Type: application/json
     "subtasks": [
         {
             "title": "Subtask mới",
-            "subtaskDes": "Mô tả subtask sửa",
-            "_id": "6832a2b2727015191954a622"
+            "subtaskDes": "Mô tả subtask sửa"
         },
         {
             "title": "Subtask mới",
-            "subtaskDes": "Mô tả subtask mới",
-            "_id": "6832a2b2727015191954a623"
+            "subtaskDes": "Mô tả subtask mới"
         }
     ],
     "createAt": "2025-05-25T04:52:01.355Z",
