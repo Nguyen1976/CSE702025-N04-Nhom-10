@@ -10,6 +10,14 @@ import retrofit2.http.POST
 
 data class LogoutResponse(val message: String)
 
+data class RefreshTokenRequest(
+    val refreshToken: String
+)
+
+data class RefreshTokenResponse(
+    val accessToken: String
+)
+
 interface AuthApi {
     @POST("/api/auth/signUp")
     suspend fun signUp(@Body request: SignUpRequest): Response<SignUpResponse>
@@ -19,4 +27,7 @@ interface AuthApi {
 
     @POST("/api/auth/signOut")
     suspend fun signOut(): Response<LogoutResponse>
+
+    @POST("/api/auth/refresh_token")
+    suspend fun refreshToken(@Body request: RefreshTokenRequest): Response<RefreshTokenResponse>
 }

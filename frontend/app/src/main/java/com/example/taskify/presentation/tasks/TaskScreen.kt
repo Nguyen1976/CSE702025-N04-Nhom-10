@@ -1,5 +1,6 @@
 package com.example.taskify.presentation.tasks
 
+import android.content.Intent
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
@@ -65,6 +66,7 @@ import com.example.taskify.domain.model.themeModel.ThemeOption
 import com.example.taskify.presentation.main.toColor
 import com.example.taskify.ui.theme.TaskifyTheme
 import java.time.LocalDate
+import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
@@ -73,6 +75,8 @@ fun TasksScreen(
     theme: ThemeOption,
     taskViewModel: TaskViewModel = hiltViewModel()
 ) {
+    val color = theme.toColor()
+
     val tasks by taskViewModel.taskList.collectAsState()
     val isLoading by taskViewModel.isLoading.collectAsState() // handle
     val isSubtaskLoading by taskViewModel.isSubtaskLoading.collectAsState()
@@ -85,7 +89,7 @@ fun TasksScreen(
 
     LaunchedEffect(tasks) {
         selectedTask = selectedTask?.let { oldSelected ->
-            tasks.find { it.id == oldSelected.id }
+            tasks.find { it._id == oldSelected._id }
         }
     }
 
@@ -124,7 +128,7 @@ fun TasksScreen(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator(color = Color(0xFF24A19C))
+                    CircularProgressIndicator(color = color)
                 }
             } else if (tasks.isEmpty()) {
                 Text(
@@ -136,12 +140,12 @@ fun TasksScreen(
                 LazyColumn(
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    items(tasks, key = { it.id }) { task ->
+                    items(tasks, key = { it._id }) { task ->
                         TaskCard(
                             theme = theme,
                             task = task,
                             onDeleteTask = {
-                                taskViewModel.deleteTask(task.id)
+                                taskViewModel.deleteTask(task._id)
                             },
                             onDetailTask = {
                                 selectedTask = task
@@ -152,12 +156,20 @@ fun TasksScreen(
                 }
 
                 if (showBottomSheet && selectedTask != null) {
-                    Log.d("DEBUG", "Show bottom sheet with task: ${selectedTask!!.title}")
                     TaskBottomSheet(
                         task = selectedTask!!,
                         theme = theme,
-                        subtasks = selectedTask!!.subTasks,
-                        onEditTask = { /** composable task input panel **/ },
+                        subtasks = selectedTask!!.subTasks ?: emptyList(),
+                        onEditTask = {
+                            val intent = Intent(context, TaskEditActivity::class.java).apply {
+                                putExtra("title", selectedTask!!.title)
+                                putExtra("description", selectedTask!!.description)
+                                putExtra("taskDate", selectedTask!!.taskDate.toString())
+                                putExtra("taskTime", selectedTask!!.taskTime.toString())
+                                putExtra("type", selectedTask!!.type)
+                            }
+                            context.startActivity(intent)
+                        },
                         onUpdateTask = { taskViewModel.updateTask(selectedTask!!) },
                         onDeleteSubtask = { index ->
                             selectedTask?.let { currentTask ->
@@ -180,7 +192,7 @@ fun TasksScreen(
         }
     }
 
-    LoadingDialog(show = isSubtaskLoading)
+    LoadingDialog(theme = theme, show = isSubtaskLoading)
 
     if (isLoading) {
         Box(
@@ -189,7 +201,7 @@ fun TasksScreen(
                 .background(Color.Black.copy(alpha = 0.4f)),
             contentAlignment = Alignment.Center
         ) {
-            CircularProgressIndicator(color = Color.White)
+            CircularProgressIndicator(color = color)
         }
     }
 }
@@ -206,6 +218,9 @@ fun TaskCard(
     val color = theme.toColor()
 
     var expanded by remember { mutableStateOf(false) }
+    val formattedTime = LocalTime.parse(task.taskTime).format(DateTimeFormatter.ofPattern("HH:mm"))
+
+    Log.d("Task_time", "$formattedTime")
 
     fun formatTaskDate(dateString: String?): String {
         return try {
@@ -375,7 +390,7 @@ fun TaskCard(
                 Spacer(modifier = Modifier.width(4.dp))
 
                 Text(
-                    text = task.taskTime,
+                    text = formattedTime,
                     fontSize = 14.sp,
                     color = Color(0xFFFF486A)
                 )
@@ -390,7 +405,7 @@ fun TaskCard(
                 Spacer(modifier = Modifier.width(4.dp))
 
                 Text(
-                    text = task.subTasks.size.toString(),
+                    text = (task.subTasks?.size ?: 0).toString(),
                     fontSize = 14.sp,
                     color = Color(0xFF767E8C)
                 )
@@ -408,14 +423,18 @@ fun TaskCard(
 }
 
 @Composable
-fun LoadingDialog(show: Boolean, onDismissRequest: () -> Unit = {}) {
+fun LoadingDialog(
+    theme: ThemeOption,
+    show: Boolean,
+    onDismissRequest: () -> Unit = {}
+) {
     if (show) {
         AlertDialog(
             onDismissRequest = onDismissRequest,
             title = { Text("Loading...") },
             text = {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                    CircularProgressIndicator(modifier = Modifier.size(24.dp), color = theme.toColor())
                     Spacer(modifier = Modifier.width(16.dp))
                     Text("Please wait")
                 }
@@ -435,7 +454,7 @@ fun TaskBottomSheet(
     onUpdateTask: () -> Unit,
     onDeleteSubtask: (index: Int) -> Unit,
     onEditSubtask: () -> Unit,
-    subtasks: List<SubtaskResponse>,
+    subtasks: List<SubtaskResponse> = emptyList(),
     onDismissRequest: () -> Unit
 ) {
 
@@ -475,6 +494,7 @@ fun TaskBottomSheetContent(
 ) {
     val color = theme.toColor()
     val backgroundColor = theme.toColor().copy(alpha = 0.08f)
+    val formattedTime = LocalTime.parse(task.taskTime).format(DateTimeFormatter.ofPattern("HH:mm"))
 
     fun formatTaskDate(dateString: String?): String {
         return try {
@@ -565,7 +585,7 @@ fun TaskBottomSheetContent(
                     Spacer(modifier = Modifier.width(4.dp))
 
                     Text(
-                        text = task.taskTime,
+                        text = formattedTime,
                         fontSize = 14.sp,
                         color = Color(0xFFFF486A)
                     )
@@ -803,7 +823,7 @@ fun SubTaskItem(
 @Composable
 private fun TaskBottomSheetPreview() {
     val task = TaskResponse(
-        id = "1",
+        _id = "1",
         userId = "user123",
         title = "Play video games tonight",
         description = "Play valorant with friends Play valorant with friends Play valorant with friends",

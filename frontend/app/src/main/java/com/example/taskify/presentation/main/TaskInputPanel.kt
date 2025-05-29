@@ -366,7 +366,7 @@ fun TaskInputPanel(
                             val minute = taskTime?.minute ?: nowTime.minute
 
                             TimePickerDialog(
-                                englishContext,
+                                context,
                                 { _, h, m ->
                                     onTaskTimeChange(LocalTime.of(h, m))
                                 },

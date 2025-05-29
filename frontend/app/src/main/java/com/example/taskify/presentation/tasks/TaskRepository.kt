@@ -2,15 +2,14 @@ package com.example.taskify.presentation.tasks
 
 import com.example.taskify.data.remote.TaskApi
 import com.example.taskify.domain.model.signUpModel.ErrorResponse
-import com.example.taskify.domain.model.taskModel.SubTaskRequest
-import com.example.taskify.domain.model.taskModel.SubtaskResponse
 import com.example.taskify.domain.model.taskModel.TaskRequest
 import com.example.taskify.domain.model.taskModel.TaskResponse
 import com.google.gson.Gson
 import javax.inject.Inject
 
 class TaskRepository @Inject constructor(
-    private val api: TaskApi
+    private val api: TaskApi,
+    private val gson: Gson
 ) {
     // Task
     suspend fun createTask(request: TaskRequest): Result<TaskResponse> {
@@ -20,7 +19,7 @@ class TaskRepository @Inject constructor(
                 Result.success(response.body()!!)
             } else {
                 val errorBody = response.errorBody()?.string()
-                val errorMessage = Gson().fromJson(errorBody, ErrorResponse::class.java).error
+                val errorMessage = gson.fromJson(errorBody, ErrorResponse::class.java).error
                 Result.failure(Exception(errorMessage))
             }
         } catch (e:Exception) {
@@ -36,7 +35,7 @@ class TaskRepository @Inject constructor(
                 Result.success(tasks)
             } else {
                 val errorBody = response.errorBody()?.string()
-                val errorMessage = Gson().fromJson(errorBody, ErrorResponse::class.java).error
+                val errorMessage = gson.fromJson(errorBody, ErrorResponse::class.java).error
                 Result.failure(Exception(errorMessage))
             }
         } catch (e: Exception) {
@@ -52,7 +51,7 @@ class TaskRepository @Inject constructor(
                 Result.success(updatedTask)
             } else {
                 val errorBody = response.errorBody()?.string()
-                val errorMessage = Gson().fromJson(errorBody, ErrorResponse::class.java).error
+                val errorMessage = gson.fromJson(errorBody, ErrorResponse::class.java).error
                 Result.failure(Exception(errorMessage))
             }
         } catch (e: Exception) {
@@ -67,7 +66,7 @@ class TaskRepository @Inject constructor(
                 Result.success(Unit)
             } else {
                 val errorBody = response.errorBody()?.string()
-                val errorMessage = Gson().fromJson(errorBody, ErrorResponse::class.java).error
+                val errorMessage = gson.fromJson(errorBody, ErrorResponse::class.java).error
                 Result.failure(Exception(errorMessage))
             }
         } catch (e: Exception) {
