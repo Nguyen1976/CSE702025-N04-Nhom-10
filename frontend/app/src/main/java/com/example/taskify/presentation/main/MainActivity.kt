@@ -166,7 +166,7 @@ class MainActivity : BaseActivity() {
                                     showInputPanel = showInputPanel
                                 )
                                 1 -> TasksScreen(theme = theme ?: ThemeOption.Teal)
-                                2 -> key(page) { CalendarScreen() }
+                                2 -> key(page) { CalendarScreen(theme = theme ?: ThemeOption.Teal) }
                                 3 -> key(page) { FilterScreen() }
                                 4 -> SettingScreen()
                             }
@@ -230,7 +230,6 @@ class MainActivity : BaseActivity() {
                                     val taskRequest = TaskRequest(
                                         title = title,
                                         description = description,
-                                        createAt = LocalDateTime.now(),
                                         taskDate = taskDate!!,
                                         taskTime = taskTime!!,
                                         type = selectedType!!,

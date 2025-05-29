@@ -11,10 +11,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Named
 
 @HiltViewModel
 class SignOutViewModel @Inject constructor(
-    private val authApi: AuthApi,
+    @Named("withInterceptor") private val authApi: AuthApi,
     private val tokenManager: TokenManager,
     private val userPreferences: UserPreferences
 ) : ViewModel() {

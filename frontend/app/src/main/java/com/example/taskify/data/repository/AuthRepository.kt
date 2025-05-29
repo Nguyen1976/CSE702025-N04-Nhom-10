@@ -9,9 +9,10 @@ import com.example.taskify.domain.model.signUpModel.SignUpRequest
 import com.example.taskify.domain.model.signUpModel.SignUpResponse
 import com.google.gson.Gson
 import javax.inject.Inject
+import javax.inject.Named
 
 class AuthRepository @Inject constructor (
-    private val api: AuthApi,
+    @Named("withInterceptor") private val api: AuthApi,
     private val tokenManager: TokenManager
 ) {
     suspend fun signUp(request: SignUpRequest): Result<SignUpResponse> {

@@ -65,7 +65,6 @@ class TaskViewModel @Inject constructor(
             _isLoading.value = true
 
             val rawCreateAt = task.createAt
-            val trimmedCreateAt = rawCreateAt.substringAfter(", ").trim()  // "19 Jul 2024 09:00:00"
 
             val formatter = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss", Locale.ENGLISH)
 
@@ -80,14 +79,13 @@ class TaskViewModel @Inject constructor(
                 title = task.title,
                 description = task.description,
                 subTasks = subTasksRequest,
-                createAt = LocalDateTime.parse(trimmedCreateAt, formatter),
                 taskDate = LocalDate.parse(task.taskDate),
                 taskTime = LocalTime.parse(task.taskTime),
                 type = task.type,
                 isSuccess = task.isSuccess
             )
 
-            val result = repository.updateTask(task.id, taskRequest)
+            val result = repository.updateTask(task._id, taskRequest)
             result.onSuccess {
                 val getResult = repository.getTasks()
                 getResult.onSuccess { tasks ->

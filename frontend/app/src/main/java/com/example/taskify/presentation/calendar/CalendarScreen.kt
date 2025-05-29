@@ -37,13 +37,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.taskify.domain.model.themeModel.ThemeOption
+import com.example.taskify.presentation.main.toColor
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 @Composable
-fun CalendarScreen() {
+fun CalendarScreen(
+    theme: ThemeOption
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -60,12 +64,14 @@ fun CalendarScreen() {
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        CalendarSection()
+        CalendarSection(theme)
     }
 }
 
 @Composable
-fun CalendarSection() {
+fun CalendarSection(
+    theme: ThemeOption
+) {
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
     var selectedMonth by remember { mutableStateOf(YearMonth.now()) }
 
@@ -84,6 +90,7 @@ fun CalendarSection() {
 
     Column {
         MonthSelector(
+            theme = theme,
             selectedDate = selectedDate,
             onMonthSelected = {
                 selectedMonth = it
@@ -98,6 +105,7 @@ fun CalendarSection() {
         Spacer(modifier = Modifier.height(8.dp))
 
         ScrollableCalendar(
+            theme = theme,
             selectedDate = selectedDate,
             onDateSelected = { selectedDate = it },
             currentMonth = selectedMonth,
@@ -132,10 +140,13 @@ fun CalendarSection() {
 
 @Composable
 fun MonthSelector(
+    theme: ThemeOption,
     selectedDate: LocalDate,
     onMonthSelected: (YearMonth) -> Unit,
     onTodayClick: () -> Unit
 ) {
+    val color = theme.toColor()
+
     var expanded by remember { mutableStateOf(false) }
 
     val formatter = DateTimeFormatter.ofPattern("MMMM yyyy", Locale.ENGLISH)
@@ -169,7 +180,7 @@ fun MonthSelector(
 
         Text(
             "Today",
-            color = Color(0xFF24A19C),
+            color = color,
             fontSize = 16.sp,
             modifier = Modifier
                 .clickable(
@@ -194,11 +205,14 @@ fun MonthSelector(
 
 @Composable
 fun ScrollableCalendar(
+    theme: ThemeOption,
     selectedDate: LocalDate,
     onDateSelected: (LocalDate) -> Unit,
     currentMonth: YearMonth,
     listState: LazyListState
 ) {
+    val color = theme.toColor()
+
     val daysInMonth = currentMonth.lengthOfMonth()
     val startDate = currentMonth.atDay(1)
     val dates = (0 until daysInMonth).map { startDate.plusDays(it.toLong()) }
@@ -212,7 +226,7 @@ fun ScrollableCalendar(
                     .padding(horizontal = 4.dp)
                     .padding(bottom = 8.dp)
                     .clip(RoundedCornerShape(8.dp))
-                    .background(if (isSelected) Color(0xFF24A19C) else Color.Transparent)
+                    .background(if (isSelected) color else Color.Transparent)
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null
