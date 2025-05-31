@@ -288,7 +288,26 @@
 			"name": "get infor user",
 			"request": {
 				"method": "GET",
-				"header": []
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2ODJmMmRjYzNmNDczNWI4YTg5MTA3MTUiLCJlbWFpbCI6InRlc3QxMEBleGFtcGxlLmNvbSIsImlhdCI6MTc0ODY3MjQ4NCwiZXhwIjoxNzQ4Njc2MDg0fQ.1IOilkxXzD8Com2gy411bbxkxd8OAj4wGzxN4WtmAH8",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:3000/api/v1/users",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"v1",
+						"users"
+					]
+				}
 			},
 			"response": []
 		},
@@ -296,15 +315,34 @@
 			"name": "update user",
 			"request": {
 				"method": "POST",
-				"header": [],
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2ODJmMmRjYzNmNDczNWI4YTg5MTA3MTUiLCJlbWFpbCI6InRlc3QxMEBleGFtcGxlLmNvbSIsImlhdCI6MTc0ODY3MjQ4NCwiZXhwIjoxNzQ4Njc2MDg0fQ.1IOilkxXzD8Com2gy411bbxkxd8OAj4wGzxN4WtmAH8",
+						"type": "text"
+					}
+				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\"email\": \"test10@example.com\",\r\n    \"username\": \"test1\"}",
+					"raw": "{\r\n    \"email\": \"test10@example.com\",\r\n    \"username\": \"nguyen\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
 						}
 					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/v1/users",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"v1",
+						"users"
+					]
 				}
 			},
 			"response": []
