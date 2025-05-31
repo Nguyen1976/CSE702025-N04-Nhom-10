@@ -1,9 +1,10 @@
 {
 	"info": {
-		"_postman_id": "18b8d04e-f441-4fed-a886-df94e344ac36",
+		"_postman_id": "8757ea40-22af-4ee6-95cf-14c35c3d47d3",
 		"name": "Note_App_KTPM",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "30276076"
+		"_exporter_id": "36484739",
+		"_collection_link": "https://noteappapi.postman.co/workspace/note_app_api-Workspace~1696072c-b0eb-414c-8266-e2b497885e5f/collection/36484739-8757ea40-22af-4ee6-95cf-14c35c3d47d3?action=share&source=collection_link&creator=36484739"
 	},
 	"item": [
 		{
@@ -248,6 +249,62 @@
 						"tasks",
 						"6832d75d7ab5eaa0a75d5bc7"
 					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "logout",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"accessToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2ODJmMmRjYzNmNDczNWI4YTg5MTA3MTUiLCJlbWFpbCI6InRlc3QxMEBleGFtcGxlLmNvbSIsImlhdCI6MTc0ODY3MjQ4NCwiZXhwIjoxNzQ4Njc2MDg0fQ.1IOilkxXzD8Com2gy411bbxkxd8OAj4wGzxN4WtmAH8\",\r\n    \"refreshToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2ODJmMmRjYzNmNDczNWI4YTg5MTA3MTUiLCJlbWFpbCI6InRlc3QxMEBleGFtcGxlLmNvbSIsImlhdCI6MTc0ODY3MjQ4NCwiZXhwIjoxNzQ5ODgyMDg0fQ.mQtw-Xzb2aPumU1pPtOagTn5Ud6-QAEDQx86CxhcIPI\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/v1/users/logout",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"v1",
+						"users",
+						"logout"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get infor user",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		},
+		{
+			"name": "update user",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"email\": \"test10@example.com\",\r\n    \"username\": \"test1\"}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
 				}
 			},
 			"response": []
