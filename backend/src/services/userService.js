@@ -94,8 +94,53 @@ const refreshToken = async (clientRefreshToken) => {
   }
 }
 
+const logout = async (reqBody) => {
+  try {
+    //Vì không quản lý token ở server nên k cần làm gì
+    return true
+  } catch (error) {
+    throw new ApiError(
+      StatusCodes.FORBIDDEN,
+      'Please Sign In! (Error from logout)'
+    )
+  }
+}
+
+const getDetail = async (userId) => {
+  try {
+    const user = await User.findById(userId)
+
+    if (!user) {
+      throw new ApiError(StatusCodes.NOT_FOUND, 'User not found')
+    }
+
+    return pickUser(user)
+  } catch (error) {
+    throw error
+  }
+}
+
+const update = async (userId, reqBody) => {
+  try {
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { ...reqBody },
+      { new: true }
+    )
+    if (!updatedUser) {
+      throw new ApiError(StatusCodes.NOT_FOUND, 'User not found')
+    }
+    return pickUser(updatedUser)
+  } catch (error) {
+    throw error
+  }
+}
+
 module.exports = {
   createNew,
   login,
-  refreshToken
+  refreshToken,
+  logout,
+  getDetail,
+  update
 }

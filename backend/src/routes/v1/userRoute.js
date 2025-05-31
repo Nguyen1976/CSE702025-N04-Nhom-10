@@ -1,4 +1,5 @@
 const express = require('express')
+const authMiddleware = require('~/middlewares/authMiddleware')
 const userValidation = require('~/validations/userValidation')
 const userController = require('~/controllers/userController')
 
@@ -10,5 +11,8 @@ Router.route('/register').post(
 )
 
 Router.route('/login').post(userValidation.login, userController.login)
+Router.route('/logout').post(userController.logout)
+Router.route('/').get(authMiddleware.isAuthorized, userController.getDetail)
+Router.route('/').post(authMiddleware.isAuthorized, userController.update)
 Router.route('/refresh_token').get(userController.refreshToken)
 module.exports = Router
