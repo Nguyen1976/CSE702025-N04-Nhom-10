@@ -1,10 +1,14 @@
 package com.example.taskify.presentation.tasks
 
+import android.app.Activity
 import android.content.Intent
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,6 +25,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
@@ -40,6 +45,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -68,6 +74,7 @@ import com.example.taskify.ui.theme.TaskifyTheme
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
+import java.util.ArrayList
 import java.util.Locale
 
 @Composable
@@ -80,9 +87,19 @@ fun TasksScreen(
     val tasks by taskViewModel.taskList.collectAsState()
     val isLoading by taskViewModel.isLoading.collectAsState() // handle
     val isSubtaskLoading by taskViewModel.isSubtaskLoading.collectAsState()
-
     val context = LocalContext.current
+
     val errorMessage by taskViewModel.errorMessage.collectAsState()
+
+    // Launcher để mở TaskEditActivity và nhận kết quả trả về
+    val editTaskLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            // Khi nhận được kết quả OK từ TaskEditActivity thì gọi lại getTasks để cập nhật danh sách
+            taskViewModel.getTasks()
+        }
+    }
 
     var selectedTask by remember { mutableStateOf<TaskResponse?>(null) }
     var showBottomSheet by remember { mutableStateOf(false) }
@@ -162,29 +179,39 @@ fun TasksScreen(
                         subtasks = selectedTask!!.subTasks ?: emptyList(),
                         onEditTask = {
                             val intent = Intent(context, TaskEditActivity::class.java).apply {
+                                putExtra("_id", selectedTask!!._id)
+                                putExtra("userId", selectedTask!!.userId)
                                 putExtra("title", selectedTask!!.title)
                                 putExtra("description", selectedTask!!.description)
+                                putExtra("createAt", selectedTask!!.createAt)
                                 putExtra("taskDate", selectedTask!!.taskDate.toString())
                                 putExtra("taskTime", selectedTask!!.taskTime.toString())
                                 putExtra("type", selectedTask!!.type)
+                                putExtra("isSuccess", selectedTask!!.isSuccess)
+                                putParcelableArrayListExtra("subtask", ArrayList(selectedTask!!.subTasks))
+                                putExtra("theme", theme.name)
                             }
-                            context.startActivity(intent)
+                            editTaskLauncher.launch(intent)
                         },
-                        onUpdateTask = { taskViewModel.updateTask(selectedTask!!) },
-                        onDeleteSubtask = { index ->
+                        onUpdateTask = { newSubtask: SubtaskResponse ->
                             selectedTask?.let { currentTask ->
-                                val updatedSubtasks = currentTask.subTasks.toMutableList()
-                                if (index in updatedSubtasks.indices) {
-                                    updatedSubtasks.removeAt(index)
-                                    selectedTask = currentTask.copy(subTasks = updatedSubtasks)
-                                    taskViewModel.updateTask(selectedTask!!)
-                                }
-                            }},
+                                val updatedSubtasks = (currentTask.subTasks ?: emptyList()).toMutableList()
+                                updatedSubtasks.add(newSubtask)
+                                val updatedTask = currentTask.copy(subTasks = updatedSubtasks)
+                                selectedTask = updatedTask
+                                taskViewModel.updateTask(updatedTask)
+                            }
+                        },
+                        onDeleteSubtask = { index ->
+                            selectedTask?.let { task ->
+                                taskViewModel.deleteSubtask(task, index)
+                            }
+                        },
                         onEditSubtask = { /** composable subtask input panel **/ },
                         onDismissRequest = {
                             showBottomSheet = false
                             selectedTask = null
-                        }
+                        },
                     )
                 }
             }
@@ -451,11 +478,11 @@ fun TaskBottomSheet(
     task: TaskResponse,
     theme: ThemeOption,
     onEditTask: () -> Unit,
-    onUpdateTask: () -> Unit,
+    onUpdateTask: (SubtaskResponse) -> Unit,
     onDeleteSubtask: (index: Int) -> Unit,
     onEditSubtask: () -> Unit,
     subtasks: List<SubtaskResponse> = emptyList(),
-    onDismissRequest: () -> Unit
+    onDismissRequest: () -> Unit,
 ) {
 
     val sheetState = rememberModalBottomSheetState(
@@ -476,7 +503,7 @@ fun TaskBottomSheet(
             onDeleteSubtask = onDeleteSubtask,
             onEditSubtask = onEditSubtask,
             onDismissRequest = onDismissRequest,
-            subtasks = subtasks
+            subtasks = subtasks,
         )
     }
 }
@@ -486,15 +513,19 @@ fun TaskBottomSheetContent(
     task: TaskResponse,
     theme: ThemeOption,
     onEditTask: () -> Unit,
-    onUpdateTask: () -> Unit,
+    onUpdateTask: (SubtaskResponse) -> Unit,
     onDeleteSubtask: (index: Int) -> Unit,
     onEditSubtask: () -> Unit,
     onDismissRequest: () -> Unit,
-    subtasks: List<SubtaskResponse>
+    subtasks: List<SubtaskResponse>,
 ) {
     val color = theme.toColor()
     val backgroundColor = theme.toColor().copy(alpha = 0.08f)
     val formattedTime = LocalTime.parse(task.taskTime).format(DateTimeFormatter.ofPattern("HH:mm"))
+
+    var showAddDialog by remember { mutableStateOf(false) }
+    var newTitle by remember { mutableStateOf("") }
+    var newDescription by remember { mutableStateOf("") }
 
     fun formatTaskDate(dateString: String?): String {
         return try {
@@ -664,7 +695,7 @@ fun TaskBottomSheetContent(
         Spacer(modifier = Modifier.height(20.dp))
 
         Button(
-            onClick = {},
+            onClick = { showAddDialog = true },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),
@@ -693,6 +724,67 @@ fun TaskBottomSheetContent(
                     color = color
                 )
             }
+        }
+
+        if (showAddDialog) {
+            AlertDialog(
+                onDismissRequest = { showAddDialog = false },
+                title = { Text("Add New Sub-task") },
+                text = {
+                    Column {
+                        BasicTextField(
+                            value = newTitle,
+                            onValueChange = { newTitle = it },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .border(1.dp, Color.Gray, RoundedCornerShape(4.dp))
+                                .padding(8.dp),
+                            singleLine = true,
+                            decorationBox = { innerTextField ->
+                                if (newTitle.isEmpty()) Text("Title", color = Color.Gray)
+                                innerTextField()
+                            }
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        BasicTextField(
+                            value = newDescription,
+                            onValueChange = { newDescription = it },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(100.dp)
+                                .border(1.dp, Color.Gray, RoundedCornerShape(4.dp))
+                                .padding(8.dp),
+                            decorationBox = { innerTextField ->
+                                if (newDescription.isEmpty()) Text("Description", color = Color.Gray)
+                                innerTextField()
+                            }
+                        )
+                    }
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            if (newTitle.isNotBlank()) {
+                                val newSubtask = SubtaskResponse(
+                                    title = newTitle,
+                                    subtaskDes = newDescription
+                                )
+                                onUpdateTask(newSubtask)
+                                showAddDialog = false
+                                newTitle = ""
+                                newDescription = ""
+                            }
+                        }
+                    ) {
+                        Text("OK")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showAddDialog = false }) {
+                        Text("Cancel")
+                    }
+                }
+            )
         }
 
         Spacer(modifier = Modifier.height(20.dp))
@@ -817,45 +909,6 @@ fun SubTaskItem(
             )
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun TaskBottomSheetPreview() {
-    val task = TaskResponse(
-        _id = "1",
-        userId = "user123",
-        title = "Play video games tonight",
-        description = "Play valorant with friends Play valorant with friends Play valorant with friends",
-        createAt = "2025-05-25 19:30:00",
-        taskDate = "2025-05-25",
-        taskTime = "20:30:00",
-        type = "Entertainment",
-        isSuccess = false,
-        subTasks = listOf(
-            SubtaskResponse(
-                title = "3 ranks",
-                subtaskDes = "Play valorant with friends Play valorant with friends Play valorant with friends"
-            ),
-            SubtaskResponse(title = "2 ranks", subtaskDes = "Play yoru")
-        )
-    )
-
-    val theme = ThemeOption.Teal
-
-    TaskBottomSheetContent(
-        task = task,
-        theme = theme,
-        onUpdateTask = {},
-        onEditTask = {},
-        onDeleteSubtask = {},
-        onEditSubtask = {},
-        onDismissRequest = {},
-        subtasks = listOf(
-            SubtaskResponse(title = "3 ranks", subtaskDes = "Play omen"),
-            SubtaskResponse(title = "2 ranks", subtaskDes = "Play yoru")
-        )
-    )
 }
 
 @Preview(showBackground = true)

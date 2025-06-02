@@ -1,6 +1,8 @@
 package com.example.taskify.domain.model.taskModel
 
+import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
+import kotlinx.parcelize.Parcelize
 
 data class TaskResponse(
     val _id: String,
@@ -16,7 +18,8 @@ data class TaskResponse(
     val subTasks: List<SubtaskResponse>,
 )
 
+@Parcelize
 data class SubtaskResponse(
     val title: String,
     val subtaskDes: String
-)
+) : Parcelable

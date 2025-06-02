@@ -64,10 +64,6 @@ class TaskViewModel @Inject constructor(
         viewModelScope.launch {
             _isLoading.value = true
 
-            val rawCreateAt = task.createAt
-
-            val formatter = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss", Locale.ENGLISH)
-
             val subTasksRequest = task.subTasks.map { subtaskResponse ->
                 SubTaskRequest(
                     title = subtaskResponse.title,
@@ -86,18 +82,16 @@ class TaskViewModel @Inject constructor(
             )
 
             val result = repository.updateTask(task._id, taskRequest)
+            _taskResult.value = result.map { Unit }
+
             result.onSuccess {
                 val getResult = repository.getTasks()
                 getResult.onSuccess { tasks ->
                     _taskList.value = tasks
-                }.onFailure {
-                    // handle error
                 }
-                _isLoading.value = false
-            }.onFailure {
-                // handle error
-                _isLoading.value = false
             }
+
+            _isLoading.value = false
         }
     }
 
@@ -119,5 +113,48 @@ class TaskViewModel @Inject constructor(
 
     fun clearErrorMessage() {
         _errorMessage.value = null
+    }
+
+    fun deleteSubtask(task: TaskResponse, subtaskIndex: Int) {
+        viewModelScope.launch {
+            _isLoading.value = true
+
+            // Tạo danh sách subtask mới sau khi xóa subtask theo index
+            val updatedSubtasks = task.subTasks.toMutableList()
+            if (subtaskIndex in updatedSubtasks.indices) {
+                updatedSubtasks.removeAt(subtaskIndex)
+            }
+
+            val subTasksRequest = updatedSubtasks.map { subtaskResponse ->
+                SubTaskRequest(
+                    title = subtaskResponse.title,
+                    subTaskDes = subtaskResponse.subtaskDes
+                )
+            }
+
+            val updatedTaskRequest = TaskRequest(
+                title = task.title,
+                description = task.description,
+                subTasks = subTasksRequest,
+                taskDate = LocalDate.parse(task.taskDate),
+                taskTime = LocalTime.parse(task.taskTime),
+                type = task.type,
+                isSuccess = task.isSuccess
+            )
+
+            // Gọi updateTask trên repository với task đã bị loại subtask
+            val result = repository.updateTask(task._id, updatedTaskRequest)
+            _taskResult.value = result.map { Unit }
+
+            // Nếu update thành công, fetch lại danh sách task mới
+            result.onSuccess {
+                val getResult = repository.getTasks()
+                getResult.onSuccess { tasks ->
+                    _taskList.value = tasks
+                }
+            }
+
+            _isLoading.value = false
+        }
     }
 }
