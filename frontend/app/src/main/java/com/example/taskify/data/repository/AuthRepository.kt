@@ -22,7 +22,7 @@ class AuthRepository @Inject constructor (
                 Result.success(response.body()!!)
             } else {
                 val errorBody = response.errorBody()?.string()
-                val errorMessage = Gson().fromJson(errorBody, ErrorResponse::class.java).error
+                val errorMessage = Gson().fromJson(errorBody, ErrorResponse::class.java).message
                 Result.failure(Exception(errorMessage))
             }
         } catch (e:Exception) {
@@ -42,7 +42,7 @@ class AuthRepository @Inject constructor (
                 Result.success(body)
             } else {
                 val errorBody = response.errorBody()?.string()
-                val errorMessage = Gson().fromJson(errorBody, ErrorResponse::class.java).error
+                val errorMessage = Gson().fromJson(errorBody, ErrorResponse::class.java).message
                 Result.failure(Exception(errorMessage))
             }
         } catch (e: Exception) {

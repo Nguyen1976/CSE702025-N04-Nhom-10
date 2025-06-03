@@ -49,7 +49,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.taskify.R
 import com.example.taskify.data.viewmodel.UserViewModel
 import com.example.taskify.presentation.auth.dashboard.DashboardActivity
-import com.example.taskify.ui.viewmodels.SignOutViewModel
+import com.example.taskify.data.viewmodel.SignOutViewModel
 
 @Composable
 fun SettingScreen(

@@ -10,10 +10,10 @@ data class TaskRequest(
     val taskTime: LocalTime,
     val type: String,
     val isSuccess: Boolean,
-    val subTasks: List<SubTaskRequest>? = null
+    val subtasks: List<SubTaskRequest>? = null
 )
 
 data class SubTaskRequest (
     val title: String,
-    val subTaskDes: String
+    val subtaskDes: String
 )

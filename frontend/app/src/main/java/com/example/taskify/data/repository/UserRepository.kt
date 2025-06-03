@@ -1,13 +1,13 @@
 package com.example.taskify.data.repository
 
 import com.example.taskify.data.remote.UserApi
-import com.example.taskify.domain.model.signInModel.User
+import com.example.taskify.domain.model.userModel.UserResponse
 import javax.inject.Inject
 
 class UserRepository @Inject constructor(
     private val api: UserApi
 ) {
-    suspend fun getCurrentUser(): Result<User> {
+    suspend fun getCurrentUser(): Result<UserResponse> {
         return try {
             val response = api.getCurrentUser()
             if (response.isSuccessful) {

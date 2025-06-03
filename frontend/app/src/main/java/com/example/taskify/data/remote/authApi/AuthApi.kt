@@ -26,7 +26,7 @@ interface AuthApi {
     @POST("/api/v1/users/login")
     suspend fun signIn(@Body request: SignInRequest): Response<SignInResponse>
 
-    @POST("/api/auth/signOut")
+    @POST("/api/v1/users/logout")
     suspend fun signOut(@Body logoutRequest: LogoutRequest): Response<LogoutResponse>
 
     @POST("/api/v1/users/refresh_token")

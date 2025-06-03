@@ -61,6 +61,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.taskify.R
+import com.example.taskify.data.viewmodel.TaskViewModel
 import com.example.taskify.domain.model.taskModel.SubtaskResponse
 import com.example.taskify.domain.model.taskModel.TaskResponse
 import com.example.taskify.domain.model.themeModel.ThemeOption
@@ -97,7 +98,7 @@ class TaskEditActivity : AppCompatActivity() {
         val theme = ThemeOption.valueOf(themeName ?: ThemeOption.Teal.name)
 
         setContent {
-            val taskResult by taskViewModel.taskResult.collectAsState()
+            val updateTaskResult = taskViewModel.updateTaskResult.collectAsState()
             val context = LocalContext.current
 
             val _id by remember { mutableStateOf(initialId) }
@@ -111,16 +112,16 @@ class TaskEditActivity : AppCompatActivity() {
             val subtask: List<SubtaskResponse> = intent.getParcelableArrayListExtra("subtask") ?: emptyList()
             val isSuccess by remember { mutableStateOf(initialIsSuccess) }
 
-            LaunchedEffect(taskResult) {
-                taskResult?.let {
-                    if (it.isSuccess) {
+            LaunchedEffect(updateTaskResult.value) {
+                updateTaskResult.value?.let { result ->
+                    result.onSuccess {
                         Toast.makeText(context, "Task updated successfully", Toast.LENGTH_SHORT).show()
                         setResult(Activity.RESULT_OK)
                         finish()
-                    } else {
+                    }.onFailure {
                         Toast.makeText(context, "Failed to update task, please try again later!", Toast.LENGTH_SHORT).show()
                     }
-                    taskViewModel.resetTaskResult()
+                    taskViewModel.resetUpdateTaskResult()
                 }
             }
 
@@ -150,7 +151,7 @@ class TaskEditActivity : AppCompatActivity() {
                         taskTime = taskTime.toString(),
                         type = type,
                         isSuccess = isSuccess,
-                        subTasks = subtask
+                        subtasks = subtask
                     )
                     taskViewModel.updateTask(updatedTask)
                 }

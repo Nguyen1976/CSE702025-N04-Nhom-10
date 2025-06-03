@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.taskify.data.local.UserPreferences
 import com.example.taskify.data.repository.UserRepository
-import com.example.taskify.domain.model.signInModel.User
+import com.example.taskify.domain.model.userModel.UserResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,8 +17,8 @@ class UserViewModel @Inject constructor(
     private val userPreferences: UserPreferences
 ) : ViewModel() {
 
-    private val _userState = MutableStateFlow<User?>(null)
-    val userState: StateFlow<User?> = _userState
+    private val _userState = MutableStateFlow<UserResponse?>(null)
+    val userState: StateFlow<UserResponse?> = _userState
 
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error

@@ -131,12 +131,12 @@ fun SignUpScreen(
             Spacer(modifier = Modifier.weight(1f))
 
             // Error
-            when (signUpState) {
-                is UiState.Error -> {
-                    val errorMessage = (signUpState as UiState.Error).message
-                    Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+            LaunchedEffect(signUpState) {
+                if (signUpState is UiState.Error) {
+                    val message = (signUpState as UiState.Error).message
+                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                    viewModel.resetSignUpState()
                 }
-                else -> Unit
             }
 
             Button(

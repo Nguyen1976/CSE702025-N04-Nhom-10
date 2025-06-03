@@ -8,7 +8,7 @@ import com.example.taskify.data.remote.UserApi
 import com.example.taskify.data.remote.authApi.AuthApi
 import com.example.taskify.data.remote.authApi.AuthInterceptor
 import com.example.taskify.data.repository.UserRepository
-import com.example.taskify.presentation.tasks.TaskRepository
+import com.example.taskify.data.repository.TaskRepository
 import com.example.taskify.util.LocalDateAdapter
 import com.example.taskify.util.LocalTimeAdapter
 import com.google.gson.Gson
@@ -31,6 +31,7 @@ import javax.inject.Singleton
 object AppModule {
 
     private const val BASE_URL = "http://192.168.100.211:3000"
+//    private const val BASE_URL = "http://192.168.100.211:8080"
 
     @Provides
     @Singleton

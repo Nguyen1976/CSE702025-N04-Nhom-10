@@ -152,8 +152,8 @@ fun SignInScreen(
             }
 
             is UiState.Success -> {
-                val user = (signInState as UiState.Success).data.user
-                Toast.makeText(context, "Welcome, ${user.username}!", Toast.LENGTH_SHORT).show()
+                val response = (signInState as UiState.Success).data
+                Toast.makeText(context, "Welcome, ${response.username}!", Toast.LENGTH_SHORT).show()
 
                 LaunchedEffect(Unit) {
                     val isThemeChosen = ThemeDataStore.isThemeChosen(context)

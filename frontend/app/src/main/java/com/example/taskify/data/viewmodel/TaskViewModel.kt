@@ -1,7 +1,9 @@
-package com.example.taskify.presentation.tasks
+package com.example.taskify.data.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.taskify.data.repository.TaskRepository
 import com.example.taskify.domain.model.taskModel.SubTaskRequest
 import com.example.taskify.domain.model.taskModel.TaskRequest
 import com.example.taskify.domain.model.taskModel.TaskResponse
@@ -10,41 +12,40 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.LocalTime
-import java.time.format.DateTimeFormatter
-import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
 class TaskViewModel @Inject constructor(
     private val repository: TaskRepository
 ): ViewModel() {
+
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage = _errorMessage.asStateFlow()
-
-    // Task
-    private val _taskResult = MutableStateFlow<Result<Unit>?>(null)
-    val taskResult = _taskResult.asStateFlow()
-
-    private val _taskList = MutableStateFlow<List<com.example.taskify.domain.model.taskModel.TaskResponse>>(emptyList())
-    val taskList = _taskList.asStateFlow()
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading = _isLoading.asStateFlow()
 
-    private val _subtaskResult = MutableStateFlow<Result<Unit>?>(null)
-    val subtaskResult = _subtaskResult.asStateFlow()
-
     private val _isSubtaskLoading = MutableStateFlow(false)
     val isSubtaskLoading = _isSubtaskLoading.asStateFlow()
 
+    private val _taskList = MutableStateFlow<List<TaskResponse>>(emptyList())
+    val taskList = _taskList.asStateFlow()
+
+    private val _createTaskResult = MutableStateFlow<Result<Unit>?>(null)
+    val createTaskResult = _createTaskResult.asStateFlow()
+
+    private val _updateTaskResult = MutableStateFlow<Result<TaskResponse>?>(null)
+    val updateTaskResult = _updateTaskResult.asStateFlow()
+
+    private val _deleteTaskResult = MutableStateFlow<Result<Unit>?>(null)
+    val deleteTaskResult = _deleteTaskResult.asStateFlow()
 
     fun createTask(task: TaskRequest) {
         viewModelScope.launch {
             _isLoading.value = true
             val result = repository.createTask(task)
-            _taskResult.value = result.map { Unit }
+            _createTaskResult.value = result.map { Unit }
             _isLoading.value = false
         }
     }
@@ -55,7 +56,9 @@ class TaskViewModel @Inject constructor(
             val result = repository.getTasks()
             result.onSuccess { tasks ->
                 _taskList.value = tasks
-            }.onFailure { }
+            }.onFailure { error ->
+                _errorMessage.value = error.message
+            }
             _isLoading.value = false
         }
     }
@@ -64,31 +67,41 @@ class TaskViewModel @Inject constructor(
         viewModelScope.launch {
             _isLoading.value = true
 
-            val subTasksRequest = task.subTasks.map { subtaskResponse ->
+            val subTasksRequest = task.subtasks.map { subtaskResponse ->
                 SubTaskRequest(
                     title = subtaskResponse.title,
-                    subTaskDes = subtaskResponse.subtaskDes
+                    subtaskDes = subtaskResponse.subtaskDes
                 )
             }
 
             val taskRequest = TaskRequest(
                 title = task.title,
                 description = task.description,
-                subTasks = subTasksRequest,
+                subtasks = subTasksRequest,
                 taskDate = LocalDate.parse(task.taskDate),
                 taskTime = LocalTime.parse(task.taskTime),
                 type = task.type,
                 isSuccess = task.isSuccess
             )
 
-            val result = repository.updateTask(task._id, taskRequest)
-            _taskResult.value = result.map { Unit }
+            val updateResult = repository.updateTask(task._id, taskRequest)
+            _updateTaskResult.value = updateResult
 
-            result.onSuccess {
-                val getResult = repository.getTasks()
-                getResult.onSuccess { tasks ->
-                    _taskList.value = tasks
+            updateResult.onSuccess { updatedTask ->
+                val currentList = _taskList.value.toMutableList()
+                val index = currentList.indexOfFirst { it._id == updatedTask._id }
+                if (index != -1) {
+                    currentList[index] = updatedTask
+                    _taskList.value = currentList
+                } else {
+                    val getResult = repository.getTasks()
+                    getResult.onSuccess { tasks ->
+                        _taskList.value = tasks
+                    }
                 }
+            }.onFailure { error ->
+                Log.e("TaskViewModel", "Update task failed: ${error.message}")
+                _errorMessage.value = error.message
             }
 
             _isLoading.value = false
@@ -99,16 +112,27 @@ class TaskViewModel @Inject constructor(
         viewModelScope.launch {
             _isLoading.value = true
             val result = repository.deleteTask(taskId)
+            _deleteTaskResult.value = result
+
             result.onSuccess {
                 getTasks()
-            }.onFailure {
+            }.onFailure { error ->
+                _errorMessage.value = error.message
                 _isLoading.value = false
             }
         }
     }
 
-    fun resetTaskResult() {
-        _taskResult.value = null
+    fun resetCreateTaskResult() {
+        _createTaskResult.value = null
+    }
+
+    fun resetUpdateTaskResult() {
+        _updateTaskResult.value = null
+    }
+
+    fun resetDeleteTaskResult() {
+        _deleteTaskResult.value = null
     }
 
     fun clearErrorMessage() {
@@ -117,44 +141,42 @@ class TaskViewModel @Inject constructor(
 
     fun deleteSubtask(task: TaskResponse, subtaskIndex: Int) {
         viewModelScope.launch {
-            _isLoading.value = true
+            _isSubtaskLoading.value = true
 
-            // Tạo danh sách subtask mới sau khi xóa subtask theo index
-            val updatedSubtasks = task.subTasks.toMutableList()
-            if (subtaskIndex in updatedSubtasks.indices) {
-                updatedSubtasks.removeAt(subtaskIndex)
+            val updatedSubtasks = task.subtasks.toMutableList().apply {
+                if (subtaskIndex in indices) removeAt(subtaskIndex)
             }
 
             val subTasksRequest = updatedSubtasks.map { subtaskResponse ->
                 SubTaskRequest(
                     title = subtaskResponse.title,
-                    subTaskDes = subtaskResponse.subtaskDes
+                    subtaskDes = subtaskResponse.subtaskDes
                 )
             }
 
             val updatedTaskRequest = TaskRequest(
                 title = task.title,
                 description = task.description,
-                subTasks = subTasksRequest,
+                subtasks = subTasksRequest,
                 taskDate = LocalDate.parse(task.taskDate),
                 taskTime = LocalTime.parse(task.taskTime),
                 type = task.type,
                 isSuccess = task.isSuccess
             )
 
-            // Gọi updateTask trên repository với task đã bị loại subtask
             val result = repository.updateTask(task._id, updatedTaskRequest)
-            _taskResult.value = result.map { Unit }
+            _updateTaskResult.value = result
 
-            // Nếu update thành công, fetch lại danh sách task mới
             result.onSuccess {
                 val getResult = repository.getTasks()
                 getResult.onSuccess { tasks ->
                     _taskList.value = tasks
                 }
+            }.onFailure { error ->
+                _errorMessage.value = error.message
             }
 
-            _isLoading.value = false
+            _isSubtaskLoading.value = false
         }
     }
 }

@@ -16,6 +16,7 @@ class AuthInterceptor @Inject constructor(
 
     private val retrofitWithoutInterceptor = Retrofit.Builder()
         .baseUrl("http://192.168.100.211:3000")
+//        .baseUrl("http://192.168.100.211:8080")
         .addConverterFactory(GsonConverterFactory.create())
         .client(OkHttpClient.Builder().build())
         .build()
@@ -25,7 +26,9 @@ class AuthInterceptor @Inject constructor(
     override fun intercept(chain: Interceptor.Chain): Response {
         var request = chain.request()
         val accessToken = runBlocking { tokenManager.getAccessToken() }
-        Log.d("AccessToken", "$accessToken")
+        val refreshToken = runBlocking { tokenManager.getRefreshToken() }
+        Log.d("Token", "Access token: $accessToken")
+        Log.d("Token", "Refresh token: $refreshToken")
 
         if (!accessToken.isNullOrEmpty()) {
             request = request.newBuilder()
@@ -35,7 +38,7 @@ class AuthInterceptor @Inject constructor(
 
         val response = chain.proceed(request)
 
-        if (response.code == 401) {
+        if (response.code == 401 || response.code == 410) {
             response.close()
 
             val refreshToken = runBlocking { tokenManager.getRefreshToken() } ?: return response

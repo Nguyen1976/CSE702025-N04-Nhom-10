@@ -1,4 +1,4 @@
-package com.example.taskify.ui.viewmodels
+package com.example.taskify.data.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -48,7 +48,8 @@ class SignOutViewModel @Inject constructor(
                 if (response.isSuccessful) {
                     val logoutResponse = response.body()
                     clearLocalData()
-                    _logoutState.value = LogoutState.Success(logoutResponse?.message ?: "Log out successful")
+                    _logoutState.value =
+                        LogoutState.Success(logoutResponse?.message ?: "Log out successful")
                 } else {
                     _logoutState.value = LogoutState.Error("Logout failed: ${response.code()}")
                 }
