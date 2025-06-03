@@ -67,8 +67,74 @@
     "updatedAt": "2025-05-21T09:23:22.385Z"
 }
 ```
+### POST /api/v1/users/logout
 
+**Mô tả:** Đăng xuất
+
+- Headers:
+
+```makefile
+Authorization: Bearer <token>
+```
+
+- Response thành công (200 OK):
+
+```json
+{
+    "message": "Logout successfully!"
+}
 ---
+```
+### GET /api/v1/users/
+
+**Mô tả:** Lấy thông tin người dùng
+
+- Headers:
+
+```makefile
+Authorization: Bearer <token>
+```
+
+- Response thành công (200 OK):
+
+```json
+{
+    "_id": "682f2dcc3f4735b8a8910715",
+    "email": "test10@example.com",
+    "username": "nguyen",
+    "createdAt": "2025-05-22T13:59:40.984Z",
+    "updatedAt": "2025-05-31T06:30:39.278Z"
+}
+---
+```
+### POST /api/v1/users/
+
+**Mô tả:**  Cập nhật thông tin user (username, email, password)
+
+- Headers:
+
+```makefile
+Authorization: Bearer <token>
+```
+- Request Body:
+
+```json
+{
+  "username": "newusername",
+  "email": "newemail@example.com",
+  "password": "newpassword123"
+}
+```
+
+- Response thành công (200 OK):
+
+```json
+{
+  "id": "user123",
+  "username": "newusername",
+  "email": "newemail@example.com"
+}
+```
 
 ### GET /api/v1/users/refresh_token
 
@@ -111,51 +177,16 @@ Authorization: Bearer <token>
 ```json
 [
     {
-        "_id": "68304f091cfe257ad97f98ed",
+        "_id": "683f0b69bef1c34028cdf037",
         "userId": "682f2dcc3f4735b8a8910715",
-        "title": "Task mới sửa",
+        "title": "Task mới ",
         "description": "Mô tả task mới",
-        "taskDate": "2025-05-16",
+        "taskDate": "2025-06-07",
         "taskTime": "19:30:00",
         "type": "Meeting",
         "isSuccess": false,
-        "subtasks": [
-            {
-                "title": "Subtask sửa",
-                "subtaskDes": "Mô tả subtask sửa",
-                "_id": "683050fb1cfe257ad97f98f4"
-            },
-            {
-                "title": "Subtask mới",
-                "subtaskDes": "Mô tả subtask mới",
-                "_id": "683050fb1cfe257ad97f98f5"
-            }
-        ],
-        "createAt": "2025-05-23T10:33:45.910Z",
-        "__v": 0
-    },
-    {
-        "_id": "6832a1f1727015191954a61b",
-        "userId": "682f2dcc3f4735b8a8910715",
-        "title": "Task mới sửa",
-        "description": "Mô tả task mới",
-        "taskDate": "2025-05-16",
-        "taskTime": "19:30:00",
-        "type": "Meeting",
-        "isSuccess": true,
-        "subtasks": [
-            {
-                "title": "Subtask mới",
-                "subtaskDes": "Mô tả subtask sửa",
-                "_id": "6832a2b2727015191954a622"
-            },
-            {
-                "title": "Subtask mới",
-                "subtaskDes": "Mô tả subtask mới",
-                "_id": "6832a2b2727015191954a623"
-            }
-        ],
-        "createAt": "2025-05-25T04:52:01.355Z",
+        "subtasks": [],
+        "createAt": "2025-06-03T14:49:13.558Z",
         "__v": 0
     }
 ]
