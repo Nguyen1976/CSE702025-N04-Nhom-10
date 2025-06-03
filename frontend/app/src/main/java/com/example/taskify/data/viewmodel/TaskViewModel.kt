@@ -1,5 +1,6 @@
 package com.example.taskify.data.viewmodel
 
+import kotlin.Result
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -18,7 +19,7 @@ import javax.inject.Inject
 @HiltViewModel
 class TaskViewModel @Inject constructor(
     private val repository: TaskRepository
-): ViewModel() {
+) : ViewModel() {
 
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage = _errorMessage.asStateFlow()
@@ -40,6 +41,9 @@ class TaskViewModel @Inject constructor(
 
     private val _deleteTaskResult = MutableStateFlow<Result<Unit>?>(null)
     val deleteTaskResult = _deleteTaskResult.asStateFlow()
+
+    private val _isDragDropUpdate = MutableStateFlow(false)
+    val isDragDropUpdate = _isDragDropUpdate.asStateFlow()
 
     fun createTask(task: TaskRequest) {
         viewModelScope.launch {
@@ -85,6 +89,55 @@ class TaskViewModel @Inject constructor(
             )
 
             val updateResult = repository.updateTask(task._id, taskRequest)
+            _updateTaskResult.value = updateResult
+
+            updateResult.onSuccess { updatedTask ->
+                val currentList = _taskList.value.toMutableList()
+                val index = currentList.indexOfFirst { it._id == updatedTask._id }
+                if (index != -1) {
+                    currentList[index] = updatedTask
+                    _taskList.value = currentList
+                } else {
+                    val getResult = repository.getTasks()
+                    getResult.onSuccess { tasks ->
+                        _taskList.value = tasks
+                    }
+                }
+            }.onFailure { error ->
+                Log.e("TaskViewModel", "Update task failed: ${error.message}")
+                _errorMessage.value = error.message
+            }
+
+            _isLoading.value = false
+        }
+    }
+
+    fun updateTaskFromDragDrop(task: TaskResponse) {
+        viewModelScope.launch {
+            _isDragDropUpdate.value = true
+            _isLoading.value = true
+
+            val subTasksRequest = task.subtasks.map { subtaskResponse ->
+                SubTaskRequest(
+                    title = subtaskResponse.title,
+                    subtaskDes = subtaskResponse.subtaskDes
+                )
+            }
+
+            val taskRequest = TaskRequest(
+                title = task.title,
+                description = task.description,
+                subtasks = subTasksRequest,
+                taskDate = LocalDate.parse(task.taskDate),
+                taskTime = LocalTime.parse(task.taskTime),
+                type = task.type,
+                isSuccess = task.isSuccess
+            )
+
+            val updateResult = repository.updateTask(task._id, taskRequest)
+
+            _isDragDropUpdate.value = false
+
             _updateTaskResult.value = updateResult
 
             updateResult.onSuccess { updatedTask ->

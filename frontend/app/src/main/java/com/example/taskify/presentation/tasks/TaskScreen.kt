@@ -10,6 +10,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
+import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,8 +24,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
@@ -35,7 +39,6 @@ import androidx.compose.material.icons.filled.DeleteSweep
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MoreHoriz
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.SportsEsports
 import androidx.compose.material.icons.filled.Work
 import androidx.compose.material3.AlertDialog
@@ -48,7 +51,6 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -59,12 +61,16 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.consumeAllChanges
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -73,12 +79,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.taskify.R
+import com.example.taskify.components.dragDrop.rememberDragDropListState
 import com.example.taskify.data.viewmodel.TaskViewModel
 import com.example.taskify.domain.model.taskModel.SubtaskResponse
 import com.example.taskify.domain.model.taskModel.TaskResponse
 import com.example.taskify.domain.model.themeModel.ThemeOption
 import com.example.taskify.presentation.main.toColor
 import com.example.taskify.ui.theme.TaskifyTheme
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -99,6 +107,7 @@ fun TasksScreen(
     val errorMessage by taskViewModel.errorMessage.collectAsState()
     val updateTaskResult = taskViewModel.updateTaskResult.collectAsState()
     val deleteTaskResult = taskViewModel.deleteTaskResult.collectAsState()
+    val isDragDropUpdate by taskViewModel.isDragDropUpdate.collectAsState()
 
     val editTaskLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
@@ -128,12 +137,15 @@ fun TasksScreen(
         }
     }
 
-    LaunchedEffect(updateTaskResult.value) {
-        updateTaskResult.value?.let { result ->
-            result.onSuccess {
-                Toast.makeText(context, "Task updated successfully", Toast.LENGTH_SHORT).show()
-            }.onFailure {
-                Toast.makeText(context, "Failed to update task, please try again later!", Toast.LENGTH_SHORT).show()
+    LaunchedEffect(updateTaskResult.value, isDragDropUpdate) {
+        val result = updateTaskResult.value
+        if (result != null) {
+            if (!isDragDropUpdate) {
+                result.onSuccess { updatedTask ->
+                    Toast.makeText(context, "Task updated successfully", Toast.LENGTH_SHORT).show()
+                }.onFailure { error ->
+                    Toast.makeText(context, "Failed to update task: ${error.message}", Toast.LENGTH_SHORT).show()
+                }
             }
             taskViewModel.resetUpdateTaskResult()
         }
@@ -242,7 +254,20 @@ fun TasksScreen(
                     },
                     onDismissRequest = {
                         showBottomSheet = false
-                    }
+                    },
+                    onMove = { fromIndex, toIndex ->
+                        selectedTask?.let { task ->
+                            val updatedSubtasks = (task.subtasks ?: emptyList()).toMutableList()
+                            if (fromIndex in updatedSubtasks.indices && toIndex in updatedSubtasks.indices) {
+                                val item = updatedSubtasks.removeAt(fromIndex)
+                                updatedSubtasks.add(toIndex, item)
+                                val updatedTask = task.copy(subtasks = updatedSubtasks)
+                                selectedTask = updatedTask
+                                taskViewModel.updateTaskFromDragDrop(updatedTask)
+                            }
+                        }
+                    },
+                    lazyListState = rememberLazyListState()
                 )
             }
         }
@@ -518,6 +543,8 @@ fun TaskBottomSheet(
     onDeleteSubtask: (index: Int) -> Unit,
     subtasks: List<SubtaskResponse> = emptyList(),
     onDismissRequest: () -> Unit,
+    onMove: (Int, Int) -> Unit,
+    lazyListState: LazyListState
 ) {
 
     val sheetState = rememberModalBottomSheetState(
@@ -538,6 +565,8 @@ fun TaskBottomSheet(
             onDeleteSubtask = onDeleteSubtask,
             onDismissRequest = onDismissRequest,
             subtasks = subtasks,
+            onMove = onMove,
+            lazyListState = lazyListState
         )
     }
 }
@@ -551,17 +580,22 @@ fun TaskBottomSheetContent(
     onDeleteSubtask: (index: Int) -> Unit,
     onDismissRequest: () -> Unit,
     subtasks: List<SubtaskResponse>,
+    onMove: (Int, Int) -> Unit,
+    lazyListState: LazyListState
 ) {
     val color = theme.toColor()
     val backgroundColor = theme.toColor().copy(alpha = 0.08f)
     val formattedTime = LocalTime.parse(task.taskTime).format(DateTimeFormatter.ofPattern("HH:mm"))
-
     var showAddDialog by remember { mutableStateOf(false) }
-    var showEditDialog by remember { mutableStateOf(false) }
-    var editingSubtask by remember { mutableStateOf<SubtaskResponse?>(null) }
 
     var newTitle by remember { mutableStateOf("") }
     var newDescription by remember { mutableStateOf("") }
+
+    val scope = rememberCoroutineScope()
+    val dragDropListState = rememberDragDropListState(
+        onMove = onMove,
+        lazyListState = lazyListState
+    )
 
     fun formatTaskDate(dateString: String?): String {
         return try {
@@ -714,15 +748,46 @@ fun TaskBottomSheetContent(
             Spacer(modifier = Modifier.weight(1f))
         } else {
             LazyColumn(
+                state = dragDropListState.lazyListState,
                 modifier = Modifier
+                    .pointerInput(Unit) {
+                        detectDragGesturesAfterLongPress(
+                            onDragStart = { offset -> dragDropListState.onDragStart(offset) },
+                            onDrag = { change, offset ->
+                                change.consumeAllChanges()
+                                dragDropListState.onDrag(offset)
+
+                                val scrollAmount = dragDropListState.checkForOverScroll()
+                                if (scrollAmount != 0f) {
+                                    dragDropListState.overscrollJob?.cancel()
+                                    dragDropListState.overscrollJob = scope.launch {
+                                        dragDropListState.lazyListState.scrollBy(scrollAmount)
+                                    }
+                                }
+                            },
+                            onDragEnd = { dragDropListState.onDragInterrupted() },
+                            onDragCancel = { dragDropListState.onDragInterrupted() }
+                        )
+                    }
                     .weight(1f)
                     .fillMaxWidth()
             ) {
                 itemsIndexed(subtasks) {index, subtask ->
-                    SubTaskItem(
-                        subtask = subtask,
-                        onDeleteSubtask = { onDeleteSubtask(index) }
-                    )
+                    val isDragging = index == dragDropListState.currentIndexOfDraggedItem
+                    val translationY = if (isDragging) dragDropListState.elementDisplacement ?: 0f else 0f
+                    val bgColor = if (isDragging) Color(0xFFF0F0F0) else Color.White
+
+                    Column(
+                        modifier = Modifier
+                            .graphicsLayer { this.translationY = translationY }
+                            .background(bgColor, shape = RoundedCornerShape(8.dp))
+                            .fillMaxWidth()
+                    ) {
+                        SubTaskItem(
+                            subtask = subtask,
+                            onDeleteSubtask = { onDeleteSubtask(index) }
+                        )
+                    }
                 }
             }
         }
