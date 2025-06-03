@@ -1,11 +1,14 @@
 require('module-alias/register')
 const express = require('express')
+const cors = require('cors');
 const mongoose = require('mongoose')
 const env = require('~/config/environtment')
 const APIs_v1 = require('~/routes/v1/index')
 const errorHandlingMiddleware = require('~/middlewares/errorHandlingMiddleware.js')
 
 const app = express()
+
+app.use(cors());
 
 app.use(express.json())
 
