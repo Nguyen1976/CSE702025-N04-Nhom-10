@@ -66,13 +66,12 @@ import com.example.taskify.presentation.base.BaseActivity
 import com.example.taskify.presentation.calendar.CalendarScreen
 import com.example.taskify.presentation.filter.FilterScreen
 import com.example.taskify.presentation.settings.SettingScreen
-import com.example.taskify.presentation.tasks.TaskViewModel
+import com.example.taskify.data.viewmodel.TaskViewModel
 import com.example.taskify.presentation.tasks.TasksScreen
 import com.example.taskify.presentation.tasktheme.ThemeSectionActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -113,7 +112,7 @@ class MainActivity : BaseActivity() {
                 val pagerState = rememberPagerState { tabs.size }
 
                 val context = LocalContext.current
-                val taskResult by taskViewModel.taskResult.collectAsState()
+                val createTaskResult = taskViewModel.createTaskResult.collectAsState()
                 val isLoading by taskViewModel.isLoading.collectAsState()
 
                 if (isLoading) {
@@ -127,14 +126,15 @@ class MainActivity : BaseActivity() {
                     }
                 }
 
-                LaunchedEffect(taskResult) {
-                    taskResult?.let { result ->
+                LaunchedEffect(createTaskResult.value) {
+                    createTaskResult.value?.let { result ->
                         result.onSuccess {
                             Toast.makeText(context, "Task created successfully!", Toast.LENGTH_SHORT).show()
+                            taskViewModel.resetCreateTaskResult()
                         }.onFailure {
-                            Toast.makeText(context, "An error occurred while creating the task, please try again!", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Error occurred while creating the task, please try again!", Toast.LENGTH_SHORT).show()
+                            taskViewModel.resetCreateTaskResult()
                         }
-                        taskViewModel.resetTaskResult()
                     }
                 }
 
@@ -183,8 +183,9 @@ class MainActivity : BaseActivity() {
 
                     val context = LocalContext.current
 
-                    LaunchedEffect(taskResult) {
-                        if (taskResult?.isSuccess == true) {
+                    LaunchedEffect(createTaskResult.value) {
+                        val result = createTaskResult.value
+                        if (result?.isSuccess == true) {
                             showInputPanel.value = false
                             title = ""
                             description = ""
@@ -192,7 +193,7 @@ class MainActivity : BaseActivity() {
                             taskTime = null
                             selectedType = null
                             isLoadingLocal = false
-                        } else if (taskResult?.isFailure == true) {
+                        } else if (result?.isFailure == true) {
                             isLoadingLocal = false
                         }
                     }

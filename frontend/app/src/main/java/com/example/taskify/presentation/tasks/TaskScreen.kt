@@ -1,10 +1,14 @@
 package com.example.taskify.presentation.tasks
 
+import android.app.Activity
 import android.content.Intent
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,13 +25,19 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AutoStories
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.DeleteSweep
+import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.SportsEsports
+import androidx.compose.material.icons.filled.Work
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -38,8 +48,10 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -52,6 +64,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -60,6 +73,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.taskify.R
+import com.example.taskify.data.viewmodel.TaskViewModel
 import com.example.taskify.domain.model.taskModel.SubtaskResponse
 import com.example.taskify.domain.model.taskModel.TaskResponse
 import com.example.taskify.domain.model.themeModel.ThemeOption
@@ -78,11 +92,21 @@ fun TasksScreen(
     val color = theme.toColor()
 
     val tasks by taskViewModel.taskList.collectAsState()
-    val isLoading by taskViewModel.isLoading.collectAsState() // handle
+    val isLoading by taskViewModel.isLoading.collectAsState()
     val isSubtaskLoading by taskViewModel.isSubtaskLoading.collectAsState()
-
     val context = LocalContext.current
+
     val errorMessage by taskViewModel.errorMessage.collectAsState()
+    val updateTaskResult = taskViewModel.updateTaskResult.collectAsState()
+    val deleteTaskResult = taskViewModel.deleteTaskResult.collectAsState()
+
+    val editTaskLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            taskViewModel.getTasks()
+        }
+    }
 
     var selectedTask by remember { mutableStateOf<TaskResponse?>(null) }
     var showBottomSheet by remember { mutableStateOf(false) }
@@ -104,9 +128,29 @@ fun TasksScreen(
         }
     }
 
-    Box(
-        modifier = Modifier.fillMaxSize()
-    ) {
+    LaunchedEffect(updateTaskResult.value) {
+        updateTaskResult.value?.let { result ->
+            result.onSuccess {
+                Toast.makeText(context, "Task updated successfully", Toast.LENGTH_SHORT).show()
+            }.onFailure {
+                Toast.makeText(context, "Failed to update task, please try again later!", Toast.LENGTH_SHORT).show()
+            }
+            taskViewModel.resetUpdateTaskResult()
+        }
+    }
+
+    LaunchedEffect(deleteTaskResult.value) {
+        deleteTaskResult.value?.let { result ->
+            result.onSuccess {
+                Toast.makeText(context, "Task deleted successfully", Toast.LENGTH_SHORT).show()
+            }.onFailure {
+                Toast.makeText(context, "Failed to delete task, please try again later!", Toast.LENGTH_SHORT).show()
+            }
+            taskViewModel.resetUpdateTaskResult()
+        }
+    }
+
+    Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -123,87 +167,88 @@ fun TasksScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            if (isLoading) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator(color = color)
-                }
-            } else if (tasks.isEmpty()) {
-                Text(
-                    "No tasks yet!!!",
-                    color = Color(0xFF767E8C),
-                    fontSize = 20.sp
-                )
-            } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    items(tasks, key = { it._id }) { task ->
-                        TaskCard(
-                            theme = theme,
-                            task = task,
-                            onDeleteTask = {
-                                taskViewModel.deleteTask(task._id)
-                            },
-                            onDetailTask = {
-                                selectedTask = task
-                                showBottomSheet = true
-                            }
-                        )
+            when {
+                isLoading -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(color = color)
                     }
                 }
-
-                if (showBottomSheet && selectedTask != null) {
-                    TaskBottomSheet(
-                        task = selectedTask!!,
-                        theme = theme,
-                        subtasks = selectedTask!!.subTasks ?: emptyList(),
-                        onEditTask = {
-                            val intent = Intent(context, TaskEditActivity::class.java).apply {
-                                putExtra("title", selectedTask!!.title)
-                                putExtra("description", selectedTask!!.description)
-                                putExtra("taskDate", selectedTask!!.taskDate.toString())
-                                putExtra("taskTime", selectedTask!!.taskTime.toString())
-                                putExtra("type", selectedTask!!.type)
-                            }
-                            context.startActivity(intent)
-                        },
-                        onUpdateTask = { taskViewModel.updateTask(selectedTask!!) },
-                        onDeleteSubtask = { index ->
-                            selectedTask?.let { currentTask ->
-                                val updatedSubtasks = currentTask.subTasks.toMutableList()
-                                if (index in updatedSubtasks.indices) {
-                                    updatedSubtasks.removeAt(index)
-                                    selectedTask = currentTask.copy(subTasks = updatedSubtasks)
-                                    taskViewModel.updateTask(selectedTask!!)
-                                }
-                            }},
-                        onEditSubtask = { /** composable subtask input panel **/ },
-                        onDismissRequest = {
-                            showBottomSheet = false
-                            selectedTask = null
-                        }
+                tasks.isEmpty() -> {
+                    Text(
+                        "No tasks yet!!!",
+                        color = Color(0xFF767E8C),
+                        fontSize = 20.sp
                     )
+                }
+                else -> {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        items(tasks, key = { it._id }) { task ->
+                            TaskCard(
+                                theme = theme,
+                                task = task,
+                                onDeleteTask = { taskViewModel.deleteTask(task._id) },
+                                onDetailTask = {
+                                    selectedTask = task
+                                    showBottomSheet = true
+                                }
+                            )
+                        }
+                    }
                 }
             }
 
+            if (showBottomSheet && selectedTask != null) {
+                TaskBottomSheet(
+                    task = selectedTask!!,
+                    theme = theme,
+                    subtasks = selectedTask!!.subtasks ?: emptyList(),
+                    onEditTask = {
+                        selectedTask?.let { task ->
+                            val intent = Intent(context, TaskEditActivity::class.java).apply {
+                                putExtra("_id", task._id)
+                                putExtra("userId", task.userId)
+                                putExtra("title", task.title)
+                                putExtra("description", task.description)
+                                putExtra("createAt", task.createAt)
+                                putExtra("taskDate", task.taskDate.toString())
+                                putExtra("taskTime", task.taskTime.toString())
+                                putExtra("type", task.type)
+                                putExtra("isSuccess", task.isSuccess)
+                                val subtaskList = task.subtasks ?: emptyList()
+                                putParcelableArrayListExtra("subtask", ArrayList(subtaskList))
+                                putExtra("theme", theme.name)
+                            }
+                            editTaskLauncher.launch(intent)
+                        }
+                    },
+                    onUpdateTask = { newSubtask: SubtaskResponse ->
+                        selectedTask?.let { currentTask ->
+                            val updatedSubtasks = (currentTask.subtasks ?: emptyList()).toMutableList()
+                            updatedSubtasks.add(newSubtask)
+                            val updatedTask = currentTask.copy(subtasks = updatedSubtasks)
+                            selectedTask = updatedTask
+                            taskViewModel.updateTask(updatedTask)
+                        }
+                    },
+                    onDeleteSubtask = { index ->
+                        selectedTask?.let { task ->
+                            taskViewModel.deleteSubtask(task, index)
+                        }
+                    },
+                    onDismissRequest = {
+                        showBottomSheet = false
+                    }
+                )
+            }
         }
     }
 
     LoadingDialog(theme = theme, show = isSubtaskLoading)
-
-    if (isLoading) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.4f)),
-            contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator(color = color)
-        }
-    }
 }
 
 @Composable
@@ -233,6 +278,14 @@ fun TaskCard(
         }
     }
 
+    val icon: ImageVector = when (task.type) {
+        "Meeting" -> Icons.Default.Groups
+        "Entertainment" -> Icons.Default.SportsEsports
+        "Study" -> Icons.Default.AutoStories
+        "Work" -> Icons.Default.Work
+        else -> Icons.Default.Info
+    }
+
     Card(
         shape = RoundedCornerShape(8.dp),
         modifier = Modifier
@@ -256,14 +309,19 @@ fun TaskCard(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 12.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    Icon(imageVector = icon, contentDescription = null, tint = Color.White)
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
                     Text(
                         text = task.type,
                         fontSize = 15.sp,
                         color = Color.White
                     )
+                    
+                    Spacer(modifier = Modifier.weight(1f))
 
                     Box {
                         Icon(
@@ -344,25 +402,30 @@ fun TaskCard(
 
                 Spacer(modifier = Modifier.width(12.dp))
 
+                // Giới hạn title bằng weight
                 Text(
-                    text = task.title,
+                    text = task.title ?: "",
                     fontWeight = FontWeight.Medium,
                     fontSize = 16.sp,
-                    color = Color.Black
+                    color = Color.Black,
+                    maxLines = 1,
+                    modifier = Modifier.weight(1f) // 👈 Chìa khóa nằm ở đây
                 )
 
-                Spacer(modifier = Modifier.weight(1f))
-                Log.d("DEBUGTASK", "Task: ${task}")
+                // Icon nằm cố định bên phải
+                Spacer(modifier = Modifier.width(12.dp))
 
                 Image(
                     painter = painterResource(id = R.drawable.ic_complete),
                     contentDescription = null,
                     colorFilter = if (task.isSuccess)
                         ColorFilter.tint(color)
-                    else ColorFilter.tint(Color(0xFFA0AAB8)),
+                    else
+                        ColorFilter.tint(Color(0xFFA0AAB8)),
                     modifier = Modifier.size(24.dp)
                 )
             }
+
 
             Box(
                 Modifier
@@ -405,7 +468,7 @@ fun TaskCard(
                 Spacer(modifier = Modifier.width(4.dp))
 
                 Text(
-                    text = (task.subTasks?.size ?: 0).toString(),
+                    text = (task.subtasks?.size ?: 0).toString(),
                     fontSize = 14.sp,
                     color = Color(0xFF767E8C)
                 )
@@ -451,11 +514,10 @@ fun TaskBottomSheet(
     task: TaskResponse,
     theme: ThemeOption,
     onEditTask: () -> Unit,
-    onUpdateTask: () -> Unit,
+    onUpdateTask: (SubtaskResponse) -> Unit,
     onDeleteSubtask: (index: Int) -> Unit,
-    onEditSubtask: () -> Unit,
     subtasks: List<SubtaskResponse> = emptyList(),
-    onDismissRequest: () -> Unit
+    onDismissRequest: () -> Unit,
 ) {
 
     val sheetState = rememberModalBottomSheetState(
@@ -474,9 +536,8 @@ fun TaskBottomSheet(
             onEditTask = onEditTask,
             onUpdateTask = onUpdateTask,
             onDeleteSubtask = onDeleteSubtask,
-            onEditSubtask = onEditSubtask,
             onDismissRequest = onDismissRequest,
-            subtasks = subtasks
+            subtasks = subtasks,
         )
     }
 }
@@ -486,15 +547,21 @@ fun TaskBottomSheetContent(
     task: TaskResponse,
     theme: ThemeOption,
     onEditTask: () -> Unit,
-    onUpdateTask: () -> Unit,
+    onUpdateTask: (SubtaskResponse) -> Unit,
     onDeleteSubtask: (index: Int) -> Unit,
-    onEditSubtask: () -> Unit,
     onDismissRequest: () -> Unit,
-    subtasks: List<SubtaskResponse>
+    subtasks: List<SubtaskResponse>,
 ) {
     val color = theme.toColor()
     val backgroundColor = theme.toColor().copy(alpha = 0.08f)
     val formattedTime = LocalTime.parse(task.taskTime).format(DateTimeFormatter.ofPattern("HH:mm"))
+
+    var showAddDialog by remember { mutableStateOf(false) }
+    var showEditDialog by remember { mutableStateOf(false) }
+    var editingSubtask by remember { mutableStateOf<SubtaskResponse?>(null) }
+
+    var newTitle by remember { mutableStateOf("") }
+    var newDescription by remember { mutableStateOf("") }
 
     fun formatTaskDate(dateString: String?): String {
         return try {
@@ -555,7 +622,7 @@ fun TaskBottomSheetContent(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    text = task.title,
+                    text = task.title ?: "",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Medium,
                     color = Color.Black
@@ -564,7 +631,7 @@ fun TaskBottomSheetContent(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
-                    text = task.description,
+                    text = task.description ?: "",
                     fontSize = 14.sp,
                     color = Color(0xFF767E8C)
                 )
@@ -654,8 +721,7 @@ fun TaskBottomSheetContent(
                 itemsIndexed(subtasks) {index, subtask ->
                     SubTaskItem(
                         subtask = subtask,
-                        onDeleteSubtask = { onDeleteSubtask(index) },
-                        onEditSubtask = { onEditSubtask() }
+                        onDeleteSubtask = { onDeleteSubtask(index) }
                     )
                 }
             }
@@ -664,7 +730,7 @@ fun TaskBottomSheetContent(
         Spacer(modifier = Modifier.height(20.dp))
 
         Button(
-            onClick = {},
+            onClick = { showAddDialog = true },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),
@@ -695,6 +761,71 @@ fun TaskBottomSheetContent(
             }
         }
 
+        if (showAddDialog) {
+            AlertDialog(
+                onDismissRequest = { showAddDialog = false },
+                title = { Text("Add New Sub-task", fontSize = 18.sp, color = color) },
+                text = {
+                    Column {
+                        BasicTextField(
+                            value = newTitle,
+                            onValueChange = { newTitle = it },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .border(1.dp, Color.Gray, RoundedCornerShape(4.dp))
+                                .padding(8.dp),
+                            singleLine = true,
+                            decorationBox = { innerTextField ->
+                                if (newTitle.isEmpty()) Text("Title", color = Color.Gray)
+                                innerTextField()
+                            }
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        BasicTextField(
+                            value = newDescription,
+                            onValueChange = { newDescription = it },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(100.dp)
+                                .border(1.dp, Color.Gray, RoundedCornerShape(4.dp))
+                                .padding(8.dp),
+                            decorationBox = { innerTextField ->
+                                if (newDescription.isEmpty()) Text("Description", color = Color.Gray)
+                                innerTextField()
+                            }
+                        )
+                    }
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            val newSubtask = SubtaskResponse(
+                                title = newTitle,
+                                subtaskDes = newDescription
+                            )
+                            onUpdateTask(newSubtask)
+                            showAddDialog = false
+                            newTitle = ""
+                            newDescription = ""
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = color
+                        ),
+                        shape = RoundedCornerShape(10.dp),
+                        enabled = newTitle.isNotBlank() && newDescription.isNotBlank()
+                    ) {
+                        Text("OK")
+                    }
+                },
+                dismissButton = {
+                    TextButton(
+                        onClick = { showAddDialog = false }
+                    ) {
+                        Text("Cancel", color = color)
+                    }
+                }
+            )
+        }
         Spacer(modifier = Modifier.height(20.dp))
     }
 }
@@ -703,7 +834,6 @@ fun TaskBottomSheetContent(
 fun SubTaskItem(
     subtask: SubtaskResponse,
     onDeleteSubtask: () -> Unit,
-    onEditSubtask: () -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
 
@@ -744,67 +874,13 @@ fun SubTaskItem(
                     fontWeight = FontWeight.Medium
                 )
 
-                Box {
-                    Icon(
-                        Icons.Filled.MoreVert,
-                        contentDescription = null,
-                        tint = Color.Black.copy(0.8f),
-                        modifier = Modifier
-                            .size(20.dp)
-                            .clickable {
-                                expanded = true
-                            }
-                    )
-                    DropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false }
-                    ) {
-                        DropdownMenuItem(
-                            text = {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(
-                                        Icons.Default.Delete,
-                                        contentDescription = null,
-                                        tint = Color.Black,
-                                        modifier = Modifier
-                                            .size(28.dp)
-                                            .padding(end = 8.dp)
-                                    )
-                                    Text(
-                                        "Delete Sub-task",
-                                        color = Color.Black
-                                    )
-                                }
-                            },
-                            onClick = {
-                                onDeleteSubtask()
-                                expanded = false
-                            }
-                        )
-                        DropdownMenuItem(
-                            text = {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(
-                                        Icons.Default.Info,
-                                        contentDescription = null,
-                                        tint = Color.Black,
-                                        modifier = Modifier
-                                            .size(28.dp)
-                                            .padding(end = 8.dp)
-                                    )
-                                    Text(
-                                        "Edit Sub-task",
-                                        color = Color.Black
-                                    )
-                                }
-                            },
-                            onClick = {
-                                onEditSubtask()
-                                expanded = false
-                            }
-                        )
-                    }
-                }
+                Icon(
+                    Icons.Default.DeleteSweep,
+                    contentDescription = null,
+                    tint = Color(0xFFFF3333),
+                    modifier = Modifier
+                        .clickable { onDeleteSubtask() }
+                )
             }
 
             Spacer(modifier = Modifier.height(4.dp))
@@ -821,52 +897,12 @@ fun SubTaskItem(
 
 @Preview(showBackground = true)
 @Composable
-private fun TaskBottomSheetPreview() {
-    val task = TaskResponse(
-        _id = "1",
-        userId = "user123",
-        title = "Play video games tonight",
-        description = "Play valorant with friends Play valorant with friends Play valorant with friends",
-        createAt = "2025-05-25 19:30:00",
-        taskDate = "2025-05-25",
-        taskTime = "20:30:00",
-        type = "Entertainment",
-        isSuccess = false,
-        subTasks = listOf(
-            SubtaskResponse(
-                title = "3 ranks",
-                subtaskDes = "Play valorant with friends Play valorant with friends Play valorant with friends"
-            ),
-            SubtaskResponse(title = "2 ranks", subtaskDes = "Play yoru")
-        )
-    )
-
-    val theme = ThemeOption.Teal
-
-    TaskBottomSheetContent(
-        task = task,
-        theme = theme,
-        onUpdateTask = {},
-        onEditTask = {},
-        onDeleteSubtask = {},
-        onEditSubtask = {},
-        onDismissRequest = {},
-        subtasks = listOf(
-            SubtaskResponse(title = "3 ranks", subtaskDes = "Play omen"),
-            SubtaskResponse(title = "2 ranks", subtaskDes = "Play yoru")
-        )
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
 private fun SubtaskPreview() {
     TaskifyTheme {
         SubTaskItem(
             subtask = SubtaskResponse(title = "3 ranks", subtaskDes = "Play valorant with " +
                     "friends Play valorant with friends Play valorant with friends"),
             onDeleteSubtask = {},
-            onEditSubtask = {}
         )
     }
 }

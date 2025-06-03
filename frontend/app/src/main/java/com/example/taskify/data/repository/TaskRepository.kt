@@ -1,4 +1,4 @@
-package com.example.taskify.presentation.tasks
+package com.example.taskify.data.repository
 
 import com.example.taskify.data.remote.TaskApi
 import com.example.taskify.domain.model.signUpModel.ErrorResponse
@@ -19,7 +19,7 @@ class TaskRepository @Inject constructor(
                 Result.success(response.body()!!)
             } else {
                 val errorBody = response.errorBody()?.string()
-                val errorMessage = gson.fromJson(errorBody, ErrorResponse::class.java).error
+                val errorMessage = gson.fromJson(errorBody, ErrorResponse::class.java).message
                 Result.failure(Exception(errorMessage))
             }
         } catch (e:Exception) {
@@ -35,7 +35,7 @@ class TaskRepository @Inject constructor(
                 Result.success(tasks)
             } else {
                 val errorBody = response.errorBody()?.string()
-                val errorMessage = gson.fromJson(errorBody, ErrorResponse::class.java).error
+                val errorMessage = gson.fromJson(errorBody, ErrorResponse::class.java).message
                 Result.failure(Exception(errorMessage))
             }
         } catch (e: Exception) {
@@ -51,7 +51,7 @@ class TaskRepository @Inject constructor(
                 Result.success(updatedTask)
             } else {
                 val errorBody = response.errorBody()?.string()
-                val errorMessage = gson.fromJson(errorBody, ErrorResponse::class.java).error
+                val errorMessage = gson.fromJson(errorBody, ErrorResponse::class.java).message
                 Result.failure(Exception(errorMessage))
             }
         } catch (e: Exception) {
@@ -66,7 +66,7 @@ class TaskRepository @Inject constructor(
                 Result.success(Unit)
             } else {
                 val errorBody = response.errorBody()?.string()
-                val errorMessage = gson.fromJson(errorBody, ErrorResponse::class.java).error
+                val errorMessage = gson.fromJson(errorBody, ErrorResponse::class.java).message
                 Result.failure(Exception(errorMessage))
             }
         } catch (e: Exception) {

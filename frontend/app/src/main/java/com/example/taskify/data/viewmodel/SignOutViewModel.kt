@@ -1,10 +1,11 @@
-package com.example.taskify.ui.viewmodels
+package com.example.taskify.data.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.taskify.data.local.TokenManager
 import com.example.taskify.data.local.UserPreferences
 import com.example.taskify.data.remote.authApi.AuthApi
+import com.example.taskify.data.remote.authApi.LogoutRequest
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -34,25 +35,26 @@ class SignOutViewModel @Inject constructor(
         viewModelScope.launch {
             _logoutState.value = LogoutState.Loading
             try {
-                val accessToken = tokenManager.getAccessToken()
-                if (accessToken.isNullOrEmpty()) {
-                    _logoutState.value = LogoutState.Error("Not found access token")
+                val accessToken = tokenManager.getAccessToken() ?: ""
+                val refreshToken = tokenManager.getRefreshToken() ?: ""
+
+                if (accessToken.isEmpty() || refreshToken.isEmpty()) {
+                    _logoutState.value = LogoutState.Error("Tokens missing")
                     clearLocalData()
                     return@launch
                 }
 
-                val response = authApi.signOut()
+                val response = authApi.signOut(LogoutRequest(accessToken, refreshToken))
                 if (response.isSuccessful) {
                     val logoutResponse = response.body()
                     clearLocalData()
-                    _logoutState.value = LogoutState.Success(logoutResponse?.message ?: "Log out successful")
+                    _logoutState.value =
+                        LogoutState.Success(logoutResponse?.message ?: "Log out successful")
                 } else {
                     _logoutState.value = LogoutState.Error("Logout failed: ${response.code()}")
-                    clearLocalData()
                 }
             } catch (e: Exception) {
                 _logoutState.value = LogoutState.Error("Error: ${e.message}")
-                clearLocalData()
             }
         }
     }

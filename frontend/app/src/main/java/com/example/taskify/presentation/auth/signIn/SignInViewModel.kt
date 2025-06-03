@@ -32,7 +32,9 @@ class SignInViewModel @Inject constructor(
                     UiState.Success(response)
                 }
 
-                result.isFailure -> UiState.Error(result.exceptionOrNull()?.message ?: "Unknown error")
+                result.isFailure -> UiState.Error(
+                    result.exceptionOrNull()?.message ?: "Unknown error"
+                )
                 else -> UiState.Error("Unknown error")
             }
         }
