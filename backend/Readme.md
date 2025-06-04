@@ -109,7 +109,7 @@ Authorization: Bearer <token>
 ```
 ### POST /api/v1/users/
 
-**Mô tả:**  Cập nhật thông tin user (username, email, password)
+**Mô tả:**  Cập nhật thông tin user (username, email)
 
 - Headers:
 
@@ -121,8 +121,7 @@ Authorization: Bearer <token>
 ```json
 {
   "username": "newusername",
-  "email": "newemail@example.com",
-  "password": "newpassword123"
+  "email": "newemail@example.com"
 }
 ```
 
@@ -130,9 +129,11 @@ Authorization: Bearer <token>
 
 ```json
 {
-  "id": "user123",
-  "username": "newusername",
-  "email": "newemail@example.com"
+    "_id": "682f2dcc3f4735b8a8910715",
+    "email": "newemail@example.com",
+    "username": "newusername",
+    "createdAt": "2025-05-22T13:59:40.984Z",
+    "updatedAt": "2025-06-04T00:06:45.948Z"
 }
 ```
 
