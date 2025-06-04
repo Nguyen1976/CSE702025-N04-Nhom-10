@@ -45,6 +45,9 @@ class TaskViewModel @Inject constructor(
     private val _isDragDropUpdate = MutableStateFlow(false)
     val isDragDropUpdate = _isDragDropUpdate.asStateFlow()
 
+    private val _showUpdateSuccessToast = MutableStateFlow(false)
+    val showUpdateSuccessToast = _showUpdateSuccessToast.asStateFlow()
+
     fun createTask(task: TaskRequest) {
         viewModelScope.launch {
             _isLoading.value = true
@@ -103,6 +106,7 @@ class TaskViewModel @Inject constructor(
                         _taskList.value = tasks
                     }
                 }
+                _showUpdateSuccessToast.value = true
             }.onFailure { error ->
                 Log.e("TaskViewModel", "Update task failed: ${error.message}")
                 _errorMessage.value = error.message
@@ -112,9 +116,8 @@ class TaskViewModel @Inject constructor(
         }
     }
 
-    fun updateTaskFromDragDrop(task: TaskResponse) {
+    fun updateTaskFromDrag_DROP(task: TaskResponse) {
         viewModelScope.launch {
-            _isDragDropUpdate.value = true
             _isLoading.value = true
 
             val subTasksRequest = task.subtasks.map { subtaskResponse ->
@@ -135,9 +138,6 @@ class TaskViewModel @Inject constructor(
             )
 
             val updateResult = repository.updateTask(task._id, taskRequest)
-
-            _isDragDropUpdate.value = false
-
             _updateTaskResult.value = updateResult
 
             updateResult.onSuccess { updatedTask ->
@@ -152,6 +152,7 @@ class TaskViewModel @Inject constructor(
                         _taskList.value = tasks
                     }
                 }
+                // Không kích hoạt Toast cho kéo thả
             }.onFailure { error ->
                 Log.e("TaskViewModel", "Update task failed: ${error.message}")
                 _errorMessage.value = error.message
@@ -182,6 +183,7 @@ class TaskViewModel @Inject constructor(
 
     fun resetUpdateTaskResult() {
         _updateTaskResult.value = null
+        _showUpdateSuccessToast.value = false
     }
 
     fun resetDeleteTaskResult() {

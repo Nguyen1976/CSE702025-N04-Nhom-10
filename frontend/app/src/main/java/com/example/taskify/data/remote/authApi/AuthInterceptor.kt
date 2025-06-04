@@ -16,6 +16,7 @@ class AuthInterceptor @Inject constructor(
 
     private val retrofitWithoutInterceptor = Retrofit.Builder()
         .baseUrl("http://192.168.100.211:3000")
+//        .baseUrl("http://10.0.2.2:3000")
 //        .baseUrl("http://192.168.100.211:8080")
         .addConverterFactory(GsonConverterFactory.create())
         .client(OkHttpClient.Builder().build())

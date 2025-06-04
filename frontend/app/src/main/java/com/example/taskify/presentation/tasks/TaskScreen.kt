@@ -107,7 +107,7 @@ fun TasksScreen(
     val errorMessage by taskViewModel.errorMessage.collectAsState()
     val updateTaskResult = taskViewModel.updateTaskResult.collectAsState()
     val deleteTaskResult = taskViewModel.deleteTaskResult.collectAsState()
-    val isDragDropUpdate by taskViewModel.isDragDropUpdate.collectAsState()
+    val showUpdateSuccessToast by taskViewModel.showUpdateSuccessToast.collectAsState()
 
     val editTaskLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
@@ -137,10 +137,10 @@ fun TasksScreen(
         }
     }
 
-    LaunchedEffect(updateTaskResult.value, isDragDropUpdate) {
+    LaunchedEffect(updateTaskResult.value, showUpdateSuccessToast) {
         val result = updateTaskResult.value
         if (result != null) {
-            if (!isDragDropUpdate) {
+            if (showUpdateSuccessToast) {
                 result.onSuccess { updatedTask ->
                     Toast.makeText(context, "Task updated successfully", Toast.LENGTH_SHORT).show()
                 }.onFailure { error ->
@@ -263,7 +263,7 @@ fun TasksScreen(
                                 updatedSubtasks.add(toIndex, item)
                                 val updatedTask = task.copy(subtasks = updatedSubtasks)
                                 selectedTask = updatedTask
-                                taskViewModel.updateTaskFromDragDrop(updatedTask)
+                                taskViewModel.updateTaskFromDrag_DROP(updatedTask)
                             }
                         }
                     },
@@ -427,17 +427,15 @@ fun TaskCard(
 
                 Spacer(modifier = Modifier.width(12.dp))
 
-                // Giới hạn title bằng weight
                 Text(
                     text = task.title ?: "",
                     fontWeight = FontWeight.Medium,
                     fontSize = 16.sp,
                     color = Color.Black,
                     maxLines = 1,
-                    modifier = Modifier.weight(1f) // 👈 Chìa khóa nằm ở đây
+                    modifier = Modifier.weight(1f)
                 )
 
-                // Icon nằm cố định bên phải
                 Spacer(modifier = Modifier.width(12.dp))
 
                 Image(
