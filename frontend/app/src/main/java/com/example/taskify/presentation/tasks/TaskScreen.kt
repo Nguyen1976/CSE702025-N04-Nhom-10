@@ -107,6 +107,7 @@ fun TasksScreen(
     val errorMessage by taskViewModel.errorMessage.collectAsState()
     val updateTaskResult = taskViewModel.updateTaskResult.collectAsState()
     val deleteTaskResult = taskViewModel.deleteTaskResult.collectAsState()
+    val updateIsSuccessResult = taskViewModel.updateIsSuccessResult.collectAsState()
     val showUpdateSuccessToast by taskViewModel.showUpdateSuccessToast.collectAsState()
 
     val editTaskLauncher = rememberLauncherForActivityResult(
@@ -121,13 +122,10 @@ fun TasksScreen(
     var showBottomSheet by remember { mutableStateOf(false) }
 
     LaunchedEffect(tasks) {
+        Log.d("TasksScreen", "tasks changed: size = ${tasks.size}")
         selectedTask = selectedTask?.let { oldSelected ->
             tasks.find { it._id == oldSelected._id }
         }
-    }
-
-    LaunchedEffect(Unit) {
-        taskViewModel.getTasks()
     }
 
     LaunchedEffect(errorMessage) {
@@ -137,9 +135,10 @@ fun TasksScreen(
         }
     }
 
-    LaunchedEffect(updateTaskResult.value, showUpdateSuccessToast) {
+    LaunchedEffect(updateTaskResult.value, showUpdateSuccessToast, updateIsSuccessResult.value) {
         val result = updateTaskResult.value
-        if (result != null) {
+        val isSuccessResult = updateIsSuccessResult.value
+        if (result != null && isSuccessResult == null) {
             if (showUpdateSuccessToast) {
                 result.onSuccess { updatedTask ->
                     Toast.makeText(context, "Task updated successfully", Toast.LENGTH_SHORT).show()
@@ -158,7 +157,7 @@ fun TasksScreen(
             }.onFailure {
                 Toast.makeText(context, "Failed to delete task, please try again later!", Toast.LENGTH_SHORT).show()
             }
-            taskViewModel.resetUpdateTaskResult()
+            taskViewModel.resetDeleteTaskResult()
         }
     }
 
@@ -172,7 +171,7 @@ fun TasksScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                "Inbox",
+                "All Tasks",
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold
             )

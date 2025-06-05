@@ -24,6 +24,8 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
@@ -54,19 +56,24 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.lifecycleScope
 import com.example.taskify.R
 import com.example.taskify.data.themeStorage.ThemeDataStore
+import com.example.taskify.data.viewmodel.TaskViewModel
+import com.example.taskify.data.viewmodel.UserViewModel
 import com.example.taskify.domain.model.taskModel.TaskRequest
+import com.example.taskify.domain.model.taskModel.TaskResponse
 import com.example.taskify.domain.model.themeModel.ThemeOption
 import com.example.taskify.presentation.auth.dashboard.DashboardActivity
 import com.example.taskify.presentation.base.BaseActivity
 import com.example.taskify.presentation.calendar.CalendarScreen
+import com.example.taskify.presentation.calendar.LineGray
 import com.example.taskify.presentation.filter.FilterScreen
 import com.example.taskify.presentation.settings.SettingScreen
-import com.example.taskify.data.viewmodel.TaskViewModel
 import com.example.taskify.presentation.tasks.TasksScreen
 import com.example.taskify.presentation.tasktheme.ThemeSectionActivity
 import dagger.hilt.android.AndroidEntryPoint
@@ -107,9 +114,11 @@ class MainActivity : BaseActivity() {
                 val themeFlow = ThemeDataStore.getSavedTheme(this@MainActivity)
                 val theme by themeFlow.collectAsState(initial = ThemeOption.Teal)
 
+                val tasksState = taskViewModel.taskList.collectAsState()
                 val coroutineScope = rememberCoroutineScope()
                 val tabs = TabItem.values()
                 val pagerState = rememberPagerState { tabs.size }
+                var previousPage by remember { mutableStateOf(pagerState.currentPage) }
 
                 val context = LocalContext.current
                 val createTaskResult = taskViewModel.createTaskResult.collectAsState()
@@ -131,6 +140,7 @@ class MainActivity : BaseActivity() {
                         result.onSuccess {
                             Toast.makeText(context, "Task created successfully!", Toast.LENGTH_SHORT).show()
                             taskViewModel.resetCreateTaskResult()
+                            taskViewModel.getTasks()
                         }.onFailure {
                             Toast.makeText(context, "Error occurred while creating the task, please try again!", Toast.LENGTH_SHORT).show()
                             taskViewModel.resetCreateTaskResult()
@@ -138,11 +148,20 @@ class MainActivity : BaseActivity() {
                     }
                 }
 
+                LaunchedEffect(pagerState.currentPage) {
+                    val current = pagerState.currentPage
+                    if (current == 1 && previousPage != current) {
+                        taskViewModel.getTasks()
+                    }
+                    previousPage = current
+                }
+
                 MaterialTheme {
                     Scaffold(
                         containerColor = Color.Transparent,
                         bottomBar = {
                             BottomBarWithIndicator(
+                                theme = theme ?: ThemeOption.Teal,
                                 tabs = tabs,
                                 pagerState = pagerState,
                                 onTabSelected = { index ->
@@ -163,7 +182,9 @@ class MainActivity : BaseActivity() {
                             when (page) {
                                 0 -> MainScreen(
                                     theme = theme ?: ThemeOption.Teal,
-                                    showInputPanel = showInputPanel
+                                    taskViewModel = taskViewModel,
+                                    showInputPanel = showInputPanel,
+                                    tasks = tasksState.value
                                 )
                                 1 -> TasksScreen(theme = theme ?: ThemeOption.Teal)
                                 2 -> key(page) { CalendarScreen(theme = theme ?: ThemeOption.Teal) }
@@ -259,13 +280,26 @@ class MainActivity : BaseActivity() {
 
 @Composable
 fun MainScreen(
+    userViewModel: UserViewModel = hiltViewModel(),
+    taskViewModel: TaskViewModel = hiltViewModel(),
+    tasks: List<TaskResponse>,
     theme: ThemeOption,
     showInputPanel: MutableState<Boolean>
 ) {
+    val user by userViewModel.userState.collectAsState()
+    val today = LocalDate.now().toString()
+    val tasksToday = tasks.filter { it.taskDate == today }
+
     val color = theme.toColor()
     val formatterDate = "Today. " + LocalDate.now().format(
         DateTimeFormatter.ofPattern("EEE dd MMM yyyy", Locale.ENGLISH)
     )
+
+    LaunchedEffect(Unit) {
+        userViewModel.getUserFromLocal()
+        userViewModel.loadCurrentUser()
+        taskViewModel.getTasks()
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -275,6 +309,14 @@ fun MainScreen(
                 .padding(16.dp)
                 .padding(top = 48.dp)
         ) {
+            Text(
+                text = "\uD83D\uDC4B Hello, ${user?.username ?: "there"}! Ready to conquer today?",
+                fontSize = 17.sp,
+                textAlign = TextAlign.Center,
+                fontWeight = FontWeight.Medium,
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(8.dp))
             Text("Today", fontSize = 24.sp, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(6.dp))
             Text(
@@ -344,37 +386,45 @@ fun MainScreen(
                     }
                 }
             }
+
+            LineGray(modifier = Modifier.padding(vertical = 32.dp))
+
+            if(tasksToday.isEmpty()) {
+                Text(
+                    "There are no tasks today!",
+                    color = Color(0xFF767E8C),
+                    fontSize = 16.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    items(tasks) {task ->
+
+                    }
+                }
+            }
         }
     }
 }
 
-fun ThemeOption.toColor(): Color = when (this) {
-    ThemeOption.Teal -> Color(0xFF26A69A)
-    ThemeOption.Black -> Color(0xFF1B1C1F)
-    ThemeOption.Red -> Color(0xFFEA4335)
-    ThemeOption.Blue -> Color(0xFF1877F2)
-    ThemeOption.LightRed -> Color(0xFFE57373)
-    ThemeOption.LightBlue -> Color(0xFF42A5F5)
-    ThemeOption.LightGreen -> Color(0xFF81C784)
-    ThemeOption.LightOrange -> Color(0xFFFFB74D)
-    ThemeOption.DarkCharcoal -> Color(0xFF212121)
-    ThemeOption.BabyPink -> Color(0xFFF8BBD0)
-    ThemeOption.LightYellow -> Color(0xFFFFF176)
-    ThemeOption.MediumBlue -> Color(0xFF2196F3)
-    ThemeOption.LightPurple -> Color(0xFFBA68C8)
-    ThemeOption.SlateGray -> Color(0xFF546E7A)
-    ThemeOption.LightCyan -> Color(0xFF4DD0E1)
-    ThemeOption.MintGreen -> Color(0xFF4DB6AC)
-    ThemeOption.HotPink -> Color(0xFFF06292)
-    ThemeOption.VividOrange -> Color(0xFFFF5722)
+@Composable
+fun TaskListForToday(
+    task: TaskResponse
+) {
+
 }
 
 @Composable
 fun BottomBarWithIndicator(
+    theme: ThemeOption,
     tabs: Array<TabItem>,
     pagerState: PagerState,
     onTabSelected: (Int) -> Unit
 ) {
+    val color = theme.toColor()
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
     val tabCount = tabs.size
     val tabWidth = screenWidth / tabCount
@@ -419,7 +469,7 @@ fun BottomBarWithIndicator(
                         painter = painterResource(id = tab.iconRes),
                         contentDescription = tab.label,
                         modifier = Modifier.size(26.dp),
-                        colorFilter = if (selected) ColorFilter.tint(Color(0xFF24A19C)) else ColorFilter.tint(Color(0xFFA0AAB8))
+                        colorFilter = if (selected) ColorFilter.tint(color) else ColorFilter.tint(Color(0xFFA0AAB8))
                     )
                 }
             }
@@ -431,7 +481,7 @@ fun BottomBarWithIndicator(
                 .width(indicatorWidth)
                 .height(3.dp)
                 .align(Alignment.TopStart)
-                .background(Color(0xFF24A19C))
+                .background(color)
         )
     }
 }
@@ -442,4 +492,25 @@ enum class TabItem(@DrawableRes val iconRes: Int, val label: String) {
     Filter(R.drawable.ic_calendar, "Filter"),
     Calendar(R.drawable.ic_category, "Calendar"),
     Settings(R.drawable.ic_setting, "Settings")
+}
+
+fun ThemeOption.toColor(): Color = when (this) {
+    ThemeOption.Teal -> Color(0xFF26A69A)
+    ThemeOption.Black -> Color(0xFF1B1C1F)
+    ThemeOption.Red -> Color(0xFFEA4335)
+    ThemeOption.Blue -> Color(0xFF1877F2)
+    ThemeOption.LightRed -> Color(0xFFE57373)
+    ThemeOption.LightBlue -> Color(0xFF42A5F5)
+    ThemeOption.LightGreen -> Color(0xFF81C784)
+    ThemeOption.LightOrange -> Color(0xFFFFB74D)
+    ThemeOption.DarkCharcoal -> Color(0xFF212121)
+    ThemeOption.BabyPink -> Color(0xFFF8BBD0)
+    ThemeOption.LightYellow -> Color(0xFFFFF176)
+    ThemeOption.MediumBlue -> Color(0xFF2196F3)
+    ThemeOption.LightPurple -> Color(0xFFBA68C8)
+    ThemeOption.SlateGray -> Color(0xFF546E7A)
+    ThemeOption.LightCyan -> Color(0xFF4DD0E1)
+    ThemeOption.MintGreen -> Color(0xFF4DB6AC)
+    ThemeOption.HotPink -> Color(0xFFF06292)
+    ThemeOption.VividOrange -> Color(0xFFFF5722)
 }

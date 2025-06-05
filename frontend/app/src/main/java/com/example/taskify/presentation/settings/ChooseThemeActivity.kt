@@ -27,6 +27,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -50,6 +51,7 @@ import com.example.taskify.R
 import com.example.taskify.components.ButtonSection
 import com.example.taskify.data.themeStorage.ThemeDataStore
 import com.example.taskify.domain.model.themeModel.ThemeOption
+import com.example.taskify.presentation.main.toColor
 import kotlinx.coroutines.launch
 
 class ChooseThemeActivity : AppCompatActivity() {
@@ -84,9 +86,6 @@ fun ChooseThemeScreen(
     onThemeSelected: (ThemeOption) -> Unit,
     onConfirm: () -> Unit
 ) {
-    val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -96,6 +95,7 @@ fun ChooseThemeScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         val themes = ThemeOption.values().toList().drop(4)
+        val color = selectedTheme.toColor()
 
         Text(
             "Theme",
@@ -123,7 +123,10 @@ fun ChooseThemeScreen(
             onClick = {
                 onConfirm()
             },
-            text = "Apply Change"
+            text = "Apply Change",
+            colors = ButtonDefaults.buttonColors(
+                containerColor = color
+            )
         )
     }
 }

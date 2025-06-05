@@ -42,8 +42,11 @@ class TaskViewModel @Inject constructor(
     private val _deleteTaskResult = MutableStateFlow<Result<Unit>?>(null)
     val deleteTaskResult = _deleteTaskResult.asStateFlow()
 
-    private val _isDragDropUpdate = MutableStateFlow(false)
-    val isDragDropUpdate = _isDragDropUpdate.asStateFlow()
+    private val _updateIsSuccessResult = MutableStateFlow<Result<TaskResponse>?>(null)
+    val updateIsSuccessResult = _updateIsSuccessResult.asStateFlow()
+
+    private val _isSuccessLoading = MutableStateFlow(false)
+    val isSuccessLoading = _isSuccessLoading.asStateFlow()
 
     private val _showUpdateSuccessToast = MutableStateFlow(false)
     val showUpdateSuccessToast = _showUpdateSuccessToast.asStateFlow()
@@ -162,6 +165,50 @@ class TaskViewModel @Inject constructor(
         }
     }
 
+    fun updateTaskIsSuccess(task: TaskResponse, newIsSuccess: Boolean) {
+        viewModelScope.launch {
+            _isSuccessLoading.value = true
+
+            val subTasksRequest = task.subtasks.map { subtaskResponse ->
+                SubTaskRequest(
+                    title = subtaskResponse.title,
+                    subtaskDes = subtaskResponse.subtaskDes
+                )
+            }
+
+            val updatedTaskRequest = TaskRequest(
+                title = task.title,
+                description = task.description,
+                subtasks = subTasksRequest,
+                taskDate = LocalDate.parse(task.taskDate),
+                taskTime = LocalTime.parse(task.taskTime),
+                type = task.type,
+                isSuccess = newIsSuccess
+            )
+
+            val updateResult = repository.updateTask(task._id, updatedTaskRequest)
+            _updateIsSuccessResult.value = updateResult
+
+            updateResult.onSuccess { updatedTask ->
+                val currentList = _taskList.value.toMutableList()
+                val index = currentList.indexOfFirst { it._id == updatedTask._id }
+                if (index != -1) {
+                    currentList[index] = updatedTask
+                    _taskList.value = currentList
+                } else {
+                    val getResult = repository.getTasks()
+                    getResult.onSuccess { tasks ->
+                        _taskList.value = tasks
+                    }
+                }
+            }.onFailure { error ->
+                _errorMessage.value = error.message
+            }
+
+            _isSuccessLoading.value = false
+        }
+    }
+
     fun deleteTask(taskId: String) {
         viewModelScope.launch {
             _isLoading.value = true
@@ -177,6 +224,7 @@ class TaskViewModel @Inject constructor(
         }
     }
 
+
     fun resetCreateTaskResult() {
         _createTaskResult.value = null
     }
@@ -188,6 +236,10 @@ class TaskViewModel @Inject constructor(
 
     fun resetDeleteTaskResult() {
         _deleteTaskResult.value = null
+    }
+
+    fun resetUpdateIsSuccessResult() {
+        _updateIsSuccessResult.value = null
     }
 
     fun clearErrorMessage() {

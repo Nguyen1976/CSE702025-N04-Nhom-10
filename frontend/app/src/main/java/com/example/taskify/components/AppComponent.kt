@@ -14,6 +14,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIos
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -88,7 +89,10 @@ fun TopTitle(
 @Composable
 fun ButtonSection(
     onClick: () -> Unit,
-    text: String
+    text: String,
+    colors: ButtonColors = ButtonDefaults.buttonColors(
+        containerColor = Color(0xFF24A19C)
+    )
 ) {
     Button(
         onClick = { onClick() },
@@ -96,9 +100,7 @@ fun ButtonSection(
             .fillMaxWidth()
             .padding(vertical = 16.dp)
             .height(52.dp),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = Color(0xFF24A19C)
-        ),
+        colors = colors,
         shape = RoundedCornerShape(16.dp)
     ) {
         Text(

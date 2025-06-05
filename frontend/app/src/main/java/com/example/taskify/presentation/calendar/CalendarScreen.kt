@@ -1,5 +1,6 @@
 package com.example.taskify.presentation.calendar
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -26,13 +27,16 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -45,6 +49,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -67,9 +72,41 @@ import java.util.Locale
 @Composable
 fun CalendarScreen(
     theme: ThemeOption,
-    taskViewModel: TaskViewModel = hiltViewModel()
+    taskViewModel: TaskViewModel = hiltViewModel(),
+    onDismissRequest: () -> Unit = {}
 ) {
+    val context = LocalContext.current
     val tasks by taskViewModel.taskList.collectAsState()
+    val isSuccessLoading by taskViewModel.isSuccessLoading.collectAsState()
+    val updateIsSuccessResult by taskViewModel.updateIsSuccessResult.collectAsState()
+
+    if (isSuccessLoading) {
+        AlertDialog(
+            onDismissRequest = onDismissRequest,
+            title = { Text("Loading...") },
+            text = {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    CircularProgressIndicator(modifier = Modifier.size(24.dp), color = theme.toColor())
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Text("Please wait")
+                }
+            },
+            confirmButton = {},
+            dismissButton = {}
+        )
+    }
+
+    LaunchedEffect(updateIsSuccessResult) {
+        val result = updateIsSuccessResult
+        if (result != null) {
+            result.onSuccess {
+                Toast.makeText(context, "Task completed!", Toast.LENGTH_SHORT).show()
+            }.onFailure { error ->
+                Toast.makeText(context, "Failed to update task: ${error.message}", Toast.LENGTH_SHORT).show()
+            }
+            taskViewModel.resetUpdateIsSuccessResult()
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -80,7 +117,7 @@ fun CalendarScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            "Upcoming",
+            "Daily Tasks",
             fontSize = 20.sp,
             fontWeight = FontWeight.SemiBold
         )
@@ -90,9 +127,8 @@ fun CalendarScreen(
         CalendarSection(
             theme = theme,
             tasks = tasks,
-            onUpdateTask = {task ->
-                val updatedTask = task.copy(isSuccess = !task.isSuccess)
-                taskViewModel.updateTask(updatedTask)
+            onUpdateTask = { task ->
+                taskViewModel.updateTaskIsSuccess(task, !task.isSuccess)
             }
         )
     }
