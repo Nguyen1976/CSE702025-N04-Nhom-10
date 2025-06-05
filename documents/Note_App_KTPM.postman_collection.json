@@ -1,10 +1,9 @@
 {
 	"info": {
-		"_postman_id": "8757ea40-22af-4ee6-95cf-14c35c3d47d3",
+		"_postman_id": "18b8d04e-f441-4fed-a886-df94e344ac36",
 		"name": "Note_App_KTPM",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "36484739",
-		"_collection_link": "https://noteappapi.postman.co/workspace/note_app_api-Workspace~1696072c-b0eb-414c-8266-e2b497885e5f/collection/36484739-8757ea40-22af-4ee6-95cf-14c35c3d47d3?action=share&source=collection_link&creator=36484739"
+		"_exporter_id": "30276076"
 	},
 	"item": [
 		{
@@ -97,13 +96,13 @@
 				"header": [
 					{
 						"key": "Authorization",
-						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2ODJmMmRjYzNmNDczNWI4YTg5MTA3MTUiLCJlbWFpbCI6InRlc3QxMEBleGFtcGxlLmNvbSIsImlhdCI6MTc0ODE0ODY3OCwiZXhwIjoxNzQ4MTUyMjc4fQ.2W3WxXKMtHc3pk5Wgnzg61w8XZgyxTsDIo5VkpAz3K4",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2ODJmMmRjYzNmNDczNWI4YTg5MTA3MTUiLCJlbWFpbCI6InRlc3QxMEBleGFtcGxlLmNvbSIsImlhdCI6MTc0ODkyMDM0NCwiZXhwIjoxNzQ4OTIzOTQ0fQ.u2TJOGJAW0tuQ71tVGKxnMDBhPLIOwiiDTSASVeU6wo",
 						"type": "text"
 					}
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"title\": \"Task mới sửa\",\r\n    \"description\": \"Mô tả task mới\",\r\n    \"taskDate\": \"2025-05-16\",\r\n    \"taskTime\": \"19:30:00\",\r\n    \"type\": \"Meeting\",\r\n    \"isSuccess\": true,\r\n    \"_id\": \"6832a1f1727015191954a61b\",\r\n    \"subtasks\": [{\r\n      \"title\": \"Subtask mới\",\r\n      \"subtaskDes\": \"Mô tả subtask sửa\"\r\n    },\r\n    {\r\n      \"title\": \"Subtask mới\",\r\n      \"subtaskDes\": \"Mô tả subtask mới\"\r\n    }],\r\n    \"createAt\": \"2025-05-25T04:52:01.355Z\",\r\n    \"__v\": 0\r\n}",
+					"raw": "{\r\n    \"title\": \"Task mới sửa\",\r\n    \"description\": \"Mô tả task mới\",\r\n    \"taskDate\": \"2025-05-16\",\r\n    \"taskTime\": \"19:30:00\",\r\n    \"type\": \"Meeting\",\r\n    \"isSuccess\": true,\r\n    \"subtasks\": [{\r\n      \"title\": \"Subtask mới 3\",\r\n      \"subtaskDes\": \"Mô tả subtask sửa\"\r\n    },\r\n    {\r\n      \"title\": \"Subtask mới 2\",\r\n      \"subtaskDes\": \"Mô tả subtask mới\"\r\n    }],\r\n    \"createAt\": \"2025-05-25T04:52:01.355Z\",\r\n    \"__v\": 0\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -111,7 +110,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:3000/api/v1/tasks/6832a1f1727015191954a61b",
+					"raw": "http://localhost:3000/api/v1/tasks/6837d4870baf0fc7e196a451",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -121,7 +120,7 @@
 						"api",
 						"v1",
 						"tasks",
-						"6832a1f1727015191954a61b"
+						"6837d4870baf0fc7e196a451"
 					]
 				}
 			},
@@ -165,7 +164,7 @@
 				"header": [
 					{
 						"key": "Authorization",
-						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2ODJmMmRjYzNmNDczNWI4YTg5MTA3MTUiLCJlbWFpbCI6InRlc3QxMEBleGFtcGxlLmNvbSIsImlhdCI6MTc0ODE2MjIyOCwiZXhwIjoxNzQ4MTY1ODI4fQ.LkP8BZ9cmGK3NIM__RyLH_eRITE40p7GkHx8dM4qoHg",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2ODJmMmRjYzNmNDczNWI4YTg5MTA3MTUiLCJlbWFpbCI6InRlc3QxMEBleGFtcGxlLmNvbSIsImlhdCI6MTc0ODkyMDM0NCwiZXhwIjoxNzQ4OTIzOTQ0fQ.u2TJOGJAW0tuQ71tVGKxnMDBhPLIOwiiDTSASVeU6wo",
 						"type": "text"
 					}
 				],
@@ -192,13 +191,13 @@
 				"header": [
 					{
 						"key": "Authorization",
-						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2ODJmMmRjYzNmNDczNWI4YTg5MTA3MTUiLCJlbWFpbCI6InRlc3QxMEBleGFtcGxlLmNvbSIsImlhdCI6MTc0ODE2MjIyOCwiZXhwIjoxNzQ4MTY1ODI4fQ.LkP8BZ9cmGK3NIM__RyLH_eRITE40p7GkHx8dM4qoHg",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2ODJmMmRjYzNmNDczNWI4YTg5MTA3MTUiLCJlbWFpbCI6InRlc3QxMEBleGFtcGxlLmNvbSIsImlhdCI6MTc0ODQ4NTc2NiwiZXhwIjoxNzQ4NDg5MzY2fQ.8f_u-1rV9eEBMp_s9i9PUDL57DeWjaSO4cgKAi-xf_I",
 						"type": "text"
 					}
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n  \"title\": \"Task mới\",\r\n  \"description\": \"Mô tả task mới\",\r\n  \"taskDate\": \"2025-05-26\",\r\n  \"taskTime\": \"19:30:00\",\r\n  \"type\": \"Meeting\",\r\n  \"isSuccess\": false\r\n}",
+					"raw": "{\r\n  \"title\": \"Task mới \",\r\n  \"description\": \"Mô tả task mới\",\r\n  \"taskDate\": \"2025-06-07\",\r\n  \"taskTime\": \"19:30:00\",\r\n  \"type\": \"Meeting\",\r\n  \"isSuccess\": false\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -257,16 +256,13 @@
 			"name": "logout",
 			"request": {
 				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"accessToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2ODJmMmRjYzNmNDczNWI4YTg5MTA3MTUiLCJlbWFpbCI6InRlc3QxMEBleGFtcGxlLmNvbSIsImlhdCI6MTc0ODY3MjQ4NCwiZXhwIjoxNzQ4Njc2MDg0fQ.1IOilkxXzD8Com2gy411bbxkxd8OAj4wGzxN4WtmAH8\",\r\n    \"refreshToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2ODJmMmRjYzNmNDczNWI4YTg5MTA3MTUiLCJlbWFpbCI6InRlc3QxMEBleGFtcGxlLmNvbSIsImlhdCI6MTc0ODY3MjQ4NCwiZXhwIjoxNzQ5ODgyMDg0fQ.mQtw-Xzb2aPumU1pPtOagTn5Ud6-QAEDQx86CxhcIPI\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2ODJmMmRjYzNmNDczNWI4YTg5MTA3MTUiLCJlbWFpbCI6InRlc3QxMEBleGFtcGxlLmNvbSIsImlhdCI6MTc0ODk2MTI2NywiZXhwIjoxNzQ4OTY0ODY3fQ.mTezofTfC27rwgldIfxqM4sxpYknLFo9PY51s7lNWUM",
+						"type": "text"
 					}
-				},
+				],
 				"url": {
 					"raw": "http://localhost:3000/api/v1/users/logout",
 					"protocol": "http",
@@ -285,46 +281,22 @@
 			"response": []
 		},
 		{
-			"name": "get infor user",
+			"name": "getDetail",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
 			"request": {
 				"method": "GET",
 				"header": [
 					{
 						"key": "Authorization",
-						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2ODJmMmRjYzNmNDczNWI4YTg5MTA3MTUiLCJlbWFpbCI6InRlc3QxMEBleGFtcGxlLmNvbSIsImlhdCI6MTc0ODY3MjQ4NCwiZXhwIjoxNzQ4Njc2MDg0fQ.1IOilkxXzD8Com2gy411bbxkxd8OAj4wGzxN4WtmAH8",
-						"type": "text"
-					}
-				],
-				"url": {
-					"raw": "http://localhost:3000/api/v1/users",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "3000",
-					"path": [
-						"api",
-						"v1",
-						"users"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "update user",
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Authorization",
-						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2ODJmMmRjYzNmNDczNWI4YTg5MTA3MTUiLCJlbWFpbCI6InRlc3QxMEBleGFtcGxlLmNvbSIsImlhdCI6MTc0ODY3MjQ4NCwiZXhwIjoxNzQ4Njc2MDg0fQ.1IOilkxXzD8Com2gy411bbxkxd8OAj4wGzxN4WtmAH8",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2ODJmMmRjYzNmNDczNWI4YTg5MTA3MTUiLCJlbWFpbCI6InRlc3QxMEBleGFtcGxlLmNvbSIsImlhdCI6MTc0ODk2MTI2NywiZXhwIjoxNzQ4OTY0ODY3fQ.mTezofTfC27rwgldIfxqM4sxpYknLFo9PY51s7lNWUM",
 						"type": "text"
 					}
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"email\": \"test10@example.com\",\r\n    \"username\": \"nguyen\"\r\n}",
+					"raw": "",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -332,7 +304,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:3000/api/v1/users",
+					"raw": "http://localhost:3000/api/v1/users/",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -341,7 +313,43 @@
 					"path": [
 						"api",
 						"v1",
-						"users"
+						"users",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "updateUser",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2ODJkOWI4YWY2MDliNzMyMmRiZDcyMTEiLCJlbWFpbCI6InRlc3QxQGV4YW1wbGUuY29tIiwiaWF0IjoxNzQ3ODE5NzQ5LCJleHAiOjE3NDkwMjkzNDl9._8m6jHBgpEAAFlzuYGj1Swbm87CfszoGJvaBQEDB9b4",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"email\": \"test10@example.com\",\r\n  \"password\": \"securePassword123\"\r\n}"
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/v1/users/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"v1",
+						"users",
+						""
 					]
 				}
 			},
