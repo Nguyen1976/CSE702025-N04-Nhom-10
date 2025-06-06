@@ -1,6 +1,7 @@
 package com.example.taskify.presentation.main
 
 import android.content.Intent
+import android.hardware.lights.Light
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.compose.setContent
@@ -10,11 +11,13 @@ import androidx.annotation.DrawableRes
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -24,15 +27,23 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.Scaffold
@@ -50,6 +61,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalConfiguration
@@ -57,6 +69,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -65,6 +78,7 @@ import com.example.taskify.R
 import com.example.taskify.data.themeStorage.ThemeDataStore
 import com.example.taskify.data.viewmodel.TaskViewModel
 import com.example.taskify.data.viewmodel.UserViewModel
+import com.example.taskify.domain.model.taskModel.SubtaskResponse
 import com.example.taskify.domain.model.taskModel.TaskRequest
 import com.example.taskify.domain.model.taskModel.TaskResponse
 import com.example.taskify.domain.model.themeModel.ThemeOption
@@ -72,10 +86,12 @@ import com.example.taskify.presentation.auth.dashboard.DashboardActivity
 import com.example.taskify.presentation.base.BaseActivity
 import com.example.taskify.presentation.calendar.CalendarScreen
 import com.example.taskify.presentation.calendar.LineGray
+import com.example.taskify.presentation.calendar.toTimeOnly
 import com.example.taskify.presentation.filter.FilterScreen
 import com.example.taskify.presentation.settings.SettingScreen
 import com.example.taskify.presentation.tasks.TasksScreen
 import com.example.taskify.presentation.tasktheme.ThemeSectionActivity
+import com.example.taskify.ui.theme.TaskifyTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -284,8 +300,13 @@ fun MainScreen(
     taskViewModel: TaskViewModel = hiltViewModel(),
     tasks: List<TaskResponse>,
     theme: ThemeOption,
-    showInputPanel: MutableState<Boolean>
+    showInputPanel: MutableState<Boolean>,
+    onDismissRequest: () -> Unit = {}
 ) {
+    val context = LocalContext.current
+    val isSuccessLoading by taskViewModel.isSuccessLoading.collectAsState()
+    val updateIsSuccessResult by taskViewModel.updateIsSuccessResult.collectAsState()
+
     val user by userViewModel.userState.collectAsState()
     val today = LocalDate.now().toString()
     val tasksToday = tasks.filter { it.taskDate == today }
@@ -294,6 +315,34 @@ fun MainScreen(
     val formatterDate = "Today. " + LocalDate.now().format(
         DateTimeFormatter.ofPattern("EEE dd MMM yyyy", Locale.ENGLISH)
     )
+
+    if (isSuccessLoading) {
+        AlertDialog(
+            onDismissRequest = onDismissRequest,
+            title = { Text("Loading...") },
+            text = {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    CircularProgressIndicator(modifier = Modifier.size(24.dp), color = theme.toColor())
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Text("Please wait")
+                }
+            },
+            confirmButton = {},
+            dismissButton = {}
+        )
+    }
+
+    LaunchedEffect(updateIsSuccessResult) {
+        val result = updateIsSuccessResult
+        if (result != null) {
+            result.onSuccess {
+                Toast.makeText(context, "Task completed!", Toast.LENGTH_SHORT).show()
+            }.onFailure { error ->
+                Toast.makeText(context, "Failed to update task: ${error.message}", Toast.LENGTH_SHORT).show()
+            }
+            taskViewModel.resetUpdateIsSuccessResult()
+        }
+    }
 
     LaunchedEffect(Unit) {
         userViewModel.getUserFromLocal()
@@ -387,22 +436,37 @@ fun MainScreen(
                 }
             }
 
-            LineGray(modifier = Modifier.padding(vertical = 32.dp))
+            LineGray(modifier = Modifier.padding(top = 32.dp))
+
+            Spacer(modifier = Modifier.height(16.dp))
 
             if(tasksToday.isEmpty()) {
                 Text(
                     "There are no tasks today!",
                     color = Color(0xFF767E8C),
-                    fontSize = 16.sp,
+                    fontSize = 18.sp,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth()
                 )
             } else {
+                Text(
+                    "Tiny tasks, big wins. Let’s roll!",
+                    fontSize = 17.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = Color.Black
+                )
+                Spacer(modifier = Modifier.height(6.dp))
                 LazyColumn(
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    items(tasks) {task ->
-
+                    items(tasksToday) {task ->
+                        TaskListForToday(
+                            task = task,
+                            theme = theme,
+                            onUpdateTask = {
+                                taskViewModel.updateTaskIsSuccess(task, !task.isSuccess)
+                            }
+                        )
                     }
                 }
             }
@@ -412,9 +476,199 @@ fun MainScreen(
 
 @Composable
 fun TaskListForToday(
-    task: TaskResponse
+    task: TaskResponse,
+    theme: ThemeOption,
+    onUpdateTask: (TaskResponse) -> Unit
 ) {
+    val color = theme.toColor()
+    val completed = task.isSuccess
 
+    Box(
+        modifier = Modifier
+            .padding(bottom = 8.dp)
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(8.dp))
+            .border(1.dp, Color.LightGray, RoundedCornerShape(8.dp))
+            .wrapContentHeight(),
+    ) {
+        Column(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = task.type,
+                    fontSize = 15.sp,
+                    color = Color.Black
+                )
+
+                Button(
+                    onClick = { onUpdateTask(task) },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if(completed) color else Color.White
+                    ),
+                    modifier = Modifier
+                        .then(
+                            if (!completed) {
+                                Modifier.border(
+                                    0.5.dp,
+                                    Color.LightGray,
+                                    RoundedCornerShape(4.dp)
+                                )
+                            } else {
+                                Modifier
+                            }
+                        )
+                        .height(28.dp)
+                        .wrapContentWidth(),
+                    shape = RoundedCornerShape(4.dp),
+                    contentPadding = PaddingValues(
+                        horizontal = 6.dp,
+                        vertical = 2.dp
+                    )
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            "Done",
+                            fontSize = 14.sp,
+                            lineHeight = 1.sp,
+                            color = if (completed) Color.White else Color.Black
+                        )
+
+                        Spacer(modifier = Modifier.width(2.dp))
+
+                        if(completed) {
+                            Icon(
+                                Icons.Default.Check,
+                                contentDescription = null,
+                                tint = Color.White,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            LineGray()
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Text(
+                text = task.title,
+                fontSize = 15.sp,
+                color = Color.Black
+            )
+            Text(
+                text = task.description,
+                fontSize = 13.sp,
+                color = Color.Black
+            )
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.ic_alarm),
+                    contentDescription = null,
+                    colorFilter = ColorFilter.tint(Color(0xFFFF486A)),
+                    modifier = Modifier.size(13.dp)
+                )
+
+                Spacer(modifier = Modifier.width(4.dp))
+
+                Text(
+                    text = task.taskTime.toTimeOnly(),
+                    fontSize = 12.sp,
+                    color = Color(0xFFFF486A)
+                )
+            }
+        }
+    }
+
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun TaskListForTodayPreview() {
+    val tasks = listOf(
+        TaskResponse(
+            _id = "task001",
+            userId = "user123",
+            title = "Meeting with client",
+            description = "Jetpack compose",
+            createAt = "2025-06-05 19:00",
+            taskDate = "2025-06-06",
+            taskTime = "18:30",
+            type = "Meeting",
+            isSuccess = false,
+            subtasks = listOf(
+                SubtaskResponse(
+                    title = "Subtask 1",
+                    subtaskDes = "Subtask des 1"
+                ),
+                SubtaskResponse(
+                    title = "Subtask 1",
+                    subtaskDes = "Subtask des 1"
+                )
+            )
+        ),
+        TaskResponse(
+            _id = "task001",
+            userId = "user123",
+            title = "Meeting with client",
+            description = "Jetpack compose",
+            createAt = "2025-06-05 19:00",
+            taskDate = "2025-06-06",
+            taskTime = "18:30",
+            type = "Meeting",
+            isSuccess = false,
+            subtasks = listOf(
+                SubtaskResponse(
+                    title = "Subtask 1",
+                    subtaskDes = "Subtask des 1"
+                ),
+                SubtaskResponse(
+                    title = "Subtask 1",
+                    subtaskDes = "Subtask des 1"
+                )
+            )
+        ),
+        TaskResponse(
+            _id = "task001",
+            userId = "user123",
+            title = "Meeting with client",
+            description = "Jetpack compose",
+            createAt = "2025-06-05 19:00",
+            taskDate = "2025-06-06",
+            taskTime = "18:30",
+            type = "Meeting",
+            isSuccess = false,
+            subtasks = listOf(
+                SubtaskResponse(
+                    title = "Subtask 1",
+                    subtaskDes = "Subtask des 1"
+                ),
+                SubtaskResponse(
+                    title = "Subtask 1",
+                    subtaskDes = "Subtask des 1"
+                )
+            )
+        )
+    )
+
+    val theme = ThemeOption.Teal
+
+    TaskifyTheme {
+        tasks.forEach { task ->
+            TaskListForToday(task, theme, onUpdateTask = {})
+        }
+    }
 }
 
 @Composable
