@@ -62,7 +62,28 @@ const login = async (req, res, next) => {
   }
 }
 
+const update = async (req, res, next) => {
+  const correctCondition = Joi.object({
+    username: Joi.string()
+      .required()
+      .pattern(USERNAME_RULE)
+      .message(USERNAME_RULE_MESSAGE)
+  })
+
+  try {
+    await correctCondition.validateAsync(req.body, {
+      abortEarly: false
+    })
+    next()
+  } catch (error) {
+    next(
+      new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, new Error(error).message)
+    )
+  }
+}
+
 module.exports = {
   createNew,
-  login
+  login,
+  update
 }
