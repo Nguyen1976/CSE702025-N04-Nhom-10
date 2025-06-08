@@ -136,11 +136,38 @@ const update = async (userId, reqBody) => {
   }
 }
 
+const updatePassword = async (userId, reqBody) => {
+  try {
+    const { oldPassword, password } = reqBody
+
+    const user = await User.findById(userId)
+
+    if (!user) {
+      throw new ApiError(StatusCodes.NOT_FOUND, 'User not found')
+    }
+
+    const isMatch = await bcrypt.compare(oldPassword, user.password)
+
+    if (!isMatch) {
+      throw new ApiError(StatusCodes.UNAUTHORIZED, 'Old password is incorrect')
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10)
+
+    const updatedUser = await User.findByIdAndUpdate(userId, { password: hashedPassword })
+
+    return pickUser(updatedUser)
+  } catch (error) {
+    throw error
+  }
+}
+
 module.exports = {
   createNew,
   login,
   refreshToken,
   logout,
   getDetail,
-  update
+  update,
+  updatePassword
 }

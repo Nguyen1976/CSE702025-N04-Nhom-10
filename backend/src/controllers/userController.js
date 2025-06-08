@@ -71,11 +71,24 @@ const update = async (req, res, next) => {
   }
 }
 
+const updatePassword = async (req, res, next) => {
+  try {
+    const updatedUser = await userService.updatePassword(
+      req.jwtDecoded._id,
+      req.body
+    )
+    res.status(StatusCodes.OK).json(updatedUser)
+  } catch (error) {
+    next(error)
+  }
+}
+
 module.exports = {
   createNew,
   login,
   refreshToken,
   logout,
   getDetail,
-  update
+  update,
+  updatePassword
 }

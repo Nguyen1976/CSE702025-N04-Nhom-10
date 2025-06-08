@@ -23,7 +23,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n  \"email\": \"test10@example.com\",\r\n  \"password\": \"securePassword123\"\r\n}",
+					"raw": "{\r\n  \"email\": \"test2@example.com\",\r\n  \"password\": \"securePassword123\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -356,6 +356,43 @@
 						"v1",
 						"users",
 						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update password",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2ODMyZDY2YzdhYjVlYWEwYTc1ZDViYmYiLCJlbWFpbCI6InRlc3QyQGV4YW1wbGUuY29tIiwiaWF0IjoxNzQ5MzUxNDY0LCJleHAiOjE3NDkzNTUwNjR9.Jq8F_DkgvrP-ixMu1aVgmCaps58Yziuv2FSlXXJvS_Q",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"oldPassword\": \"securePassword123\",\r\n    \"password\":\"securePassword12\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/v1/users/update-password",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"v1",
+						"users",
+						"update-password"
 					]
 				}
 			},
