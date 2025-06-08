@@ -250,7 +250,7 @@ fun SettingScreen(
                     }
                 }
             )
-            SettingItem(painter = painterResource(id = R.drawable.ic_productivity), "Productivity", onClick = {})
+            SettingItem(painter = painterResource(id = R.drawable.ic_productivity), "Productivity", onClick = { context.startActivity(Intent(context, ProductivityActivity::class.java)) })
 
             Box(
                 modifier = Modifier
@@ -261,7 +261,7 @@ fun SettingScreen(
             )
 
             SettingItem(painter = painterResource(id = R.drawable.ic_key), "Privacy Policy", onClick = {})
-            SettingItem(painter = painterResource(id = R.drawable.ic_help_center), "Help Center", onClick = {context.startActivity(Intent(context, HelpCenterActivity::class.java))})
+            SettingItem(painter = painterResource(id = R.drawable.ic_help_center), "Help Center", onClick = { context.startActivity(Intent(context, HelpCenterActivity::class.java)) })
             SettingItem(
                 painter = painterResource(id = R.drawable.ic_logout),
                 text = "Log Out",

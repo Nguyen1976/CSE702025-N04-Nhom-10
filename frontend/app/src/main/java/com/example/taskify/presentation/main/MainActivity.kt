@@ -3,6 +3,7 @@ package com.example.taskify.presentation.main
 import android.content.Intent
 import android.hardware.lights.Light
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -591,84 +592,6 @@ fun TaskListForToday(
         }
     }
 
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun TaskListForTodayPreview() {
-    val tasks = listOf(
-        TaskResponse(
-            _id = "task001",
-            userId = "user123",
-            title = "Meeting with client",
-            description = "Jetpack compose",
-            createAt = "2025-06-05 19:00",
-            taskDate = "2025-06-06",
-            taskTime = "18:30",
-            type = "Meeting",
-            isSuccess = false,
-            subtasks = listOf(
-                SubtaskResponse(
-                    title = "Subtask 1",
-                    subtaskDes = "Subtask des 1"
-                ),
-                SubtaskResponse(
-                    title = "Subtask 1",
-                    subtaskDes = "Subtask des 1"
-                )
-            )
-        ),
-        TaskResponse(
-            _id = "task001",
-            userId = "user123",
-            title = "Meeting with client",
-            description = "Jetpack compose",
-            createAt = "2025-06-05 19:00",
-            taskDate = "2025-06-06",
-            taskTime = "18:30",
-            type = "Meeting",
-            isSuccess = false,
-            subtasks = listOf(
-                SubtaskResponse(
-                    title = "Subtask 1",
-                    subtaskDes = "Subtask des 1"
-                ),
-                SubtaskResponse(
-                    title = "Subtask 1",
-                    subtaskDes = "Subtask des 1"
-                )
-            )
-        ),
-        TaskResponse(
-            _id = "task001",
-            userId = "user123",
-            title = "Meeting with client",
-            description = "Jetpack compose",
-            createAt = "2025-06-05 19:00",
-            taskDate = "2025-06-06",
-            taskTime = "18:30",
-            type = "Meeting",
-            isSuccess = false,
-            subtasks = listOf(
-                SubtaskResponse(
-                    title = "Subtask 1",
-                    subtaskDes = "Subtask des 1"
-                ),
-                SubtaskResponse(
-                    title = "Subtask 1",
-                    subtaskDes = "Subtask des 1"
-                )
-            )
-        )
-    )
-
-    val theme = ThemeOption.Teal
-
-    TaskifyTheme {
-        tasks.forEach { task ->
-            TaskListForToday(task, theme, onUpdateTask = {})
-        }
-    }
 }
 
 @Composable

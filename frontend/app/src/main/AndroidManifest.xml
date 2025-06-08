@@ -17,6 +17,9 @@
         android:theme="@style/Theme.Taskify"
         tools:targetApi="31">
         <activity
+            android:name=".presentation.settings.ProductivityActivity"
+            android:exported="false" />
+        <activity
             android:name=".presentation.settings.HelpCenterActivity"
             android:exported="false"
             android:theme="@style/Theme.Taskify" />
