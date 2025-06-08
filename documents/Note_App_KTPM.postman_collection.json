@@ -1,9 +1,10 @@
 {
 	"info": {
-		"_postman_id": "18b8d04e-f441-4fed-a886-df94e344ac36",
+		"_postman_id": "034ea5f8-7ff5-4d74-9ca1-08be59253ef1",
 		"name": "Note_App_KTPM",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "30276076"
+		"_exporter_id": "36484739",
+		"_collection_link": "https://noteappapi.postman.co/workspace/note_app_api-Workspace~1696072c-b0eb-414c-8266-e2b497885e5f/collection/36484739-034ea5f8-7ff5-4d74-9ca1-08be59253ef1?action=share&source=collection_link&creator=36484739"
 	},
 	"item": [
 		{
@@ -336,7 +337,12 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n  \"email\": \"test10@example.com\",\r\n  \"password\": \"securePassword123\"\r\n}"
+					"raw": "{\r\n    \"username\": \"test\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
 				},
 				"url": {
 					"raw": "http://localhost:3000/api/v1/users/",
