@@ -92,11 +92,12 @@ fun ButtonSection(
     text: String,
     colors: ButtonColors = ButtonDefaults.buttonColors(
         containerColor = Color(0xFF24A19C)
-    )
+    ),
+    modifier: Modifier = Modifier
 ) {
     Button(
         onClick = { onClick() },
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(vertical = 16.dp)
             .height(52.dp),
