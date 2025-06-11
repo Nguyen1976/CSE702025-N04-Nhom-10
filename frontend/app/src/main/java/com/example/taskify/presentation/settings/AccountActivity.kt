@@ -28,6 +28,5 @@ class AccountActivity : AppCompatActivity() {
 
 @Composable
 fun AccountScreen() {
-
     var newUsername by remember { mutableStateOf("") }
 }
