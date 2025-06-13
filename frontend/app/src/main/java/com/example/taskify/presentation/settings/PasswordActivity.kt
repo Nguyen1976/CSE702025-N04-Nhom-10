@@ -1,12 +1,10 @@
 package com.example.taskify.presentation.settings
 
-import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,11 +16,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -38,60 +34,78 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.taskify.components.AccountTextField
+import com.example.taskify.R
 import com.example.taskify.components.ButtonSection
+import com.example.taskify.components.PasswordTextField
 import com.example.taskify.data.themeStorage.ThemeDataStore
-import com.example.taskify.data.viewmodel.UpdateUsernameState
+import com.example.taskify.data.viewmodel.UpdatePasswordState
 import com.example.taskify.data.viewmodel.UserViewModel
 import com.example.taskify.domain.model.themeModel.ThemeOption
 import com.example.taskify.presentation.main.toColor
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class AccountActivity : AppCompatActivity() {
+class PasswordActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        setContentView(R.layout.activity_password)
 
         setContent {
             val context = LocalContext.current
             val themeFlow = ThemeDataStore.getSavedTheme(context)
             val theme by themeFlow.collectAsState(initial = ThemeOption.Teal)
 
-            AccountScreen(
-                onBackClick = { finish() },
-                theme = theme ?: ThemeOption.Teal
+            ChangePasswordScreen(
+                theme = theme ?: ThemeOption.Teal,
+                onBackClick = {finish()}
             )
         }
     }
 }
 
 @Composable
-fun AccountScreen(
-    onBackClick: () -> Unit,
+fun ChangePasswordScreen(
     theme: ThemeOption,
+    onBackClick: () -> Unit = {},
     userViewModel: UserViewModel = hiltViewModel()
 ) {
-    val username by userViewModel.username.collectAsState()
-    var fullNameError by remember { mutableStateOf<String?>(null) }
-    val updateUserState by userViewModel.updateUserState.collectAsState()
+    val oldPassword by userViewModel.oldPassword.collectAsState()
+    val newPassword by userViewModel.newPassword.collectAsState()
 
+    val updatePasswordState by userViewModel.updatePasswordState.collectAsState()
     val color = theme.toColor()
     val context = LocalContext.current
 
-    LaunchedEffect(updateUserState) {
-        when (updateUserState) {
-            is UpdateUsernameState.Success -> {
+    var oldPasswordError by remember { mutableStateOf<String?>(null) }
+    var newPasswordError by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(updatePasswordState) {
+        when (updatePasswordState) {
+            is UpdatePasswordState.Error -> {
+                val msg = (updatePasswordState as UpdatePasswordState.Error).message
+                if (msg == "Old password is incorrect") {
+                    oldPasswordError = msg
+                } else {
+                    oldPasswordError = null
+                }
+            }
+            UpdatePasswordState.Success -> {
+                oldPasswordError = null
+                newPasswordError = null
                 Toast.makeText(context, "Updated successfully!", Toast.LENGTH_SHORT).show()
                 onBackClick()
             }
-            is UpdateUsernameState.Error -> {
-                Toast.makeText(context, "Update failed, please try again!", Toast.LENGTH_SHORT).show()
+            else -> {
+                oldPasswordError = null
+                newPasswordError = null
             }
-            else -> {}
         }
     }
 
@@ -123,7 +137,7 @@ fun AccountScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "Account",
+                    text = "Change Password",
                     fontSize = 20.sp,
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.padding(end = 16.dp)
@@ -131,58 +145,39 @@ fun AccountScreen(
             }
         }
 
-        Spacer(modifier = Modifier.height(48.dp))
-
-        AccountTextField(
-            text = "Full Name",
-            placeholder = "Full name",
-            value = username,
-            onValueChange = { userViewModel.setUsername(it) },
-            errorText = fullNameError
+        PasswordTextField(
+            password = oldPassword,
+            onPasswordChange = {
+                userViewModel.setOldPassword(it)
+                oldPasswordError = null
+            },
+            errorText = oldPasswordError
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-        ) {
-            Text(
-                text = "Password",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.SemiBold
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Button(
-                onClick = {
-                    context.startActivity(Intent(context, PasswordActivity::class.java))
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(52.dp)
-                    .border(1.dp, Color.LightGray, RoundedCornerShape(16.dp)),
-                colors = ButtonDefaults.buttonColors(containerColor = Color.White),
-                shape = RoundedCornerShape(16.dp)
-            ) {
-                Text(
-                    text = "Change Password",
-                    fontSize = 18.sp,
-                    color = Color(0xFF767E8C)
-                )
-            }
-        }
+        PasswordTextField(
+            password = newPassword,
+            onPasswordChange = {
+                userViewModel.setNewPassword(it)
+                newPasswordError = null
+            },
+            errorText = newPasswordError
+        )
 
         Spacer(modifier = Modifier.weight(1f))
 
         ButtonSection(
             onClick = {
-                fullNameError = null
-                if (username.isBlank()) {
-                    fullNameError = "This field cannot be empty!"
+                oldPasswordError = null
+                newPasswordError = null
+
+                if (oldPassword.isBlank()) {
+                    oldPasswordError = "This field cannot be empty!"
+                } else if (newPassword.isBlank()) {
+                    newPasswordError = "This field cannot be empty!"
                 } else {
-                    userViewModel.updateUsername()
+                    userViewModel.updatePassword()
                 }
             },
             text = "Save Change",

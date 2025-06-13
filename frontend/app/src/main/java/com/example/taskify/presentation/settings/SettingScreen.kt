@@ -78,6 +78,7 @@ fun SettingScreen(
                 val intent = Intent(context, DashboardActivity::class.java)
                 intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                 context.startActivity(intent)
+                userViewModel.clearUser()
             }
             is SignOutViewModel.LogoutState.Error -> {
                 snackbarHostState.showSnackbar(
@@ -236,7 +237,7 @@ fun SettingScreen(
             }
 
             Spacer(modifier = Modifier.height(20.dp))
-            SettingItem(painter = painterResource(id = R.drawable.ic_account), "Account", onClick = {})
+            SettingItem(painter = painterResource(id = R.drawable.ic_account), "Account", onClick = {context.startActivity(Intent(context, AccountActivity::class.java))})
             SettingItem(painter = painterResource(id = R.drawable.ic_theme), "Theme", onClick = { context.startActivity(Intent(context, ChooseThemeActivity::class.java)) })
             SettingItem(
                 painter = painterResource(id = R.drawable.ic_app_icon),

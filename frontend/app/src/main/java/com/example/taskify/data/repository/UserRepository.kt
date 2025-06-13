@@ -1,7 +1,6 @@
 package com.example.taskify.data.repository
 
 import com.example.taskify.data.remote.UserApi
-import com.example.taskify.domain.model.userModel.UserRequest
 import com.example.taskify.domain.model.userModel.UserResponse
 import javax.inject.Inject
 
@@ -23,15 +22,45 @@ class UserRepository @Inject constructor(
         }
     }
 
-    suspend fun updateUser(userRequest: UserRequest): Result<UserResponse> {
+    data class UsernameUpdateRequest (
+        val username: String
+    )
+
+    data class PasswordUpdateRequest (
+        val oldPassword: String,
+        val password: String
+    )
+
+    suspend fun updateUsername(usernameRequest: UsernameUpdateRequest): Result<UserResponse> {
         return try {
-            val response = api.putUser(userRequest)
+            val response = api.putUsername(usernameRequest)
             if (response.isSuccessful) {
-                response.body()?.let { updatedUser ->
-                    Result.success(updatedUser)
+                response.body()?.let { updatedUsername ->
+                    Result.success(updatedUsername)
                 } ?: Result.failure(Exception("Empty response body"))
             } else {
-                Result.failure(Exception("Failed to update user: ${response.code()} ${response.message()}"))
+                Result.failure(Exception("Failed to update username: ${response.code()} ${response.message()}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun updatePassword(passwordRequest: PasswordUpdateRequest): Result<UserResponse> {
+        return try {
+            val response = api.putPassword(passwordRequest)
+            if (response.isSuccessful) {
+                response.body()?.let {
+                    Result.success(it)
+                } ?: Result.failure(Exception("Empty response body"))
+            } else {
+                val errorMsg = if (response.code() == 401) {
+                    "Old password is incorrect"
+                } else {
+                    "Failed to update password: ${response.code()} ${response.message()}"
+                }
+
+                Result.failure(Exception(errorMsg))
             }
         } catch (e: Exception) {
             Result.failure(e)
