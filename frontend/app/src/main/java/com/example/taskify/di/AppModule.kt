@@ -31,6 +31,7 @@ import javax.inject.Singleton
 object AppModule {
 
     private const val BASE_URL = "http://192.168.100.211:3000"
+//    private const val BASE_URL = "http://10.6.212.66:3000"
 //    private const val BASE_URL = "http://192.168.100.211:8080"
 
     @Provides

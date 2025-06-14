@@ -72,6 +72,7 @@ fun SignUpScreen(
 
     val signUpState by viewModel.signUpState.collectAsState()
     val context = LocalContext.current
+    var lastToastTime by remember { mutableStateOf(0L) }
 
     LaunchedEffect(signUpState) {
         if (signUpState is UiState.Success) {
@@ -123,6 +124,8 @@ fun SignUpScreen(
             Spacer(modifier = Modifier.height(32.dp))
 
             PasswordTextField(
+                text = "Password",
+                placeholder = "Enter your password",
                 password = password,
                 onPasswordChange = { password = it },
                 errorText = passwordError
@@ -134,7 +137,13 @@ fun SignUpScreen(
             LaunchedEffect(signUpState) {
                 if (signUpState is UiState.Error) {
                     val message = (signUpState as UiState.Error).message
-                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+
+                    val currentTime = System.currentTimeMillis()
+                    if(currentTime - lastToastTime > 2000) {
+                        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                        lastToastTime = currentTime
+                    }
+
                     viewModel.resetSignUpState()
                 }
             }
@@ -142,6 +151,8 @@ fun SignUpScreen(
             Button(
                 onClick = {
                     var isValid = true
+                    val usernameRegex = Regex("^[a-zA-Z0-9_]+$")
+
                     emailError = null
                     usernameError = null
                     passwordError = null
@@ -157,10 +168,21 @@ fun SignUpScreen(
                     if (username.isBlank()) {
                         usernameError = "Username is required"
                         isValid = false
+                    } else if (username.any { it.isWhitespace() }) {
+                        usernameError = "Username must not contain whitespace"
+                        isValid = false
+                    } else if (!username.matches(usernameRegex)) {
+                        usernameError = "Username can only contain letters, digits and underscores"
+                        isValid = false
                     }
 
                     if (password.isBlank()) {
                         passwordError = "Password is required"
+                        isValid = false
+                    }
+
+                    if (!isValidPassword(password)) {
+                        passwordError = "Password must be at least 8 characters,\n" + "include a digit and an uppercase letter!"
                         isValid = false
                     }
 
@@ -202,4 +224,9 @@ fun SignUpScreen(
             }
         }
     }
+}
+
+fun isValidPassword(password: String): Boolean {
+    val passwordRegex = Regex("^(?=.*[A-Z])(?=.*\\d).{8,}$")
+    return passwordRegex.matches(password)
 }

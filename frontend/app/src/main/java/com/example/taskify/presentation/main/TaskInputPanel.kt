@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -55,6 +56,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
@@ -107,10 +109,6 @@ fun TaskInputPanel(
 
     val dateFormatter = remember {
         DateTimeFormatter.ofPattern("EEE, dd MMM yyyy", Locale.ENGLISH)
-    }
-
-    fun formatTaskDate(date: LocalDate?): String {
-        return date?.format(dateFormatter) ?: ""
     }
 
     BackHandler(enabled = true) {
@@ -284,102 +282,145 @@ fun TaskInputPanel(
             Spacer(modifier = Modifier.height(12.dp))
 
             Row(
-                verticalAlignment = Alignment.CenterVertically,
+                verticalAlignment = Alignment.Top,
                 horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp)
+                modifier = Modifier.fillMaxWidth()
+                    .padding(horizontal = 12.dp)
             ) {
-                Image(
-                    painter = painterResource(R.drawable.ic_tag),
-                    contentDescription = null,
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier
-                        .size(24.dp)
-                        .clickable(
-                            interactionSource = interactionSource,
-                            indication = null
-                        ) { showTypeDialog = true },
-                    colorFilter = if (selectedType != null)
-                        ColorFilter.tint(Color(0xFF24A19C))
-                    else
-                        ColorFilter.tint(Color(0xFFA0AAB8))
-                )
+                        .wrapContentWidth()
+                        .height(40.dp)
+                ) {
+                    Image(
+                        painter = painterResource(R.drawable.ic_tag),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(24.dp)
+                            .clickable(
+                                interactionSource = interactionSource,
+                                indication = null
+                            ) { showTypeDialog = true },
+                        colorFilter = if (selectedType != null)
+                            ColorFilter.tint(Color(0xFF24A19C))
+                        else
+                            ColorFilter.tint(Color(0xFFA0AAB8))
+                    )
+
+                    if (selectedType != null) {
+                        Text(
+                            text = selectedType.toString(),
+                            fontSize = 12.sp
+                        )
+                    }
+                }
 
                 Spacer(modifier = Modifier.width(12.dp))
 
-                Image(
-                    painter = painterResource(R.drawable.ic_calendar),
-                    contentDescription = null,
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier
-                        .size(24.dp)
-                        .clickable(
-                            interactionSource = interactionSource,
-                            indication = null
-                        ) {
-                            val now = LocalDate.now()
-                            val year = taskDate?.year ?: now.year
-                            val month = taskDate?.monthValue?.minus(1) ?: now.monthValue - 1
-                            val day = taskDate?.dayOfMonth ?: now.dayOfMonth
+                        .wrapContentWidth()
+                        .height(40.dp)
+                ) {
+                    Image(
+                        painter = painterResource(R.drawable.ic_calendar),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(24.dp)
+                            .clickable(
+                                interactionSource = interactionSource,
+                                indication = null
+                            ) {
+                                val now = LocalDate.now()
+                                val year = taskDate?.year ?: now.year
+                                val month = taskDate?.monthValue?.minus(1) ?: now.monthValue - 1
+                                val day = taskDate?.dayOfMonth ?: now.dayOfMonth
 
-                            val datePickerDialog = DatePickerDialog(
-                                englishContext,
-                                { _, y, m, d ->
-                                    onTaskDateChange(LocalDate.of(y, m + 1, d))
-                                },
-                                year,
-                                month,
-                                day
-                            )
+                                val datePickerDialog = DatePickerDialog(
+                                    englishContext,
+                                    { _, y, m, d ->
+                                        onTaskDateChange(LocalDate.of(y, m + 1, d))
+                                    },
+                                    year,
+                                    month,
+                                    day
+                                )
 
-                            val dateFormat = java.text.SimpleDateFormat("EEE, MMM d", Locale.ENGLISH)
-                            val selectedDate = Calendar.getInstance().apply {
-                                set(year, month, day)
-                            }.time
-                            datePickerDialog.setTitle(dateFormat.format(selectedDate))
-
-                            datePickerDialog.datePicker.init(year, month, day) { _, y, m, d ->
-                                val updatedDate = Calendar.getInstance().apply {
-                                    set(y, m, d)
+                                val dateFormat = java.text.SimpleDateFormat("EEE, MMM d", Locale.ENGLISH)
+                                val selectedDate = Calendar.getInstance().apply {
+                                    set(year, month, day)
                                 }.time
-                                datePickerDialog.setTitle(dateFormat.format(updatedDate))
-                            }
+                                datePickerDialog.setTitle(dateFormat.format(selectedDate))
 
-                            datePickerDialog.show()
-                        },
-                    colorFilter = if (taskDate != null)
-                        ColorFilter.tint(Color(0xFF24A19C))
-                    else
-                        ColorFilter.tint(Color(0xFFA0AAB8))
-                )
+                                datePickerDialog.datePicker.init(year, month, day) { _, y, m, d ->
+                                    val updatedDate = Calendar.getInstance().apply {
+                                        set(y, m, d)
+                                    }.time
+                                    datePickerDialog.setTitle(dateFormat.format(updatedDate))
+                                }
+
+                                datePickerDialog.show()
+                            },
+                        colorFilter = if (taskDate != null)
+                            ColorFilter.tint(Color(0xFF24A19C))
+                        else
+                            ColorFilter.tint(Color(0xFFA0AAB8))
+                    )
+
+                    if(taskDate != null) {
+                        Text(
+                            text = taskDate.toString(),
+                            fontSize = 12.sp
+                        )
+                    }
+                }
 
                 Spacer(modifier = Modifier.width(12.dp))
 
-                Image(
-                    painter = painterResource(R.drawable.ic_clock),
-                    contentDescription = null,
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier
-                        .size(24.dp)
-                        .clickable(
-                            interactionSource = interactionSource,
-                            indication = null
-                        ) {
-                            val nowTime = LocalTime.now()
-                            val hour = taskTime?.hour ?: nowTime.hour
-                            val minute = taskTime?.minute ?: nowTime.minute
+                        .wrapContentWidth()
+                        .height(40.dp)
+                ) {
+                    Image(
+                        painter = painterResource(R.drawable.ic_clock),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(24.dp)
+                            .clickable(
+                                interactionSource = interactionSource,
+                                indication = null
+                            ) {
+                                val nowTime = LocalTime.now()
+                                val hour = taskTime?.hour ?: nowTime.hour
+                                val minute = taskTime?.minute ?: nowTime.minute
 
-                            TimePickerDialog(
-                                context,
-                                { _, h, m ->
-                                    onTaskTimeChange(LocalTime.of(h, m))
-                                },
-                                hour,
-                                minute,
-                                true
-                            ).show()
-                        },
-                    colorFilter = if (taskTime != null)
-                        ColorFilter.tint(Color(0xFF24A19C))
-                    else
-                        ColorFilter.tint(Color(0xFFA0AAB8))
-                )
+                                TimePickerDialog(
+                                    context,
+                                    { _, h, m ->
+                                        onTaskTimeChange(LocalTime.of(h, m))
+                                    },
+                                    hour,
+                                    minute,
+                                    true
+                                ).show()
+                            },
+                        colorFilter = if (taskTime != null)
+                            ColorFilter.tint(Color(0xFF24A19C))
+                        else
+                            ColorFilter.tint(Color(0xFFA0AAB8))
+                    )
+
+                    if (taskTime != null) {
+                        Text(
+                            text = taskTime.toString(),
+                            fontSize = 12.sp
+                        )
+                    }
+                }
 
                 Spacer(modifier = Modifier.width(12.dp))
 
@@ -456,7 +497,7 @@ fun TaskInputPanel(
         }
     }
 }
-
+//
 //@Preview(showBackground = true)
 //@Composable
 //fun TaskInputPanel2Preview() {

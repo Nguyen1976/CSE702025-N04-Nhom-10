@@ -27,29 +27,27 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import com.example.taskify.R
 import com.example.taskify.components.ButtonSection
 import com.example.taskify.data.themeStorage.ThemeDataStore
 import com.example.taskify.domain.model.themeModel.ThemeOption
+import com.example.taskify.presentation.main.toColor
 import kotlinx.coroutines.launch
 
 class ChooseThemeActivity : AppCompatActivity() {
@@ -84,9 +82,6 @@ fun ChooseThemeScreen(
     onThemeSelected: (ThemeOption) -> Unit,
     onConfirm: () -> Unit
 ) {
-    val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -95,7 +90,8 @@ fun ChooseThemeScreen(
             .padding(top = 48.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        val themes = ThemeOption.values().toList().drop(4)
+        val themes = ThemeOption.values().toList()
+        val color = selectedTheme.toColor()
 
         Text(
             "Theme",
@@ -107,7 +103,7 @@ fun ChooseThemeScreen(
 
         LazyColumn(
             modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+//            verticalArrangement = Arrangement.spacedBy(16.dp),
             contentPadding = PaddingValues(bottom = 16.dp)
         ) {
             items(themes) { theme ->
@@ -123,7 +119,10 @@ fun ChooseThemeScreen(
             onClick = {
                 onConfirm()
             },
-            text = "Apply Change"
+            text = "Apply Change",
+            colors = ButtonDefaults.buttonColors(
+                containerColor = color
+            )
         )
     }
 }
@@ -135,6 +134,10 @@ fun ThemeSettingItem(
     onClick: () -> Unit
 ) {
     val color = when (theme) {
+        ThemeOption.Teal -> Color(0xFF26A69A)
+        ThemeOption.Black -> Color(0xFF1B1C1F)
+        ThemeOption.Red -> Color(0xFFEA4335)
+        ThemeOption.Blue -> Color(0xFF1877F2)
         ThemeOption.LightRed -> Color(0xFFE57373)
         ThemeOption.LightBlue -> Color(0xFF42A5F5)
         ThemeOption.LightGreen -> Color(0xFF81C784)
@@ -153,7 +156,7 @@ fun ThemeSettingItem(
     }
 
     ConstraintLayout(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth().padding(top = 16.dp)
     ) {
         val (card, icon) = createRefs()
 
