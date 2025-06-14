@@ -1,6 +1,7 @@
 package com.example.taskify.presentation.settings
 
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -78,7 +79,6 @@ fun ChangePasswordScreen(
 ) {
     val oldPassword by userViewModel.oldPassword.collectAsState()
     val newPassword by userViewModel.newPassword.collectAsState()
-
     val updatePasswordState by userViewModel.updatePasswordState.collectAsState()
     val color = theme.toColor()
     val context = LocalContext.current
@@ -90,10 +90,16 @@ fun ChangePasswordScreen(
         when (updatePasswordState) {
             is UpdatePasswordState.Error -> {
                 val msg = (updatePasswordState as UpdatePasswordState.Error).message
-                if (msg == "Old password is incorrect") {
-                    oldPasswordError = msg
-                } else {
-                    oldPasswordError = null
+                when {
+                    msg?.contains("Old password is incorrect", ignoreCase = true) == true -> {
+                        oldPasswordError = "Old password is incorrect"
+                    }
+                    msg?.contains("closed") == true -> {
+                        oldPasswordError = "Old password is incorrect"
+                    }
+                    else -> {
+                        oldPasswordError = "Unknown error, please try again!"
+                    }
                 }
             }
             UpdatePasswordState.Success -> {
@@ -118,8 +124,7 @@ fun ChangePasswordScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
@@ -132,8 +137,7 @@ fun ChangePasswordScreen(
             )
 
             Box(
-                modifier = Modifier
-                    .weight(1f),
+                modifier = Modifier.weight(1f),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
@@ -145,7 +149,11 @@ fun ChangePasswordScreen(
             }
         }
 
+        Spacer(modifier = Modifier.height(48.dp))
+
         PasswordTextField(
+            text = "Old Password",
+            placeholder = "Enter your old password",
             password = oldPassword,
             onPasswordChange = {
                 userViewModel.setOldPassword(it)
@@ -154,9 +162,11 @@ fun ChangePasswordScreen(
             errorText = oldPasswordError
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
         PasswordTextField(
+            text = "New Password",
+            placeholder = "Enter your new password",
             password = newPassword,
             onPasswordChange = {
                 userViewModel.setNewPassword(it)
@@ -176,6 +186,10 @@ fun ChangePasswordScreen(
                     oldPasswordError = "This field cannot be empty!"
                 } else if (newPassword.isBlank()) {
                     newPasswordError = "This field cannot be empty!"
+                } else if (!isValidPassword(newPassword)) {
+                    newPasswordError = "Password must be at least 8 characters,\ninclude a digit and an uppercase letter!"
+                } else if (!isValidPassword(oldPassword)) {
+                    oldPasswordError = "Password must be at least 8 characters,\ninclude a digit and an uppercase letter!"
                 } else {
                     userViewModel.updatePassword()
                 }
@@ -184,4 +198,9 @@ fun ChangePasswordScreen(
             colors = ButtonDefaults.buttonColors(containerColor = color)
         )
     }
+}
+
+fun isValidPassword(password: String): Boolean {
+    val passwordRegex = Regex("^(?=.*[A-Z])(?=.*\\d).{8,}$")
+    return passwordRegex.matches(password)
 }

@@ -38,11 +38,20 @@ import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -50,6 +59,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -64,6 +74,9 @@ import com.example.taskify.data.viewmodel.UserViewModel
 import com.example.taskify.domain.model.taskModel.TaskResponse
 import com.example.taskify.presentation.calendar.LineGray
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import okhttp3.internal.cookieToString
 import java.time.LocalDate
 import java.time.Month
 import java.time.format.DateTimeFormatter
@@ -96,191 +109,264 @@ fun ProductivityScreen(
     val formatter = DateTimeFormatter.ofPattern("dd MMM yyyy", Locale.ENGLISH)
     val formatterDate = today.format(formatter)
 
+    val scope = rememberCoroutineScope()
+    var snackbarJob: Job? by remember { mutableStateOf(null) }
+    val snackbarHostState = remember { SnackbarHostState() }
+    val context = LocalContext.current
+
     LaunchedEffect(Unit) {
         taskViewModel.getTasks()
         userViewModel.getUserFromLocal()
         userViewModel.loadCurrentUser()
     }
 
-    Log.d("ChartDebug", "Task size: ${tasksState.value.size}")
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(vertical = 16.dp)
-            .padding(top = 32.dp)
-            .verticalScroll(rememberScrollState()),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Row(
-            modifier = Modifier
-                .padding(horizontal = 16.dp)
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = Icons.Default.ArrowBackIosNew,
-                contentDescription = null,
-                tint = Color(0xFF1B1C1F).copy(alpha = 0.8f),
-                modifier = Modifier
-                    .size(20.dp)
-                    .clickable { onBackClick() }
-            )
-
-            Box(
-                modifier = Modifier
-                    .weight(1f),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "Productivity",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.padding(end = 16.dp)
-                )
+    Scaffold(
+        snackbarHost = {
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier = Modifier.padding(8.dp)
+            ) { data ->
+                Snackbar(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    shape = RoundedCornerShape(8.dp),
+                    containerColor = Color(0xFF1E9584),
+                    contentColor = Color.White,
+                    action = {
+                        TextButton(
+                            onClick = { data.dismiss() }
+                        ) {
+                            Text(
+                                text = data.visuals.actionLabel ?: "OK",
+                                color = Color.Yellow
+                            )
+                        }
+                    }
+                ) {
+                    Text(
+                        text = data.visuals.message,
+                        modifier = Modifier.padding(vertical = 8.dp)
+                    )
+                }
             }
         }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
+    ) { paddingValues ->
         Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(vertical = 16.dp)
+                .padding(top = 32.dp)
+                .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Image(
-                painter = painterResource(R.drawable.person),
-                contentDescription = null,
-                modifier = Modifier.size(100.dp),
-                contentScale = ContentScale.Crop
-            )
-
-            if(user != null) {
-                val currentUser = user!!
-
-                Text(
-                    text = currentUser.username,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = Color.Black
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Text(
-                    text = currentUser.email,
-                    fontSize = 15.sp,
-                    color = Color(0xFF767E8C)
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        Row(
-            modifier = Modifier
-                .padding(vertical = 16.dp)
-                .height(56.dp)
-                .fillMaxWidth()
-                .border(1.dp, Color(0xFFE0E5ED)),
-            horizontalArrangement = Arrangement.SpaceAround,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Row( verticalAlignment = Alignment.CenterVertically ) {
-                Icon(
-                    Icons.Default.CalendarMonth,
-                    contentDescription = null,
-                    tint = Color(0xFF767E8C),
-                    modifier = Modifier.size(24.dp)
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(
-                    text = formatterDate,
-                    fontSize = 14.sp,
-                    color = Color(0xFF767E8C)
-                )
-            }
-
-            Box(
+            Row(
                 modifier = Modifier
-                    .padding(vertical = 4.dp)
-                    .fillMaxHeight()
-                    .width(1.dp)
-                    .background(Color(0xFFE0E5ED))
-            )
-
-            Row( verticalAlignment = Alignment.CenterVertically ) {
+                    .padding(horizontal = 16.dp)
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Icon(
-                    Icons.Default.BarChart,
+                    imageVector = Icons.Default.ArrowBackIosNew,
                     contentDescription = null,
-                    tint = Color(0xFF767E8C),
-                    modifier = Modifier.size(24.dp)
+                    tint = Color(0xFF1B1C1F).copy(alpha = 0.8f),
+                    modifier = Modifier
+                        .size(20.dp)
+                        .clickable { onBackClick() }
                 )
-                Spacer(modifier = Modifier.width(4.dp))
+
+                Box(
+                    modifier = Modifier
+                        .weight(1f),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Productivity",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.padding(end = 16.dp)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Image(
+                    painter = painterResource(R.drawable.person),
+                    contentDescription = null,
+                    modifier = Modifier.size(100.dp),
+                    contentScale = ContentScale.Crop
+                )
+
+                if(user != null) {
+                    val currentUser = user!!
+
+                    Text(
+                        text = currentUser.username,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = Color.Black
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Text(
+                        text = currentUser.email,
+                        fontSize = 15.sp,
+                        color = Color(0xFF767E8C)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Row(
+                modifier = Modifier
+                    .padding(vertical = 16.dp)
+                    .height(56.dp)
+                    .fillMaxWidth()
+                    .border(1.dp, Color(0xFFE0E5ED)),
+                horizontalArrangement = Arrangement.SpaceAround,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row( verticalAlignment = Alignment.CenterVertically ) {
+                    Icon(
+                        Icons.Default.CalendarMonth,
+                        contentDescription = null,
+                        tint = Color(0xFF767E8C),
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = formatterDate,
+                        fontSize = 14.sp,
+                        color = Color(0xFF767E8C)
+                    )
+                }
+
+                Box(
+                    modifier = Modifier
+                        .padding(vertical = 4.dp)
+                        .fillMaxHeight()
+                        .width(1.dp)
+                        .background(Color(0xFFE0E5ED))
+                )
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .clickable {
+                            if (snackbarHostState.currentSnackbarData == null) {
+                                snackbarJob?.cancel()
+                                snackbarJob = scope.launch {
+                                    snackbarHostState.showSnackbar("Growing features")
+                                }
+                            }
+                        }
+                ) {
+                    Icon(
+                        Icons.Default.BarChart,
+                        contentDescription = null,
+                        tint = Color(0xFF767E8C),
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = "My Report",
+                        fontSize = 14.sp,
+                        color = Color(0xFF767E8C)
+                    )
+                }
+            }
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .padding(bottom = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
                 Text(
-                    text = "My Report",
-                    fontSize = 14.sp,
-                    color = Color(0xFF767E8C)
+                    "Report Progress",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+
+                Icon(
+                    Icons.Default.ArrowForwardIos,
+                    contentDescription = null,
+                    tint = Color(0xFF1B1C1F).copy(alpha = 0.6f),
+                    modifier = Modifier
+                        .size(20.dp)
+                        .clickable {
+                            if (snackbarHostState.currentSnackbarData == null) {
+                                snackbarJob?.cancel()
+                                snackbarJob = scope.launch {
+                                    snackbarHostState.showSnackbar("Growing features")
+                                }
+                            }
+                        }
                 )
             }
-        }
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
+            LineGray(modifier = Modifier.padding(horizontal = 16.dp))
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .padding(top = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    "Statistic Goals",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+
+                Icon(
+                    Icons.Default.ArrowForwardIos,
+                    contentDescription = null,
+                    tint = Color(0xFF1B1C1F).copy(alpha = 0.6f),
+                    modifier = Modifier
+                        .size(20.dp)
+                        .clickable {
+                            if (snackbarHostState.currentSnackbarData == null) {
+                                snackbarJob?.cancel()
+                                snackbarJob = scope.launch {
+                                    snackbarHostState.showSnackbar("Growing features")
+                                }
+                            }
+                        }
+                )
+            }
+
+            LineGray(modifier = Modifier
                 .padding(horizontal = 16.dp)
-                .padding(bottom = 12.dp ),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                "Report Progress",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.SemiBold
-            )
+                .padding(top = 12.dp))
 
-            Icon(
-                Icons.Default.ArrowForwardIos,
-                contentDescription = null,
-                tint = Color(0xFF1B1C1F).copy(alpha = 0.8f),
-                modifier = Modifier.size(20.dp)
-            )
-        }
+            MonthlyProgressBarChart(tasks = tasksState.value)
 
-        LineGray(modifier = Modifier.padding(horizontal = 16.dp))
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-                .padding(top = 12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                "Statistic Goals",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.SemiBold
-            )
-
-            Icon(
-                Icons.Default.ArrowForwardIos,
-                contentDescription = null,
-                tint = Color(0xFF1B1C1F).copy(alpha = 0.8f),
-                modifier = Modifier.size(20.dp)
+            ButtonSection(
+                onClick = {
+                    if (snackbarHostState.currentSnackbarData == null) {
+                        snackbarJob?.cancel()
+                        snackbarJob = scope.launch {
+                            snackbarHostState.showSnackbar("Growing features")
+                        }
+                    }
+                },
+                text = "More Statistic",
+                modifier = Modifier.padding(horizontal = 16.dp)
             )
         }
-
-        LineGray(modifier = Modifier.padding(horizontal = 16.dp))
-
-        MonthlyProgressBarChart(tasks = tasksState.value)
-
-        ButtonSection(
-            onClick = {},
-            text = "More Statistic",
-            modifier = Modifier.padding(horizontal = 16.dp)
-        )
     }
 }
 
@@ -319,14 +405,62 @@ fun MonthlyProgressBarChart(
                 .fillMaxWidth()
                 .padding(bottom = 16.dp, start = 8.dp, end = 8.dp)
         ) {
-            Text(
-                text = "Monthly Progress",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
+            Row(
                 modifier = Modifier
-                    .padding(vertical = 8.dp)
-                    .padding(top = 12.dp, start = 4.dp)
-            )
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp, top = 20.dp),
+                verticalAlignment = Alignment.Bottom
+            ) {
+                Text(
+                    text = "Monthly Progress",
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier
+                        .padding(start = 4.dp)
+                )
+                
+                Spacer(modifier = Modifier.weight(1f))
+
+                Row(
+                    verticalAlignment = Alignment.Bottom
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .width(15.dp)
+                            .height(25.dp)
+                            .background(Color(0xFF2AB6AF))
+                            .clip(RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp))
+                    )
+                    Spacer(modifier = Modifier.width(2.dp))
+                    Text(
+                        "Completed",
+                        fontSize = 12.sp,
+                        lineHeight = 0.1.sp,
+                        color = Color(0xFF2AB6AF)
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(10.dp))
+
+                Row(
+                    verticalAlignment = Alignment.Bottom
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .width(15.dp)
+                            .height(25.dp)
+                            .background(Color(0xFF9CE1DE))
+                            .clip(RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp))
+                    )
+                    Spacer(modifier = Modifier.width(2.dp))
+                    Text(
+                        "Incomplete",
+                        lineHeight = 0.1.sp,
+                        fontSize = 12.sp,
+                        color = Color(0xFF9CE1DE)
+                    )
+                }
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
 

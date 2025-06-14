@@ -1,5 +1,6 @@
 package com.example.taskify.data.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.taskify.data.local.UserPreferences
@@ -113,7 +114,6 @@ class UserViewModel @Inject constructor(
                 _userState.value = updatedUser
                 _error.value = null
                 updatedUser?.let { userPreferences.saveUser(it) }
-
                 _updatePasswordState.value = UpdatePasswordState.Success
             } else {
                 val errorMsg = result.exceptionOrNull()?.message

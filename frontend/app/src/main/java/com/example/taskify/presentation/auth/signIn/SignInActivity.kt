@@ -48,7 +48,7 @@ class SignInActivity : AppCompatActivity() {
         setContentView(R.layout.activity_sign_in)
 
         setContent {
-            SignInScreen(onBackClick = {finish()})
+            SignInScreen(onBackClick = { finish() })
         }
     }
 }
@@ -61,10 +61,18 @@ fun SignInScreen(
     val signInState by viewModel.signInState.collectAsState()
     val context = LocalContext.current
 
+    var lastToastTime by remember { mutableStateOf(0L) }
+
     LaunchedEffect(signInState) {
         if (signInState is UiState.Error) {
             val errorMessage = (signInState as UiState.Error).message
-            Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+
+            val currentTime = System.currentTimeMillis()
+            if (currentTime - lastToastTime > 2000) {
+                Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+                lastToastTime = currentTime
+            }
+
             viewModel.resetState()
         }
     }
@@ -101,7 +109,12 @@ fun SignInScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            PasswordTextField(password = password, onPasswordChange = { password = it }, errorText = passwordError)
+            PasswordTextField(text = "Password",
+                placeholder = "Enter your password",
+                password = password,
+                onPasswordChange = { password = it },
+                errorText = passwordError
+            )
 
             Spacer(modifier = Modifier.weight(1f))
 
@@ -144,11 +157,6 @@ fun SignInScreen(
                         color = Color.White
                     )
                 }
-            }
-
-            is UiState.Error -> {
-                val errorMessage = (signInState as UiState.Error).message
-                Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
             }
 
             is UiState.Success -> {

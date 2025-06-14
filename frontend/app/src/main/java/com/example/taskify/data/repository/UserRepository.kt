@@ -1,7 +1,9 @@
 package com.example.taskify.data.repository
 
+import android.util.Log
 import com.example.taskify.data.remote.UserApi
 import com.example.taskify.domain.model.userModel.UserResponse
+import org.json.JSONObject
 import javax.inject.Inject
 
 class UserRepository @Inject constructor(
@@ -54,12 +56,10 @@ class UserRepository @Inject constructor(
                     Result.success(it)
                 } ?: Result.failure(Exception("Empty response body"))
             } else {
-                val errorMsg = if (response.code() == 401) {
-                    "Old password is incorrect"
-                } else {
-                    "Failed to update password: ${response.code()} ${response.message()}"
-                }
-
+                val errorMsg = response.errorBody()?.string()?.let { errorBody ->
+                    val jsonObj = JSONObject(errorBody)
+                    jsonObj.getString("message")
+                } ?: "Failed to update password: ${response.code()} ${response.message()}"
                 Result.failure(Exception(errorMsg))
             }
         } catch (e: Exception) {

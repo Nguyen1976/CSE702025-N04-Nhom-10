@@ -29,6 +29,8 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun PasswordTextField(
+    text: String,
+    placeholder: String,
     password: String,
     onPasswordChange: (String) -> Unit,
     errorText: String? = null
@@ -40,7 +42,7 @@ fun PasswordTextField(
             .fillMaxWidth()
     ) {
         Text(
-            text = "Password",
+            text = text,
             fontSize = 16.sp,
             fontWeight = FontWeight.SemiBold
         )
@@ -52,7 +54,7 @@ fun PasswordTextField(
             onValueChange = onPasswordChange,
             placeholder = {
                 Text(
-                    text = "Enter your password",
+                    text = placeholder,
                     color = Color(0xFFA9B0C5),
                     fontSize = 16.sp
                 )

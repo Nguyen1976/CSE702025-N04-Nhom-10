@@ -80,12 +80,14 @@ fun SettingScreen(
                 context.startActivity(intent)
                 userViewModel.clearUser()
             }
+
             is SignOutViewModel.LogoutState.Error -> {
                 snackbarHostState.showSnackbar(
                     message = (logoutState as SignOutViewModel.LogoutState.Error).error,
                     duration = SnackbarDuration.Short
                 )
             }
+
             else -> {}
         }
     }
@@ -237,8 +239,23 @@ fun SettingScreen(
             }
 
             Spacer(modifier = Modifier.height(20.dp))
-            SettingItem(painter = painterResource(id = R.drawable.ic_account), "Account", onClick = {context.startActivity(Intent(context, AccountActivity::class.java))})
-            SettingItem(painter = painterResource(id = R.drawable.ic_theme), "Theme", onClick = { context.startActivity(Intent(context, ChooseThemeActivity::class.java)) })
+            SettingItem(
+                painter = painterResource(id = R.drawable.ic_account),
+                "Account",
+                onClick = { context.startActivity(Intent(context, AccountActivity::class.java)) })
+            SettingItem(
+                painter = painterResource(id = R.drawable.ic_theme),
+                "Theme",
+                onClick = {
+                    context.startActivity(
+                        Intent(
+                            context,
+                            ChooseThemeActivity::class.java
+                        )
+                    )
+                }
+            )
+
             SettingItem(
                 painter = painterResource(id = R.drawable.ic_app_icon),
                 text = "App icon",
@@ -251,7 +268,19 @@ fun SettingScreen(
                     }
                 }
             )
-            SettingItem(painter = painterResource(id = R.drawable.ic_productivity), "Productivity", onClick = { context.startActivity(Intent(context, ProductivityActivity::class.java)) })
+
+            SettingItem(
+                painter = painterResource(id = R.drawable.ic_productivity),
+                "Productivity",
+                onClick = {
+                    context.startActivity(
+                        Intent(
+                            context,
+                            ProductivityActivity::class.java
+                        )
+                    )
+                }
+            )
 
             Box(
                 modifier = Modifier
@@ -261,8 +290,32 @@ fun SettingScreen(
                     .background(color = Color.LightGray)
             )
 
-            SettingItem(painter = painterResource(id = R.drawable.ic_key), "Privacy Policy", onClick = {})
-            SettingItem(painter = painterResource(id = R.drawable.ic_help_center), "Help Center", onClick = { context.startActivity(Intent(context, HelpCenterActivity::class.java)) })
+            SettingItem(
+                painter = painterResource(id = R.drawable.ic_key),
+                "Privacy Policy",
+                onClick = {
+                    if (snackbarHostState.currentSnackbarData == null) {
+                        snackbarJob?.cancel()
+                        snackbarJob = scope.launch {
+                            snackbarHostState.showSnackbar("Growing features")
+                        }
+                    }
+                }
+            )
+
+            SettingItem(
+                painter = painterResource(id = R.drawable.ic_help_center),
+                "Help Center",
+                onClick = {
+                    context.startActivity(
+                        Intent(
+                            context,
+                            HelpCenterActivity::class.java
+                        )
+                    )
+                }
+            )
+
             SettingItem(
                 painter = painterResource(id = R.drawable.ic_logout),
                 text = "Log Out",

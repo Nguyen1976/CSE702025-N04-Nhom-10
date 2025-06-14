@@ -90,7 +90,7 @@ fun ChooseThemeScreen(
             .padding(top = 48.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        val themes = ThemeOption.values().toList().drop(4)
+        val themes = ThemeOption.values().toList()
         val color = selectedTheme.toColor()
 
         Text(
@@ -103,7 +103,7 @@ fun ChooseThemeScreen(
 
         LazyColumn(
             modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+//            verticalArrangement = Arrangement.spacedBy(16.dp),
             contentPadding = PaddingValues(bottom = 16.dp)
         ) {
             items(themes) { theme ->
@@ -134,6 +134,10 @@ fun ThemeSettingItem(
     onClick: () -> Unit
 ) {
     val color = when (theme) {
+        ThemeOption.Teal -> Color(0xFF26A69A)
+        ThemeOption.Black -> Color(0xFF1B1C1F)
+        ThemeOption.Red -> Color(0xFFEA4335)
+        ThemeOption.Blue -> Color(0xFF1877F2)
         ThemeOption.LightRed -> Color(0xFFE57373)
         ThemeOption.LightBlue -> Color(0xFF42A5F5)
         ThemeOption.LightGreen -> Color(0xFF81C784)
@@ -152,7 +156,7 @@ fun ThemeSettingItem(
     }
 
     ConstraintLayout(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth().padding(top = 16.dp)
     ) {
         val (card, icon) = createRefs()
 
