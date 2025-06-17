@@ -30,9 +30,13 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object AppModule {
 
-    private const val BASE_URL = "http://192.168.100.211:3000"
-//    private const val BASE_URL = "http://10.6.212.66:3000"
-//    private const val BASE_URL = "http://192.168.100.211:8080"
+    private val baseUrl: String by lazy {
+        val properties = java.util.Properties().apply {
+            val file = java.io.File("local.properties")
+            if (file.exists()) load(file.inputStream())
+        }
+        properties.getProperty("baseUrl") ?: "http://10.0.2.2:3000"
+    }
 
     @Provides
     @Singleton
@@ -41,8 +45,10 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideAuthInterceptor(tokenManager: TokenManager): AuthInterceptor =
-        AuthInterceptor(tokenManager)
+    fun provideAuthInterceptor(
+        tokenManager: TokenManager,
+        @Named("withoutInterceptor") authApi: AuthApi
+    ): AuthInterceptor = AuthInterceptor(tokenManager, authApi)
 
     @Provides
     @Singleton
@@ -67,7 +73,7 @@ object AppModule {
         gson: Gson
     ): Retrofit {
         return Retrofit.Builder()
-            .baseUrl(BASE_URL)
+            .baseUrl(baseUrl)
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
@@ -81,7 +87,7 @@ object AppModule {
         gson: Gson
     ): Retrofit {
         return Retrofit.Builder()
-            .baseUrl(BASE_URL)
+            .baseUrl(baseUrl)
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
