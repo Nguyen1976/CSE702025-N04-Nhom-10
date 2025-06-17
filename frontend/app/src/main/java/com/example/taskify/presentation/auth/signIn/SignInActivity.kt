@@ -62,17 +62,15 @@ fun SignInScreen(
     val context = LocalContext.current
 
     var lastToastTime by remember { mutableStateOf(0L) }
+    val errorState = signInState as? UiState.Error
 
-    LaunchedEffect(signInState) {
-        if (signInState is UiState.Error) {
-            val errorMessage = (signInState as UiState.Error).message
-
+    LaunchedEffect(errorState?.message) {
+        errorState?.let {
             val currentTime = System.currentTimeMillis()
             if (currentTime - lastToastTime > 2000) {
-                Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, it.message, Toast.LENGTH_SHORT).show()
                 lastToastTime = currentTime
             }
-
             viewModel.resetState()
         }
     }

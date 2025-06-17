@@ -198,7 +198,7 @@ fun TasksScreen(
                     LazyColumn(
                         modifier = Modifier.fillMaxSize()
                     ) {
-                        items(tasks, key = { it._id }) { task ->
+                        items(tasks.reversed(), key = { it._id }) { task ->
                             TaskCard(
                                 theme = theme,
                                 task = task,

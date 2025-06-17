@@ -56,6 +56,13 @@ android {
     }
 }
 
+configurations.all {
+    resolutionStrategy {
+        force ("androidx.test.ext:junit:1.2.1")
+        force ("androidx.test.espresso:espresso-core:3.6.1")
+    }
+}
+
 dependencies {
 
     implementation(libs.androidx.core.ktx)
@@ -73,6 +80,7 @@ dependencies {
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.ui.ktx)
     implementation(libs.androidx.compose.testing)
+    implementation(libs.androidx.work.runtime.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -121,4 +129,6 @@ dependencies {
     implementation ("androidx.compose.foundation:foundation:1.5.0")
     implementation ("com.google.accompanist:accompanist-systemuicontroller:0.30.1")
     implementation ("androidx.compose.material3:material3:1.1.0")
+    implementation ("com.google.accompanist:accompanist-permissions:0.34.0")
+
 }

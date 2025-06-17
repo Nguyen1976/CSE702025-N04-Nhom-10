@@ -1,5 +1,6 @@
 package com.example.taskify.presentation.main
 
+import android.Manifest
 import android.content.Intent
 import android.hardware.lights.Light
 import android.os.Bundle
@@ -83,6 +84,7 @@ import com.example.taskify.domain.model.taskModel.SubtaskResponse
 import com.example.taskify.domain.model.taskModel.TaskRequest
 import com.example.taskify.domain.model.taskModel.TaskResponse
 import com.example.taskify.domain.model.themeModel.ThemeOption
+import com.example.taskify.notification.NotificationHelper
 import com.example.taskify.presentation.auth.dashboard.DashboardActivity
 import com.example.taskify.presentation.base.BaseActivity
 import com.example.taskify.presentation.calendar.CalendarScreen
@@ -93,6 +95,9 @@ import com.example.taskify.presentation.settings.SettingScreen
 import com.example.taskify.presentation.tasks.TasksScreen
 import com.example.taskify.presentation.tasktheme.ThemeSectionActivity
 import com.example.taskify.ui.theme.TaskifyTheme
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -106,9 +111,12 @@ class MainActivity : BaseActivity() {
     private val taskViewModel: TaskViewModel by viewModels()
     private val showInputPanel = mutableStateOf(false)
 
+    @OptIn(ExperimentalPermissionsApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        NotificationHelper.createTaskNotificationChannel(this)
 
         lifecycleScope.launch {
             val token = tokenManager.getAccessToken()
@@ -140,6 +148,15 @@ class MainActivity : BaseActivity() {
                 val context = LocalContext.current
                 val createTaskResult = taskViewModel.createTaskResult.collectAsState()
                 val isLoading by taskViewModel.isLoading.collectAsState()
+
+                val postNotificationPermission =
+                    rememberPermissionState(permission = Manifest.permission.POST_NOTIFICATIONS)
+
+                LaunchedEffect(key1 = true) {
+                    if (!postNotificationPermission.status.isGranted) {
+                        postNotificationPermission.launchPermissionRequest()
+                    }
+                }
 
                 if (isLoading) {
                     Box(
@@ -295,6 +312,7 @@ class MainActivity : BaseActivity() {
     }
 }
 
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun MainScreen(
     userViewModel: UserViewModel = hiltViewModel(),
@@ -305,6 +323,7 @@ fun MainScreen(
     onDismissRequest: () -> Unit = {}
 ) {
     val context = LocalContext.current
+
     val isSuccessLoading by taskViewModel.isSuccessLoading.collectAsState()
     val updateIsSuccessResult by taskViewModel.updateIsSuccessResult.collectAsState()
 
@@ -316,6 +335,8 @@ fun MainScreen(
     val formatterDate = "Today. " + LocalDate.now().format(
         DateTimeFormatter.ofPattern("EEE dd MMM yyyy", Locale.ENGLISH)
     )
+
+    val postNotificationPermission = rememberPermissionState(permission = Manifest.permission.POST_NOTIFICATIONS)
 
     if (isSuccessLoading) {
         AlertDialog(
@@ -331,6 +352,22 @@ fun MainScreen(
             confirmButton = {},
             dismissButton = {}
         )
+    }
+
+    LaunchedEffect(postNotificationPermission.status.isGranted) {
+        if (!postNotificationPermission.status.isGranted) {
+            postNotificationPermission.launchPermissionRequest()
+        } else {
+            tasks.forEach { task ->
+                NotificationHelper.scheduleTaskReminder(
+                    context = context,
+                    taskId = task._id,
+                    taskTitle = task.title,
+                    taskDate = task.taskDate,
+                    taskTime = task.taskTime
+                )
+            }
+        }
     }
 
     LaunchedEffect(updateIsSuccessResult) {
@@ -349,6 +386,7 @@ fun MainScreen(
         userViewModel.getUserFromLocal()
         userViewModel.loadCurrentUser()
         taskViewModel.getTasks()
+        NotificationHelper.createTaskNotificationChannel(context)
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
