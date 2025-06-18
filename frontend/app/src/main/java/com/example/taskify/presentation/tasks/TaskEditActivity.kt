@@ -366,28 +366,6 @@ fun TaskTextField(
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun PreviewTaskEditScreen() {
-    TaskEditScreen(
-        onBackClick = {},
-        title = "Học Compose",
-        onTitleChange = {},
-        description = "Làm UI bằng Jetpack Compose",
-        onDescriptionChange = {},
-        taskDate = LocalDate.of(2025, 5, 30),
-        selectedDate = "30-05-2025",
-        onTaskDateChange = {},
-        taskTime = LocalTime.of(9, 0),
-        selectedTime = "19:00",
-        onTaskTimeChange = {},
-        type = "Meeting",
-        onTypeChange = {},
-        onApplyChange = {},
-        theme = ThemeOption.Teal
-    )
-}
-
 @Composable
 fun DatePickerItem(
     label: String,

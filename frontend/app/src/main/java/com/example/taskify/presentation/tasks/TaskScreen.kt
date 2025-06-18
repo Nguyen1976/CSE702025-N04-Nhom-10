@@ -956,15 +956,3 @@ fun SubTaskItem(
         }
     }
 }
-
-@Preview(showBackground = true)
-@Composable
-private fun SubtaskPreview() {
-    TaskifyTheme {
-        SubTaskItem(
-            subtask = SubtaskResponse(title = "3 ranks", subtaskDes = "Play valorant with " +
-                    "friends Play valorant with friends Play valorant with friends"),
-            onDeleteSubtask = {},
-        )
-    }
-}
