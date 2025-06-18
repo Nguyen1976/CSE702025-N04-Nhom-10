@@ -45,7 +45,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-@Preview
 @Composable
 fun FilterScreen() {
     val snackbarHostState = remember { SnackbarHostState() }

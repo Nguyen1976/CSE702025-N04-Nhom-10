@@ -1,6 +1,7 @@
 package com.example.taskify.data.remote.authApi
 
 import android.util.Log
+import com.example.taskify.common.Constants
 import com.example.taskify.data.local.TokenManager
 import kotlinx.coroutines.runBlocking
 import okhttp3.Interceptor
@@ -15,9 +16,7 @@ class AuthInterceptor @Inject constructor(
 ) : Interceptor {
 
     private val retrofitWithoutInterceptor = Retrofit.Builder()
-        .baseUrl("http://192.168.100.211:3000")
-//        .baseUrl("http://10.6.212.66:3000")
-//        .baseUrl("http://192.168.100.211:8080")
+        .baseUrl(Constants.BASE_URL)
         .addConverterFactory(GsonConverterFactory.create())
         .client(OkHttpClient.Builder().build())
         .build()

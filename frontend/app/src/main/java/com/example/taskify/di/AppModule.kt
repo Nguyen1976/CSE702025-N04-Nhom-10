@@ -1,6 +1,7 @@
 package com.example.taskify.di
 
 import android.content.Context
+import com.example.taskify.common.Constants
 import com.example.taskify.data.local.TokenManager
 import com.example.taskify.data.local.UserPreferences
 import com.example.taskify.data.remote.TaskApi
@@ -30,9 +31,7 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object AppModule {
 
-    private const val BASE_URL = "http://192.168.100.211:3000"
-//    private const val BASE_URL = "http://10.6.212.66:3000"
-//    private const val BASE_URL = "http://192.168.100.211:8080"
+    private const val BASE_URL = Constants.BASE_URL
 
     @Provides
     @Singleton

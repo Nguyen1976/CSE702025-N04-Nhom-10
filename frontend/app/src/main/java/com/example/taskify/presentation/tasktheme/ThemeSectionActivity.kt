@@ -238,28 +238,3 @@ fun ThemeItem(
         }
     }
 }
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewThemeSelectionScreen() {
-    // Bạn có thể cung cấp giá trị mặc định cho selectedTheme
-    ThemeSectionScreen(
-        selectedTheme = ThemeOption.Teal,
-        onThemeSelected = {},
-        onConfirm = {}
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewThemeItemAllThemes() {
-    Column {
-        ThemeItem(theme = ThemeOption.Teal, isSelected = false, onClick = {})
-        Spacer(Modifier.height(8.dp))
-        ThemeItem(theme = ThemeOption.Black, isSelected = true, onClick = {})
-        Spacer(Modifier.height(8.dp))
-        ThemeItem(theme = ThemeOption.Red, isSelected = false, onClick = {})
-        Spacer(Modifier.height(8.dp))
-        ThemeItem(theme = ThemeOption.Blue, isSelected = true, onClick = {})
-    }
-}

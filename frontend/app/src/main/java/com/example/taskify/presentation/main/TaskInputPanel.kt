@@ -497,33 +497,3 @@ fun TaskInputPanel(
         }
     }
 }
-//
-//@Preview(showBackground = true)
-//@Composable
-//fun TaskInputPanel2Preview() {
-//    // Dummy state for preview
-//    var title by remember { mutableStateOf("Sample Task") }
-//    var description by remember { mutableStateOf("This is a description.") }
-//    var taskDate by remember { mutableStateOf(LocalDate.now()) }
-//    var taskTime by remember { mutableStateOf(LocalTime.of(14, 30)) }
-//    var selectedType by remember { mutableStateOf("Work") }
-//    var isSuccess by remember { mutableStateOf(false) }
-//
-//    // UI preview
-//    TaskInputPanel(
-//        title = title,
-//        onTitleChange = { title = it },
-//        description = description,
-//        onDescriptionChange = { description = it },
-//        taskDate = taskDate,
-//        onTaskDateChange = { taskDate = it },
-//        taskTime = taskTime,
-//        onTaskTimeChange = { taskTime = it },
-//        selectedType = selectedType,
-//        onTypeSelected = { selectedType = it },
-//        isSuccess = isSuccess,
-//        onDismiss = { /* no-op */ },
-//        onSend = { /* no-op */ },
-//        isLoading = false
-//    )
-//}

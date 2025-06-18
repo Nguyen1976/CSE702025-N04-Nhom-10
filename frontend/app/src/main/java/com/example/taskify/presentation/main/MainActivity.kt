@@ -359,14 +359,14 @@ fun MainScreen(
             postNotificationPermission.launchPermissionRequest()
         } else {
             tasks.forEach { task ->
-                NotificationHelper.scheduleTaskReminder(
-                    context = context,
-                    taskId = task._id,
-                    taskTitle = task.title,
-                    taskDate = task.taskDate,
-                    taskTime = task.taskTime
-                )
-            }
+                    NotificationHelper.scheduleTaskReminder(
+                        context = context,
+                        taskId = task._id,
+                        taskTitle = task.title,
+                        taskDate = task.taskDate,
+                        taskTime = task.taskTime
+                    )
+                }
         }
     }
 
