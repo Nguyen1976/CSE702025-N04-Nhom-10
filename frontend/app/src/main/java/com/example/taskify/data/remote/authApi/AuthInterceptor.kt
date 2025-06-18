@@ -5,16 +5,16 @@ import com.example.taskify.common.Constants
 import com.example.taskify.data.local.TokenManager
 import kotlinx.coroutines.runBlocking
 import okhttp3.Interceptor
-import okhttp3.OkHttpClient
 import okhttp3.Response
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Inject
+import javax.inject.Named
 
 class AuthInterceptor @Inject constructor(
-    private val tokenManager: TokenManager
+    private val tokenManager: TokenManager,
+    @Named("withoutInterceptor") private val authApi: AuthApi
 ) : Interceptor {
 
+<<<<<<< HEAD
     private val retrofitWithoutInterceptor = Retrofit.Builder()
         .baseUrl(Constants.BASE_URL)
         .addConverterFactory(GsonConverterFactory.create())
@@ -23,12 +23,11 @@ class AuthInterceptor @Inject constructor(
 
     private val authApiServiceWithoutInterceptor = retrofitWithoutInterceptor.create(AuthApi::class.java)
 
+=======
+>>>>>>> b3622c7a4cbd4459ab2e9747610b1728ab483316
     override fun intercept(chain: Interceptor.Chain): Response {
         var request = chain.request()
         val accessToken = runBlocking { tokenManager.getAccessToken() }
-        val refreshToken = runBlocking { tokenManager.getRefreshToken() }
-        Log.d("Token", "Access token: $accessToken")
-        Log.d("Token", "Refresh token: $refreshToken")
 
         if (!accessToken.isNullOrEmpty()) {
             request = request.newBuilder()
@@ -45,19 +44,16 @@ class AuthInterceptor @Inject constructor(
 
             val refreshResponse = runBlocking {
                 try {
-                    authApiServiceWithoutInterceptor.refreshToken(RefreshTokenRequest(refreshToken))
+                    authApi.refreshToken(RefreshTokenRequest(refreshToken))
                 } catch (e: Exception) {
                     null
                 }
             }
 
-            if (refreshResponse != null && refreshResponse.isSuccessful) {
+            if (refreshResponse?.isSuccessful == true) {
                 val newAccessToken = refreshResponse.body()?.accessToken
-
                 if (!newAccessToken.isNullOrEmpty()) {
-                    runBlocking {
-                        tokenManager.saveAccessToken(newAccessToken)
-                    }
+                    runBlocking { tokenManager.saveAccessToken(newAccessToken) }
 
                     val newRequest = request.newBuilder()
                         .header("Authorization", "Bearer $newAccessToken")
