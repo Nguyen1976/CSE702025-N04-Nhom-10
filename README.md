@@ -28,4 +28,5 @@ Dự án **Mobile App Quản Lý Công Việc** là một ứng dụng Android h
 👉 **[Xem thiết kế tại đây](https://www.figma.com/proto/Z3vkqzw8DTZlR8S3SXsdfm/Untitled?node-id=5-808&t=RGyYlcm4EdkXRcYK-1&scaling=scale-down&content-scaling=fixed&page-id=0%3A1&starting-point-node-id=5%3A808)**
 - Docs:
 👉 **[Xem docs tại đây](https://docs.google.com/document/d/1zzqsIKvVuGgxrLqXrm0inkn7I2mUVVTG)**
-
+- Hướng dẫn chạy dự án:
+👉 **[Xem hướng dẫn tại đây](https://docs.google.com/document/d/1CCP7noRjRM6M-9b0lGEfWwk-QekayggQxnb08XSMc-w/edit?usp=sharing)**
